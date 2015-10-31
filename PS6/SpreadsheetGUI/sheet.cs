@@ -30,6 +30,8 @@ namespace SS
 
          InitializeComponent();
 
+         this.FormClosing += Form1_FormClosing;
+
          spreadsheetPanel1.SelectionChanged += selectCell;
          spreadsheetPanel1.SetSelection(0, 0);
       }
@@ -60,6 +62,12 @@ namespace SS
          cellContentsTextBox.Focus();
       }
 
+      private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+      {
+         if (e.CloseReason == CloseReason.UserClosing)
+            saveChange("closing");
+      }
+
       // Deals with the New menu
       private void newToolStripMenuItem_Click(object sender, EventArgs e)
       {
@@ -70,7 +78,8 @@ namespace SS
 
       private void openToolStripMenuItem_Click(object sender, EventArgs e)
       {
-         Stream myStream = null;
+         saveChange("overwriting");
+
          OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
          openFileDialog1.InitialDirectory = "c:\\";
@@ -79,14 +88,24 @@ namespace SS
          openFileDialog1.FilterIndex = 1;
          openFileDialog1.RestoreDirectory = true;
          openFileDialog1.InitialDirectory =
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
          if (openFileDialog1.ShowDialog() == DialogResult.OK)
          {
             try
             {
-                DemoApplicationContext.getAppContext().RunForm(new Form1(openFileDialog1.FileName));
-               
+               IEnumerable<String> oldCells = mainSpreadsheet.GetNamesOfAllNonemptyCells();
+
+               mainSpreadsheet = new Spreadsheet(openFileDialog1.FileName, s => Regex.IsMatch(s, "[A-Z][1-9][0-9]?$"), s => s.ToUpper(), "ps6");
+
+               // CLear old form after successfuly opening new spreadsheet
+               clearCells(oldCells);
+
+               spreadsheetPanel1.SelectionChanged += selectCell;
+               spreadsheetPanel1.SetSelection(0, 0);
+               refreshCells(mainSpreadsheet.GetNamesOfAllNonemptyCells());
+               refreshMenu("A1");
+
             }
             catch (Exception ex)
             {
@@ -97,33 +116,7 @@ namespace SS
 
       private void saveToolStripMenuItem_Click(object sender, EventArgs e)
       {
-         // Set the properties on SaveFileDialog1 so the user is 
-         // prompted to create the file if it doesn't exist 
-         // or overwrite the file if it does exist.
-         SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-
-         saveFileDialog1.CreatePrompt = true;
-         saveFileDialog1.OverwritePrompt = true;
-
-         // Set the file name to myText.txt, set the type filter
-         // to sprd files, and set the initial directory to the 
-         // MyDocuments folder.
-         saveFileDialog1.FileName = "spreadsheet";
-         // DefaultExt is only used when "All files" is selected from 
-         // the filter box and no extension is specified by the user.
-         saveFileDialog1.DefaultExt = "sprd";
-         saveFileDialog1.Filter =
-             "sprd files (*.sprd)|*.sprd|All files (*.*)|*.*";
-         saveFileDialog1.InitialDirectory =
-             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-         // Call ShowDialog and check for a return value of DialogResult.OK,
-         // which indicates that the file was saved. 
-         DialogResult result = saveFileDialog1.ShowDialog();
-
-         // save the spreadsheet
-         mainSpreadsheet.Save(saveFileDialog1.FileName);
-
+         saveSpreadsheet();
       }
 
 
@@ -182,6 +175,76 @@ namespace SS
 
       }
 
+      private void saveSpreadsheet()
+      {
+         // Set the properties on SaveFileDialog1 so the user is 
+         // prompted to create the file if it doesn't exist 
+         // or overwrite the file if it does exist.
+         SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+         saveFileDialog1.CreatePrompt = true;
+         saveFileDialog1.OverwritePrompt = true;
+
+         // Set the file name to myText.txt, set the type filter
+         // to sprd files, and set the initial directory to the 
+         // MyDocuments folder.
+         //saveFileDialog1.FileName = "spreadsheet";
+         // DefaultExt is only used when "All files" is selected from 
+         // the filter box and no extension is specified by the user.
+         //saveFileDialog1.DefaultExt = "sprd";
+         saveFileDialog1.Filter =
+             "sprd files (*.sprd)|*.sprd|All files (*.*)|*.*";
+         saveFileDialog1.InitialDirectory =
+             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+         // Call ShowDialog and check for a return value of DialogResult.OK,
+         // which indicates that the file was saved. 
+         DialogResult result = saveFileDialog1.ShowDialog();
+
+         // save the spreadsheet
+         try
+         {
+            mainSpreadsheet.Save(saveFileDialog1.FileName);
+         }
+         catch (Exception ex)
+         {
+            MessageBox.Show("Error saving spreadsheet.\nInfo: " + ex,"Save Error",
+               MessageBoxButtons.OK,MessageBoxIcon.Error);
+         }
+      }
+
+      private void saveChange(String closeType)
+      {
+         if (mainSpreadsheet.Changed)
+         {
+            DialogResult result = MessageBox.Show("Existing Spreadsheet has been modified. " +
+               "Would you like to save before " + closeType + " the existing spreadsheet?",
+               "Unsaved Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            if (result == DialogResult.Yes)
+            {
+               saveSpreadsheet();
+            }
+
+         }
+      }
+      private void refreshMenu(String cell)
+      {
+         cellNameTextBox.Text = cell;
+         cellValueTextBox.Text = mainSpreadsheet.GetCellValue(cell).ToString();
+         cellContentsTextBox.Text = mainSpreadsheet.GetCellContents(cell).ToString();
+      }
+
+      private void clearCells(IEnumerable<String> toUpdate)
+      {
+         Tuple<int, int> temp;
+
+         foreach (string el in toUpdate)
+         {
+            temp = getColRow(el);
+            spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, "");   
+         }
+      }
+
       private void refreshCells(IEnumerable<String> toUpdate)
       {
          Tuple<int, int> temp;
@@ -201,7 +264,8 @@ namespace SS
                spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, mainSpreadsheet.GetCellValue(el).ToString());
          }
       }
-    
+
+
       private void enterButton_Click(object sender, EventArgs e)
       {
          Tuple<int, int> temp;
@@ -220,11 +284,16 @@ namespace SS
                {
                   FormulaError cellError = (FormulaError)cellValue;
                   spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, "*Cell Error*");
-                  MessageBox.Show(cellError.Reason,"Cell Error",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                  MessageBox.Show("Error in cell " + el + "\nError Info: " +
+                     cellError.Reason,"Cell Error",MessageBoxButtons.OK,
+                     MessageBoxIcon.Warning);
                }
                else
                   spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, mainSpreadsheet.GetCellValue(el).ToString());
             }
+            refreshMenu(activeCell);
+            temp = getColRow(activeCell);
+            spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, mainSpreadsheet.GetCellValue(activeCell).ToString());
          }
          catch (Exception ex)
          {

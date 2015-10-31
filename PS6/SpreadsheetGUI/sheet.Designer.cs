@@ -134,7 +134,7 @@
          // 
          this.cellValueTextBox.Name = "cellValueTextBox";
          this.cellValueTextBox.ReadOnly = true;
-         this.cellValueTextBox.Size = new System.Drawing.Size(100, 25);
+         this.cellValueTextBox.Size = new System.Drawing.Size(200, 25);
          // 
          // toolStripSeparator
          // 
@@ -182,7 +182,7 @@
          // 
          // enterButton
          // 
-         this.enterButton.Location = new System.Drawing.Point(520, 26);
+         this.enterButton.Location = new System.Drawing.Point(540, 24);
          this.enterButton.Name = "enterButton";
          this.enterButton.Size = new System.Drawing.Size(75, 23);
          this.enterButton.TabIndex = 4;
