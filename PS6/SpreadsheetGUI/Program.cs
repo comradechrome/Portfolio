@@ -9,29 +9,30 @@ namespace SS
    /// <summary>
    /// Keeps track of how many top-level forms are running
    /// </summary>
-   class DemoApplicationContext : ApplicationContext
+   class SSApplicationContext : ApplicationContext
    {
       // Number of open forms
       private int formCount = 0;
 
       // Singleton ApplicationContext
-      private static DemoApplicationContext appContext;
+      private static SSApplicationContext appContext;
 
       /// <summary>
       /// Private constructor for singleton pattern
       /// </summary>
-      private DemoApplicationContext()
+      private SSApplicationContext()
       {
       }
 
       /// <summary>
-      /// Returns the one DemoApplicationContext.
+      /// Returns the one SSApplicationContext.
       /// </summary>
-      public static DemoApplicationContext getAppContext()
+      /// <returns></returns>
+      public static SSApplicationContext getAppContext()
       {
          if (appContext == null)
          {
-            appContext = new DemoApplicationContext();
+            appContext = new SSApplicationContext();
          }
          return appContext;
       }
@@ -39,6 +40,7 @@ namespace SS
       /// <summary>
       /// Runs the form
       /// </summary>
+      /// <param name="form"></param>
       public void RunForm(Form form)
       {
          // One more form is running
@@ -66,7 +68,7 @@ namespace SS
          Application.SetCompatibleTextRenderingDefault(false);
 
          // Start an application context and run one form inside it
-         DemoApplicationContext appContext = DemoApplicationContext.getAppContext();
+         SSApplicationContext appContext = SSApplicationContext.getAppContext();
          appContext.RunForm(new Form1());
          Application.Run(appContext);
       }
