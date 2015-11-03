@@ -62,14 +62,17 @@ namespace SS
       /// The main entry point for the application.
       /// </summary>
       [STAThread]
-      static void Main()
+      static void Main(string[] args)
       {
          Application.EnableVisualStyles();
          Application.SetCompatibleTextRenderingDefault(false);
 
          // Start an application context and run one form inside it
          SSApplicationContext appContext = SSApplicationContext.getAppContext();
-         appContext.RunForm(new Form1());
+         if (args.Length > 0)
+            appContext.RunForm(new Form1(args[0]));
+         else
+            appContext.RunForm(new Form1());
          Application.Run(appContext);
       }
    }

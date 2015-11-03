@@ -37,6 +37,26 @@ namespace SS
       }
 
       /// <summary>
+      /// Constructor for the Spreadsheet Form when opening an existing file
+      /// </summary>
+      /// <param name="openfile"></param>
+      public Form1(String openfile)
+      {
+         // create our spreadsheet using an existing file, normalize all variables to use uppercase,
+         //    validate variables start with a single letter followed by 1-99, set version to ps6
+         mainSpreadsheet = new Spreadsheet(openfile, s => Regex.IsMatch(s, "[A-Z][1-9][0-9]?$"), s => s.ToUpper(), "ps6");
+
+         InitializeComponent();
+
+         spreadsheetPanel1.SelectionChanged += selectCell;
+         //set our default cell to be A1
+         spreadsheetPanel1.SetSelection(0, 0);
+
+         // refresh all cells in the spreadsheet to display non-empty cells of imported spreadsheet file
+         refreshCells(mainSpreadsheet.GetNamesOfAllNonemptyCells());
+      }
+
+      /// <summary>
       /// Get the current cell and refresh menu values
       /// </summary>
       /// <param name="ssPanel"></param>

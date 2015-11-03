@@ -26,10 +26,13 @@ Extra Features:
 - arrow key navigation
 - cells with a FormulaError show '*Error*' in the cell
 - FormulaError popup error messages display the FormulaError reason
-- MSI Installer package
+- MSI Installer package - modified file types to have this program open up .sprd files. If an existing .sprd file is double
+	clicked, that spreadsheet will open up.
 
 UI Testing:
-- UI Testing acheived 98.34 % code coverage
+- UI Testing acheived 93.5 % code coverage - we were not able to test 3 items. This prevented us from having 100% code coverage.
 	* Catch block in the openToolStripMenuItem_Click method was not covered. This is checking for a difficult to 
 		test exception where a file would be attempted to be opened but could not be read by the spreadsheet constructor
 	* A portion of the Dispose method was not able to be covered by existing tests
+	* The code required to open up existing spreadsheets. This would be dificult to test on a remote machine as the file type mapping
+		and file locations may be different from our development system.
