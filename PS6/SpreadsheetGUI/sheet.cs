@@ -390,12 +390,7 @@ namespace SS
          }
       }
 
-      /// <summary>
-      /// handle the 'Enter' button click
-      /// </summary>
-      /// <param name="sender"></param>
-      /// <param name="e"></param>
-      private void enterButton_Click(object sender, EventArgs e)
+      private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
       {
          Tuple<int, int> temp;
          try
@@ -403,34 +398,50 @@ namespace SS
             // set the spreadsheet cell with contents, get all cell dependents, then itterate through the 
             // list updating cells as needed
             ISet<string> ToUpdate = mainSpreadsheet.SetContentsOfCell(activeCell, cellContentsTextBox.Text);
-            cellValueTextBox.Text = mainSpreadsheet.GetCellValue(activeCell).ToString();
-            foreach (string el in ToUpdate)
+
+            // This is all work that needs to update the GUI so we use the this.Invoke syntax
+            this.Invoke(new Action(() =>
             {
+               cellValueTextBox.Text = mainSpreadsheet.GetCellValue(activeCell).ToString();
 
-               temp = getColRow(el);
-               object cellValue = mainSpreadsheet.GetCellValue(el);
-
-               // special FOrmulaError handling
-               if (cellValue is FormulaError)
+               foreach (string el in ToUpdate)
                {
-                  FormulaError cellError = (FormulaError)cellValue;
-                  // set form cell to display *Cell Error*
-                  spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, "*Cell Error*");
-                  // open a message box displaying the FormulaError reason
-                  MessageBox.Show("Error in cell " + el + "\nError Info: " +
-                     cellError.Reason, "Cell Error", MessageBoxButtons.OK,
-                     MessageBoxIcon.Warning);
+                  temp = getColRow(el);
+                  object cellValue = mainSpreadsheet.GetCellValue(el);
+
+                  // special FormulaError handling
+                  if (cellValue is FormulaError)
+                  {
+                     FormulaError cellError = (FormulaError)cellValue;
+                     // set form cell to display *Cell Error*
+                     spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, "*Cell Error*");
+                     // open a message box displaying the FormulaError reason
+                     MessageBox.Show("Error in cell " + el + "\nError Info: " +
+                        cellError.Reason, "Cell Error", MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                  }
+                  else
+                     spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, mainSpreadsheet.GetCellValue(el).ToString());
                }
-               else
-                  spreadsheetPanel1.SetValue(temp.Item1, temp.Item2, mainSpreadsheet.GetCellValue(el).ToString());
-            }
-            // refresh the menu
-            refreshMenu(activeCell);
+               // refresh the menu
+               refreshMenu(activeCell);
+            }));     
          }
          catch (Exception ex)
          {
             MessageBox.Show("Invalid entry in " + activeCell + " \n Error:" + ex, "Cell Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
          }
+      }
+
+      /// <summary>
+      /// handle the 'Enter' button click
+      /// </summary>
+      /// <param name="sender"></param>
+      /// <param name="e"></param>
+      private void enterButton_Click(object sender, EventArgs e)
+      {
+         // send all the cell updated work to the background worker
+         backgroundWorker1.RunWorkerAsync();
       }
    }
 }

@@ -47,6 +47,7 @@
          this.toolStrip1 = new System.Windows.Forms.ToolStrip();
          this.spreadsheetPanel1 = new SS.SpreadsheetPanel();
          this.enterButton = new System.Windows.Forms.Button();
+         this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
          this.fileMenuStrip.SuspendLayout();
          this.toolStrip1.SuspendLayout();
          this.SuspendLayout();
@@ -141,7 +142,7 @@
          // toolStripLabel2
          // 
          this.toolStripLabel2.Name = "toolStripLabel2";
-         this.toolStripLabel2.Size = new System.Drawing.Size(58, 22);
+         this.toolStripLabel2.Size = new System.Drawing.Size(59, 22);
          this.toolStripLabel2.Text = "Cell Value";
          // 
          // cellValueTextBox
@@ -205,6 +206,10 @@
          this.enterButton.UseVisualStyleBackColor = true;
          this.enterButton.Click += new System.EventHandler(this.enterButton_Click);
          // 
+         // backgroundWorker1
+         // 
+         this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+         // 
          // Form1
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -246,6 +251,7 @@
       private System.Windows.Forms.Button enterButton;
       private System.Windows.Forms.ToolStripMenuItem spreadsheetUsageToolStripMenuItem;
       private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+      private System.ComponentModel.BackgroundWorker backgroundWorker1;
    }
 
 }
