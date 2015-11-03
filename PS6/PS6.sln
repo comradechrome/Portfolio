@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Reso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetGUI", "SpreadsheetGUI\SpreadsheetGUI.csproj", "{F148C985-CE96-4548-86F3-AA96CA987283}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodedUISheetTest", "CodedUISheetTest\CodedUISheetTest.csproj", "{31C5C40E-638D-4BCC-8AD3-F05C841444F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{F148C985-CE96-4548-86F3-AA96CA987283}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F148C985-CE96-4548-86F3-AA96CA987283}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F148C985-CE96-4548-86F3-AA96CA987283}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31C5C40E-638D-4BCC-8AD3-F05C841444F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31C5C40E-638D-4BCC-8AD3-F05C841444F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31C5C40E-638D-4BCC-8AD3-F05C841444F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31C5C40E-638D-4BCC-8AD3-F05C841444F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

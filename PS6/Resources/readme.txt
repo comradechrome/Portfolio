@@ -27,3 +27,9 @@ Extra Features:
 - cells with a FormulaError show '*Error*' in the cell
 - FormulaError popup error messages display the FormulaError reason
 - MSI Installer package
+
+UI Testing:
+- UI Testing acheived 98.34 % code coverage
+	* Catch block in the openToolStripMenuItem_Click method was not covered. This is checking for a difficult to 
+		test exception where a file would be attempted to be opened but could not be read by the spreadsheet constructor
+	* A portion of the Dispose method was not able to be covered by existing tests
