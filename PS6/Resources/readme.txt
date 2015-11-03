@@ -34,5 +34,4 @@ UI Testing:
 	* Catch block in the openToolStripMenuItem_Click method was not covered. This is checking for a difficult to 
 		test exception where a file would be attempted to be opened but could not be read by the spreadsheet constructor
 	* A portion of the Dispose method was not able to be covered by existing tests
-	* The code required to open up existing spreadsheets. This would be dificult to test on a remote machine as the file type mapping
-		and file locations may be different from our development system.
+	* The code required to open up existing spreadsheets was not tested. This would be dificult to test on a remote machine as the file may or may not exist.
