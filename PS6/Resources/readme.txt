@@ -29,7 +29,7 @@ Extra Features:
 - cells with a FormulaError show '*Error*' in the cell
 - FormulaError popup error messages display the FormulaError reason
 - MSI Installer package - modified file types to have this program open up .sprd files. If an existing .sprd file is double
-	clicked, that spreadsheet will open up.
+	clicked, that spreadsheet will open up. Package is located in the Resources Project in the 'Installer' folder.
 
 UI Testing:
 - UI Testing acheived 98.45 % code coverage - we were not able to test 3 items. This prevented us from having 100% code coverage.

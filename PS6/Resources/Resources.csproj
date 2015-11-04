@@ -34,8 +34,10 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Installer\SpreadsheetInstaller.msi" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Installer\grid.ico" />
     <Content Include="Libraries\Formula.dll" />
     <Content Include="Libraries\Spreadsheet.dll" />
     <Content Include="Libraries\SpreadsheetPanel.dll" />
