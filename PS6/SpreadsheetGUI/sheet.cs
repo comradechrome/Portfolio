@@ -19,8 +19,10 @@ namespace SS
    public partial class Form1 : Form
    {
       Spreadsheet mainSpreadsheet;
-      String activeCell = "A1";
-      private int col, row;
+      String activeCell = "A1"; // active cell in the spreadsheet gui
+      private int col, row; // the col and row coordiantes of the activeCell
+      String saveFile = ""; // current saved file name
+
       /// <summary>
       /// Default Constructor for the Spreadsheet Form
       /// </summary>
@@ -54,6 +56,9 @@ namespace SS
 
          // refresh all cells in the spreadsheet to display non-empty cells of imported spreadsheet file
          refreshCells(mainSpreadsheet.GetNamesOfAllNonemptyCells());
+
+         // save the filename
+         saveFile = openfile;
       }
 
       /// <summary>
@@ -109,7 +114,7 @@ namespace SS
          openFileDialog1.FilterIndex = 1;
          openFileDialog1.RestoreDirectory = true;
          openFileDialog1.InitialDirectory =
-         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
          if (openFileDialog1.ShowDialog() == DialogResult.OK)
          {
@@ -130,6 +135,9 @@ namespace SS
                refreshCells(mainSpreadsheet.GetNamesOfAllNonemptyCells());
                refreshMenu("A1");
 
+               //save the filename
+               saveFile = openFileDialog1.FileName;
+
             }
             catch (Exception ex)
             {
@@ -139,13 +147,26 @@ namespace SS
       }
 
       /// <summary>
-      /// Save Menu item - saves the existing spreadsheet
+      /// Save Menu item - saves the existing spreadsheet. If Spreadsheet has been saved, will not propmt on overwriting an existing file.
       /// </summary>
       /// <param name="sender"></param>
       /// <param name="e"></param>
       private void saveToolStripMenuItem_Click(object sender, EventArgs e)
       {
          saveSpreadsheet();
+      }
+
+      /// <summary>
+      /// Same as save except we always prompt for a filename
+      /// </summary>
+      /// <param name="sender"></param>
+      /// <param name="e"></param>
+      private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+      {
+         // we'll reset the existing file to ensure we prompt for a file
+         saveFile = "";
+         saveSpreadsheet();
+
       }
 
 
@@ -284,32 +305,43 @@ namespace SS
       /// </summary>
       private void saveSpreadsheet()
       {
-         // Set the properties on SaveFileDialog1 so the user is 
-         // prompted to create the file if it doesn't exist 
-         // or overwrite the file if it does exist.
+
          SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-
-         saveFileDialog1.CreatePrompt = true;
-         saveFileDialog1.OverwritePrompt = true;
-
-         // Set the type filter to sprd files and set the
-         // initial directory to the MyDocuments folder.
-         // DefaultExt is only used when "All files" is selected from 
-         // the filter box and no extension is specified by the user.
-         //saveFileDialog1.DefaultExt = "sprd";
-         saveFileDialog1.Filter =
-             "sprd files (*.sprd)|*.sprd|All files (*.*)|*.*";
+         //saveFileDialog1.InitialDirectory = "c:\\";
          saveFileDialog1.InitialDirectory =
-             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-         // Call ShowDialog and check for a return value of DialogResult.OK,
-         // which indicates that the file was saved. 
-         DialogResult result = saveFileDialog1.ShowDialog();
+         // check if we have saved the spreadsheet yet
+         if (saveFile == "")
+         {
+            // Set the properties on SaveFileDialog1 so the user is 
+            // prompted to create the file if it doesn't exist 
+            // or overwrite the file if it does exist.
+
+            saveFileDialog1.CreatePrompt = true;
+            saveFileDialog1.OverwritePrompt = true;
+
+            // Set the type filter to sprd files and set the
+            // initial directory to the MyDocuments folder.
+            // DefaultExt is only used when "All files" is selected from 
+            // the filter box and no extension is specified by the user.
+            //saveFileDialog1.DefaultExt = "sprd";
+            saveFileDialog1.Filter =
+                "sprd files (*.sprd)|*.sprd|All files (*.*)|*.*";
+
+            // Call ShowDialog and check for a return value of DialogResult.OK,
+            // which indicates that the file was saved. 
+            DialogResult result = saveFileDialog1.ShowDialog();
+         }
+         else
+            saveFileDialog1.FileName = saveFile;
+         
 
          // save the spreadsheet
          try
          {
             mainSpreadsheet.Save(saveFileDialog1.FileName);
+            saveFile = saveFileDialog1.FileName;
          }
          catch (Exception ex)
          {
@@ -432,6 +464,8 @@ namespace SS
             MessageBox.Show("Invalid entry in " + activeCell + " \n Error:" + ex, "Cell Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
          }
       }
+
+
 
       /// <summary>
       /// handle the 'Enter' button click

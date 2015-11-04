@@ -48,6 +48,7 @@
          this.spreadsheetPanel1 = new SS.SpreadsheetPanel();
          this.enterButton = new System.Windows.Forms.Button();
          this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+         this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
          this.fileMenuStrip.SuspendLayout();
          this.toolStrip1.SuspendLayout();
          this.SuspendLayout();
@@ -58,6 +59,7 @@
             this.newToolStripMenuItem,
             this.openToolStripMenuItem,
             this.saveToolStripMenuItem,
+            this.saveAsToolStripMenuItem,
             this.closeToolStripMenuItem});
          this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
          this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
@@ -210,6 +212,13 @@
          // 
          this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
          // 
+         // saveAsToolStripMenuItem
+         // 
+         this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+         this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+         this.saveAsToolStripMenuItem.Text = "Save As ...";
+         this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
+         // 
          // Form1
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -252,6 +261,7 @@
       private System.Windows.Forms.ToolStripMenuItem spreadsheetUsageToolStripMenuItem;
       private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
       private System.ComponentModel.BackgroundWorker backgroundWorker1;
+      private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
    }
 
 }
