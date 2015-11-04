@@ -16,21 +16,17 @@ namespace CodedUISheetTest
    /// Summary description for CodedUITest1
    /// </summary>
    [CodedUITest]
-   public class CodedUITest1
+   public class AdditionalTests1
    {
-      public CodedUITest1()
+      public AdditionalTests1()
       {
       }
 
       [TestMethod]
-      public void CodedUITestMethod1()
+      public void CodedUIAdditionalTests1()
       {
          // To generate code for this test, select "Generate Code for Coded UI Test" from the shortcut menu and select one of the menu items.
-         this.UIMap.BasicMenuTests();
-         this.UIMap.CellNameisA1();
-         this.UIMap.CellValueis1();
-         this.UIMap.CellContentsis1();
-         this.UIMap.FormulaTest();
+         this.UIMap.AdditionalTests1();
       }
 
       #region Additional test attributes

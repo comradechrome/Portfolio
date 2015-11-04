@@ -13,22 +13,28 @@ using Keyboard = Microsoft.VisualStudio.TestTools.UITesting.Keyboard;
 namespace CodedUISheetTest
 {
    /// <summary>
-   /// Summary description for CodedUITest4
+   /// Summary description for CodedUITest1
    /// </summary>
    [CodedUITest]
-   public class CodedUITest4
+   public class AssertionTests
    {
-      public CodedUITest4()
+      public AssertionTests()
       {
       }
 
       [TestMethod]
-      public void CodedUITestMethod1()
+      public void CodedUIAssertionTests()
       {
          // To generate code for this test, select "Generate Code for Coded UI Test" from the shortcut menu and select one of the menu items.
-         this.UIMap.FormulaErrorTest();
-         this.UIMap.FormulaErrorCheck();
-         this.UIMap.RecordedMethod1();
+         this.UIMap.prepForAssertions();
+         this.UIMap.AssertFormulaError();
+         this.UIMap.prepForAssertions1();
+         this.UIMap.AssertDouble();
+         this.UIMap.prepForAssertions2();
+         this.UIMap.AssertString();
+         this.UIMap.prepForAssertions3();
+         this.UIMap.AssertFormula();
+         this.UIMap.prepForAssertions4();
       }
 
       #region Additional test attributes
