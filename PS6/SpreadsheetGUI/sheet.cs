@@ -290,7 +290,7 @@ namespace SS
          // a better design would be to use the Help Class and compiled Help files (.chm)
          String aboutText = "To use the spreadsheet:\n- Use the mouse or arrow keys to navigate the spreadsheet cells.\n" +
                             "- Enter a String, Double, or Formula into the contents box and either click the 'Enter' button or " +
-                            "enter key on the keyboard. (Note: formulas start with a '=' and support +,-,*, and / operations)\n" +
+                            "enter key on the keyboard. (Note: formulas start with a '=' and support +,-,*, and / operations. Formulas can also contain paired parenthesis to maintain order of operations.\n" +
                             "- The upper tools bar displays the current cell name, value, and contents.\n" +
                             "- The menu has 'new', 'open', 'save', and 'close' functions.\n- The default file extension for " +
                             "spreadsheets is '.sprd'";
