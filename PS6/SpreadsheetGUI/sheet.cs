@@ -291,8 +291,8 @@ namespace SS
          String aboutText = "To use the spreadsheet:\n- Use the mouse or arrow keys to navigate the spreadsheet cells.\n" +
                             "- Enter a String, Double, or Formula into the contents box and either click the 'Enter' button or " +
                             "enter key on the keyboard. (Note: formulas start with a '=' and support +,-,*, and / operations. Formulas can also contain paired parenthesis to maintain order of operations.\n" +
-                            "- The upper tools bar displays the current cell name, value, and contents.\n" +
-                            "- The menu has 'new', 'open', 'save', and 'close' functions.\n- The default file extension for " +
+                            "- The upper tools bar displays the current cell name, value, and contents. Name and value boxes are read-only. Contents is read-write.\n" +
+                            "- The menu has 'new', 'open', 'save', 'save as ...', and 'close' functions.\n- The default file extension for " +
                             "spreadsheets is '.sprd'";
 
          MessageBox.Show(aboutText, "Usage", MessageBoxButtons.OK, MessageBoxIcon.Question);
@@ -459,9 +459,18 @@ namespace SS
                refreshMenu(activeCell);
             }));     
          }
+         catch (FormulaFormatException)
+         {
+            MessageBox.Show("Formula Error in " + activeCell + "\n\nFormula must use standard InFix notation. Refer to Help for allowed formula symbols.", "Cell Error - Formula", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+         }
+         catch (CircularException)
+         {
+            MessageBox.Show("Circular Exception in " + activeCell + " is not allowed.", "Cell Error - Circular Argument", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+         }
+         // Catch any other exceptions
          catch (Exception ex)
          {
-            MessageBox.Show("Invalid entry in " + activeCell + " \n Error:" + ex, "Cell Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show("Invalid entry in " + activeCell + " \nError:" + ex, "Cell Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
          }
       }
 
