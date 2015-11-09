@@ -1,0 +1,141 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Model</name>
+    </assembly>
+    <members>
+        <member name="T:AgCubio.Cube">
+            <summary>
+            A cube contains:
+            * A unique id
+            * The position in space(x, y)
+            * A color
+            * A name -- if this is a player cube
+            * A mass
+            * Food status (is this cube food or a player)
+            
+            These should be derived properties based on mass:
+            * Width, Top, Left, Right, Bottom
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.loc_x">
+            <summary>
+            x coordinate of the center of the cube
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.loc_y">
+            <summary>
+            y coordinate of the center of the cube
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.argb_color">
+            <summary>
+            integer representation of the ARGB color value
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.uid">
+            <summary>
+            Cube unique ID
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.food">
+            <summary>
+            true = Food
+            false = Player
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.Name">
+            <summary>
+            The name on the cube - if food, the name will be an empty string
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.Mass">
+            <summary>
+            mass of the cube - if set attempts a value less than 1, we'll default to 1
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.Width">
+            <summary>
+            Width is the square root of the mass. We will drop all decimal values.
+            Width is a read only property
+            </summary>
+        </member>
+        <member name="P:AgCubio.Cube.Radius">
+            <summary>
+            Radius is half the square root of the mass. We will drop all decimal values.
+            Radius is a read only property
+            </summary>
+        </member>
+        <member name="M:AgCubio.Cube.#ctor(System.Double,System.Double,System.Int32,System.Int32,System.Boolean,System.String,System.Double)">
+            <summary>
+            Default contructor of the cube object
+            </summary>
+            <param name="loc_x"></param>
+            <param name="loc_y"></param>
+            <param name="argb_color"></param>
+            <param name="uid"></param>
+            <param name="food"></param>
+            <param name="name"></param>
+            <param name="mass"></param>
+        </member>
+        <member name="T:AgCubio.World">
+            <summary>
+            Represents 'State' of world. Responsible for tracking:
+            * the world Width and Height (read only 'constants')
+            * all the cubes in the game.
+            </summary>
+        </member>
+        <member name="P:AgCubio.World.worldHieght">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:AgCubio.World.worldWidth">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:AgCubio.World.playerName">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:AgCubio.World.Server">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:AgCubio.World.cubes">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:AgCubio.World.#ctor(System.Int32,System.Int32,System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="hieght"></param>
+            <param name="width"></param>
+            <param name="name"></param>
+            <param name="server"></param>
+        </member>
+        <member name="M:AgCubio.World.newCube(System.Double,System.Double,System.Int32,System.Int32,System.Boolean,System.String,System.Double)">
+            <summary>
+            
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+            <param name="color"></param>
+            <param name="uid"></param>
+            <param name="food"></param>
+            <param name="name"></param>
+            <param name="mass"></param>
+        </member>
+        <member name="M:AgCubio.World.addCube(AgCubio.Cube)">
+            <summary>
+            
+            </summary>
+            <param name="cube"></param>
+        </member>
+    </members>
+</doc>

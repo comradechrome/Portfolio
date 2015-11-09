@@ -1,0 +1,1 @@
+﻿Installed NewtonSoft Json.NET 7.0.1
