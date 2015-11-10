@@ -41,6 +41,8 @@ namespace AgCubio
       public PlayerConsole()
       {
 
+         //TODO: get playername and server name - then hide textbox and labels
+
          world = new World(1000, 1000, ourName, ourServer);
 
          //temporary data test method
@@ -132,11 +134,20 @@ namespace AgCubio
       private void textBox_playerName_TextChanged(object sender, EventArgs e)
       {
          ourName = textBox_playerName.ToString();
+         textBox_playerName.Hide();
+         label_playerName.Hide();
       }
 
       private void textBox_serverName_TextChanged(object sender, EventArgs e)
       {
          ourServer = textBox_serverName.ToString();
+         textBox_serverName.Hide();
+         label_serverName.Hide();
+      }
+
+      private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
+      {
+        
       }
    }
 }

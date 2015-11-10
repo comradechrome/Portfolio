@@ -45,6 +45,7 @@
          this.textBox_serverName = new System.Windows.Forms.TextBox();
          this.label_playerName = new System.Windows.Forms.Label();
          this.label_serverName = new System.Windows.Forms.Label();
+         this.newGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
          this.menuStrip1.SuspendLayout();
          this.SuspendLayout();
          // 
@@ -62,6 +63,7 @@
          // agCubioToolStripMenuItem
          // 
          this.agCubioToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newGameToolStripMenuItem,
             this.quitToolStripMenuItem});
          this.agCubioToolStripMenuItem.Name = "agCubioToolStripMenuItem";
          this.agCubioToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
@@ -70,7 +72,7 @@
          // quitToolStripMenuItem
          // 
          this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-         this.quitToolStripMenuItem.Size = new System.Drawing.Size(97, 22);
+         this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
          this.quitToolStripMenuItem.Text = "Quit";
          this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
          // 
@@ -144,7 +146,7 @@
          // 
          // textBox_playerName
          // 
-         this.textBox_playerName.Location = new System.Drawing.Point(294, 195);
+         this.textBox_playerName.Location = new System.Drawing.Point(335, 219);
          this.textBox_playerName.Name = "textBox_playerName";
          this.textBox_playerName.Size = new System.Drawing.Size(100, 20);
          this.textBox_playerName.TabIndex = 5;
@@ -152,7 +154,7 @@
          // 
          // textBox_serverName
          // 
-         this.textBox_serverName.Location = new System.Drawing.Point(294, 237);
+         this.textBox_serverName.Location = new System.Drawing.Point(335, 261);
          this.textBox_serverName.Name = "textBox_serverName";
          this.textBox_serverName.Size = new System.Drawing.Size(100, 20);
          this.textBox_serverName.TabIndex = 6;
@@ -161,7 +163,7 @@
          // label_playerName
          // 
          this.label_playerName.AutoSize = true;
-         this.label_playerName.Location = new System.Drawing.Point(221, 198);
+         this.label_playerName.Location = new System.Drawing.Point(262, 222);
          this.label_playerName.Name = "label_playerName";
          this.label_playerName.Size = new System.Drawing.Size(67, 13);
          this.label_playerName.TabIndex = 7;
@@ -170,11 +172,18 @@
          // label_serverName
          // 
          this.label_serverName.AutoSize = true;
-         this.label_serverName.Location = new System.Drawing.Point(234, 240);
+         this.label_serverName.Location = new System.Drawing.Point(275, 264);
          this.label_serverName.Name = "label_serverName";
          this.label_serverName.Size = new System.Drawing.Size(38, 13);
          this.label_serverName.TabIndex = 8;
          this.label_serverName.Text = "Server";
+         // 
+         // newGameToolStripMenuItem
+         // 
+         this.newGameToolStripMenuItem.Name = "newGameToolStripMenuItem";
+         this.newGameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+         this.newGameToolStripMenuItem.Text = "New Game";
+         this.newGameToolStripMenuItem.Click += new System.EventHandler(this.newGameToolStripMenuItem_Click);
          // 
          // PlayerConsole
          // 
@@ -219,6 +228,7 @@
       private System.Windows.Forms.TextBox textBox_serverName;
       private System.Windows.Forms.Label label_playerName;
       private System.Windows.Forms.Label label_serverName;
+      private System.Windows.Forms.ToolStripMenuItem newGameToolStripMenuItem;
    }
 }
 
