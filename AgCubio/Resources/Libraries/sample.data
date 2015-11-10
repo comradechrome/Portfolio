@@ -36,3 +36,4 @@
 {"loc_x":367.0,"loc_y":669.0,"argb_color":-6626356,"uid":34,"food":true,"Name":"","Mass":1.0}
 {"loc_x":140.0,"loc_y":347.0,"argb_color":-8316193,"uid":35,"food":true,"Name":"","Mass":1.0}
 {"loc_x":885.0,"loc_y":634.0,"argb_color":-15560314,"uid":36,"food":true,"Name":"","Mass":1.0}
+{"loc_x":230.0,"loc_y":126.0,"argb_color":-35560314,"uid":360,"food":false,"Name":"player2","Mass":2000.0}

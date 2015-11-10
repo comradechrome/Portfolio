@@ -18,6 +18,22 @@ namespace AgCubio
       private System.Drawing.SolidBrush textColor;
 
       World world;
+      /// <summary>
+      /// 
+      /// </summary>
+      public int foodCount = 0;
+      /// <summary>
+      /// 
+      /// </summary>
+      public Double ourMass = 0;
+      /// <summary>
+      /// 
+      /// </summary>
+      public String ourName;
+      /// <summary>
+      /// 
+      /// </summary>
+      public String ourServer;
 
       /// <summary>
       /// 
@@ -25,12 +41,9 @@ namespace AgCubio
       public PlayerConsole()
       {
 
+         world = new World(1000, 1000, ourName, ourServer);
 
-
-
-         world = new World(1000, 1000, "name", "server");
-
-
+         //temporary data test method
          buildWorld();
 
          InitializeComponent();
@@ -59,22 +72,25 @@ namespace AgCubio
       /// <param name="e"></param>
       private void PlayerConsole_Paint(object sender, PaintEventArgs e)
       {
-       
-            foreach (Cube cube1 in world.cubes)
-            {
+         foodCount = 0;
+         foreach (KeyValuePair<int, Cube> cube in world.cubes)
+         {
+            //Need to reset food count to zero
+            
+            if (cube.Value.food)
+               foodCount++;
+            if (world.playerName == cube.Value.Name)
+               ourMass = cube.Value.Mass;
 
-               //MessageBox.Show("cube:" + cube1.uid);
-               Color color = Color.FromArgb(cube1.argb_color);
-               myBrush = new System.Drawing.SolidBrush(color);
-               //textColor = new System.Drawing.SolidBrush(Color.Black);
-               Rectangle rectangle = new Rectangle((int)cube1.loc_x, (int)cube1.loc_y, (int)cube1.Width, (int)cube1.Width);
-               e.Graphics.FillRectangle(myBrush, rectangle);
-               //Font myFont = new Font("Arial", 10);
-               //e.Graphics.DrawString(cube1.Name, myFont, textColor, (int)cube1.loc_x, (int)cube1.loc_y);
-               Invalidate();
-            }
-            //Invalidate();
-         
+            Color color = Color.FromArgb(cube.Value.argb_color);
+            myBrush = new System.Drawing.SolidBrush(color);
+            textColor = new System.Drawing.SolidBrush(Color.Black);
+            Rectangle rectangle = new Rectangle((int)cube.Value.loc_x, (int)cube.Value.loc_y, (int)cube.Value.Width, (int)cube.Value.Width);
+            e.Graphics.FillRectangle(myBrush, rectangle);
+            Font myFont = new Font("Arial", 10);
+            e.Graphics.DrawString(cube.Value.Name, myFont, textColor, (int)cube.Value.loc_x, (int)cube.Value.loc_y);
+         }
+
       }
 
       private void aboutAgCubioToolStripMenuItem_Click(object sender, EventArgs e)
@@ -92,14 +108,10 @@ namespace AgCubio
 
       }
 
-      private void PlayerConsole_Load(object sender, EventArgs e)
-      {
-
-      }
-
       private void width_TextChanged(object sender, EventArgs e)
       {
-
+         //TODO: might want to use the cube method to get this
+         width.Text = Math.Sqrt(ourMass).ToString();
       }
 
       private void fps_TextChanged(object sender, EventArgs e)
@@ -109,12 +121,22 @@ namespace AgCubio
 
       private void food_TextChanged(object sender, EventArgs e)
       {
-
+         food.Text = foodCount.ToString();
       }
 
       private void mass_TextChanged(object sender, EventArgs e)
       {
+         mass.Text = ourMass.ToString();
+      }
 
+      private void textBox_playerName_TextChanged(object sender, EventArgs e)
+      {
+         ourName = textBox_playerName.ToString();
+      }
+
+      private void textBox_serverName_TextChanged(object sender, EventArgs e)
+      {
+         ourServer = textBox_serverName.ToString();
       }
    }
 }

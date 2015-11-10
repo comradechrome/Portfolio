@@ -41,6 +41,10 @@
          this.food = new System.Windows.Forms.TextBox();
          this.mass = new System.Windows.Forms.TextBox();
          this.width = new System.Windows.Forms.TextBox();
+         this.textBox_playerName = new System.Windows.Forms.TextBox();
+         this.textBox_serverName = new System.Windows.Forms.TextBox();
+         this.label_playerName = new System.Windows.Forms.Label();
+         this.label_serverName = new System.Windows.Forms.Label();
          this.menuStrip1.SuspendLayout();
          this.SuspendLayout();
          // 
@@ -66,7 +70,7 @@
          // quitToolStripMenuItem
          // 
          this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-         this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+         this.quitToolStripMenuItem.Size = new System.Drawing.Size(97, 22);
          this.quitToolStripMenuItem.Text = "Quit";
          this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
          // 
@@ -138,11 +142,49 @@
          this.width.TabIndex = 4;
          this.width.TextChanged += new System.EventHandler(this.width_TextChanged);
          // 
+         // textBox_playerName
+         // 
+         this.textBox_playerName.Location = new System.Drawing.Point(294, 195);
+         this.textBox_playerName.Name = "textBox_playerName";
+         this.textBox_playerName.Size = new System.Drawing.Size(100, 20);
+         this.textBox_playerName.TabIndex = 5;
+         this.textBox_playerName.TextChanged += new System.EventHandler(this.textBox_playerName_TextChanged);
+         // 
+         // textBox_serverName
+         // 
+         this.textBox_serverName.Location = new System.Drawing.Point(294, 237);
+         this.textBox_serverName.Name = "textBox_serverName";
+         this.textBox_serverName.Size = new System.Drawing.Size(100, 20);
+         this.textBox_serverName.TabIndex = 6;
+         this.textBox_serverName.TextChanged += new System.EventHandler(this.textBox_serverName_TextChanged);
+         // 
+         // label_playerName
+         // 
+         this.label_playerName.AutoSize = true;
+         this.label_playerName.Location = new System.Drawing.Point(221, 198);
+         this.label_playerName.Name = "label_playerName";
+         this.label_playerName.Size = new System.Drawing.Size(67, 13);
+         this.label_playerName.TabIndex = 7;
+         this.label_playerName.Text = "Player Name";
+         // 
+         // label_serverName
+         // 
+         this.label_serverName.AutoSize = true;
+         this.label_serverName.Location = new System.Drawing.Point(234, 240);
+         this.label_serverName.Name = "label_serverName";
+         this.label_serverName.Size = new System.Drawing.Size(38, 13);
+         this.label_serverName.TabIndex = 8;
+         this.label_serverName.Text = "Server";
+         // 
          // PlayerConsole
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
          this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
          this.ClientSize = new System.Drawing.Size(750, 596);
+         this.Controls.Add(this.label_serverName);
+         this.Controls.Add(this.label_playerName);
+         this.Controls.Add(this.textBox_serverName);
+         this.Controls.Add(this.textBox_playerName);
          this.Controls.Add(this.width);
          this.Controls.Add(this.mass);
          this.Controls.Add(this.food);
@@ -153,7 +195,6 @@
          this.Margin = new System.Windows.Forms.Padding(2);
          this.Name = "PlayerConsole";
          this.Text = "PlayerConsole";
-         this.Load += new System.EventHandler(this.PlayerConsole_Load);
          this.Paint += new System.Windows.Forms.PaintEventHandler(this.PlayerConsole_Paint);
          this.menuStrip1.ResumeLayout(false);
          this.menuStrip1.PerformLayout();
@@ -174,6 +215,10 @@
       private System.Windows.Forms.TextBox food;
       private System.Windows.Forms.TextBox mass;
       private System.Windows.Forms.TextBox width;
+      private System.Windows.Forms.TextBox textBox_playerName;
+      private System.Windows.Forms.TextBox textBox_serverName;
+      private System.Windows.Forms.Label label_playerName;
+      private System.Windows.Forms.Label label_serverName;
    }
 }
 

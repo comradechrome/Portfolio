@@ -67,7 +67,10 @@ namespace AgCubio
       /// </summary>
       public Double Width
       {
-         get { return Math.Sqrt(Mass); }
+         get { if (this.food)
+               return 4;
+            else
+               return Math.Sqrt(Mass); }
       }
 
       /// <summary>
@@ -76,7 +79,7 @@ namespace AgCubio
       /// </summary>
       public Double Radius
       {
-         get { return Math.Sqrt(Mass) / 2; }
+         get { return this.Width / 2; }
       }
 
       /// <summary>
@@ -127,7 +130,7 @@ namespace AgCubio
       /// <summary>
       /// 
       /// </summary>
-      public HashSet<Cube> cubes { get; }
+      public Dictionary<int,Cube> cubes { get; }
 
 
       /// <summary>
@@ -143,7 +146,7 @@ namespace AgCubio
          this.worldWidth = width;
          this.playerName = name;
          this.Server = server;
-         cubes = new HashSet<Cube>();
+         cubes = new Dictionary<int,Cube>();
       }
 
       /// <summary>
@@ -159,7 +162,8 @@ namespace AgCubio
       public void newCube(Double x, Double y, int color, int uid, bool food, String name, Double mass)
       {
          Cube cube = new Cube(x, y, color, uid, food, name, mass);
-         cubes.Add(cube);
+         cubes.Add(uid, cube);
+         
       }
 
       /// <summary>
@@ -168,7 +172,7 @@ namespace AgCubio
       /// <param name="cube"></param>
       public void addCube(Cube cube)
       {
-            cubes.Add(cube);
+         cubes.Add(cube.uid, cube);
       }
 
       /// <summary>
@@ -178,28 +182,28 @@ namespace AgCubio
       /// <param name="x"></param>
       /// <param name="y"></param>
       /// <param name="mass"></param>
-    //  public void moveCube(int uid, Double x, Double y, Double mass)
-     // {
-         //if (cubes.ContainsKey(uid))
-         //{
-         //   cubes[uid].Mass = mass;
-         //   cubes[uid].loc_x = x;
-          //  cubes[uid].loc_y = y;
-        // }
+      public void moveCube(int uid, Double x, Double y, Double mass)
+      {
+         if (cubes.ContainsKey(uid))
+         {
+            cubes[uid].Mass = mass;
+            cubes[uid].loc_x = x;
+            cubes[uid].loc_y = y;
+         }
          // do nothing if uid doesn't exist -
          // TODO: may need to handle this, but we'll ignore for now 
 
-   //   }
+      }
 
       /// <summary>
       /// 
       /// </summary>
       /// <param name="uid"></param>
-      //public void removeCube(int uid)
-      //{
-      //   if (cubes.ContainsKey(uid))
-      //      cubes.Remove(uid);
-      //}
+      public void removecube(int uid)
+      {
+         if (cubes.ContainsKey(uid))
+            cubes.Remove(uid);
+      }
 
    }
 

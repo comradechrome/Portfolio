@@ -137,5 +137,20 @@
             </summary>
             <param name="cube"></param>
         </member>
+        <member name="M:AgCubio.World.moveCube(System.Int32,System.Double,System.Double,System.Double)">
+            <summary>
+            
+            </summary>
+            <param name="uid"></param>
+            <param name="x"></param>
+            <param name="y"></param>
+            <param name="mass"></param>
+        </member>
+        <member name="M:AgCubio.World.removecube(System.Int32)">
+            <summary>
+            
+            </summary>
+            <param name="uid"></param>
+        </member>
     </members>
 </doc>
