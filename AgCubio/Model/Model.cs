@@ -90,17 +90,17 @@ namespace AgCubio
       /// <param name="argb_color"></param>
       /// <param name="uid"></param>
       /// <param name="food"></param>
-      /// <param name="name"></param>
-      /// <param name="mass"></param>
-      public Cube(Double loc_x, Double loc_y, int argb_color, int uid, bool food, String name, Double mass)
+      /// <param name="Name"></param>
+      /// <param name="Mass"></param>
+      public Cube(Double loc_x, Double loc_y, int argb_color, int uid, bool food, String Name, Double Mass)
       {
          this.loc_x = loc_x;
          this.loc_y = loc_y;
          this.argb_color = argb_color;
          this.uid = uid;
          this.food = food;
-         Name = name;
-         Mass = mass;
+         this.Name = Name;
+         this.Mass = Mass;
       }
    }
 

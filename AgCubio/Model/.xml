@@ -75,8 +75,8 @@
             <param name="argb_color"></param>
             <param name="uid"></param>
             <param name="food"></param>
-            <param name="name"></param>
-            <param name="mass"></param>
+            <param name="Name"></param>
+            <param name="Mass"></param>
         </member>
         <member name="T:AgCubio.World">
             <summary>
