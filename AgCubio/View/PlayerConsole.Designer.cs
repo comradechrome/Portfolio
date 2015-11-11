@@ -33,6 +33,7 @@
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.agCubioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutAgCubioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,7 +46,6 @@
             this.textBox_serverName = new System.Windows.Forms.TextBox();
             this.label_playerName = new System.Windows.Forms.Label();
             this.label_serverName = new System.Windows.Forms.Label();
-            this.newGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -69,10 +69,17 @@
             this.agCubioToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
             this.agCubioToolStripMenuItem.Text = "AgCubio";
             // 
+            // newGameToolStripMenuItem
+            // 
+            this.newGameToolStripMenuItem.Name = "newGameToolStripMenuItem";
+            this.newGameToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
+            this.newGameToolStripMenuItem.Text = "New Game";
+            this.newGameToolStripMenuItem.Click += new System.EventHandler(this.newGameToolStripMenuItem_Click);
+            // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -151,6 +158,7 @@
             this.textBox_playerName.Size = new System.Drawing.Size(100, 20);
             this.textBox_playerName.TabIndex = 5;
             this.textBox_playerName.TextChanged += new System.EventHandler(this.textBox_playerName_TextChanged);
+            this.textBox_playerName.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_playerName_KeyDown);
             // 
             // textBox_serverName
             // 
@@ -159,6 +167,7 @@
             this.textBox_serverName.Size = new System.Drawing.Size(100, 20);
             this.textBox_serverName.TabIndex = 6;
             this.textBox_serverName.TextChanged += new System.EventHandler(this.textBox_serverName_TextChanged);
+            this.textBox_serverName.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_serverName_KeyDown);
             // 
             // label_playerName
             // 
@@ -177,13 +186,7 @@
             this.label_serverName.Size = new System.Drawing.Size(38, 13);
             this.label_serverName.TabIndex = 8;
             this.label_serverName.Text = "Server";
-            // 
-            // newGameToolStripMenuItem
-            // 
-            this.newGameToolStripMenuItem.Name = "newGameToolStripMenuItem";
-            this.newGameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.newGameToolStripMenuItem.Text = "New Game";
-            this.newGameToolStripMenuItem.Click += new System.EventHandler(this.newGameToolStripMenuItem_Click);
+            this.label_serverName.Click += new System.EventHandler(this.label_serverName_Click);
             // 
             // PlayerConsole
             // 

@@ -149,22 +149,22 @@ namespace AgCubio
          cubes = new Dictionary<int,Cube>();
       }
 
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="x"></param>
-      /// <param name="y"></param>
-      /// <param name="color"></param>
-      /// <param name="uid"></param>
-      /// <param name="food"></param>
-      /// <param name="name"></param>
-      /// <param name="mass"></param>
-      public void newCube(Double x, Double y, int color, int uid, bool food, String name, Double mass)
-      {
-         Cube cube = new Cube(x, y, color, uid, food, name, mass);
-         cubes.Add(uid, cube);
+      ///// <summary>
+      ///// 
+      ///// </summary>
+      ///// <param name="x"></param>
+      ///// <param name="y"></param>
+      ///// <param name="color"></param>
+      ///// <param name="uid"></param>
+      ///// <param name="food"></param>
+      ///// <param name="name"></param>
+      ///// <param name="mass"></param>
+      //public void newCube(Double x, Double y, int color, int uid, bool food, String name, Double mass)
+      //{
+      //   Cube cube = new Cube(x, y, color, uid, food, name, mass);
+      //   cubes.Add(uid, cube);
          
-      }
+      //}
 
       /// <summary>
       /// 

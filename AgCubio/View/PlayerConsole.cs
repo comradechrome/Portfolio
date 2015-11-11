@@ -8,11 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
+using System.Net.Sockets;
 
 namespace AgCubio
 {
     public partial class PlayerConsole : Form
     {
+        private Delegate ConnectionDelegate;
 
         private System.Drawing.SolidBrush myBrush;
         private System.Drawing.SolidBrush textColor;
@@ -82,24 +84,26 @@ namespace AgCubio
         private void PlayerConsole_Paint(object sender, PaintEventArgs e)
         {
             foodCount = 0;
-            foreach (KeyValuePair<int, Cube> cube in world.cubes)
+            lock(world)
             {
-                //Need to reset food count to zero
+                foreach (KeyValuePair<int, Cube> cube in world.cubes)
+                {
+                    //Need to reset food count to zero
 
-                if (cube.Value.food)
-                    foodCount++;
-                if (world.playerName == cube.Value.Name)
-                    ourMass = cube.Value.Mass;
+                    if (cube.Value.food)
+                        foodCount++;
+                    if (world.playerName == cube.Value.Name)
+                        ourMass = cube.Value.Mass;
 
-                Color color = Color.FromArgb(cube.Value.argb_color);
-                myBrush = new System.Drawing.SolidBrush(color);
-                textColor = new System.Drawing.SolidBrush(Color.Black);
-                Rectangle rectangle = new Rectangle((int)cube.Value.loc_x, (int)cube.Value.loc_y, (int)cube.Value.Width, (int)cube.Value.Width);
-                e.Graphics.FillRectangle(myBrush, rectangle);
-                Font myFont = new Font("Arial", 10);
-                e.Graphics.DrawString(cube.Value.Name, myFont, textColor, (int)cube.Value.loc_x, (int)cube.Value.loc_y);
+                    Color color = Color.FromArgb(cube.Value.argb_color);
+                    myBrush = new System.Drawing.SolidBrush(color);
+                    textColor = new System.Drawing.SolidBrush(Color.Black);
+                    Rectangle rectangle = new Rectangle((int)cube.Value.loc_x, (int)cube.Value.loc_y, (int)cube.Value.Width, (int)cube.Value.Width);
+                    e.Graphics.FillRectangle(myBrush, rectangle);
+                    Font myFont = new Font("Arial", 10);
+                    e.Graphics.DrawString(cube.Value.Name, myFont, textColor, (int)cube.Value.loc_x, (int)cube.Value.loc_y);
+                }
             }
-
         }
 
         private void aboutAgCubioToolStripMenuItem_Click(object sender, EventArgs e)
@@ -141,20 +145,63 @@ namespace AgCubio
         private void textBox_playerName_TextChanged(object sender, EventArgs e)
         {
             ourName = textBox_playerName.ToString();
-            textBox_playerName.Hide();
-            label_playerName.Hide();
+
         }
 
         private void textBox_serverName_TextChanged(object sender, EventArgs e)
         {
             ourServer = textBox_serverName.ToString();
-            textBox_serverName.Hide();
-            label_serverName.Hide();
+            
         }
 
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }
+
+        private void textBox_playerName_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Return)
+                if (!String.IsNullOrEmpty(textBox_playerName.Text) && !String.IsNullOrEmpty(textBox_serverName.Text))
+                    startGame();
+        }
+
+        private void textBox_serverName_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Return)
+                if (!String.IsNullOrEmpty(textBox_playerName.Text) && !String.IsNullOrEmpty(textBox_serverName.Text))
+                    startGame();   
+        }
+
+        private void startGame()
+        {
+            textBox_playerName.Hide();
+            label_playerName.Hide();
+            textBox_serverName.Hide();
+            label_serverName.Hide();
+
+            Network.Connect_to_Server(SendPlayerInfo, textBox_serverName.Text);
+        }
+
+
+        private void label_serverName_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SendPlayerInfo(StateObject s)
+        {
+            Console.WriteLine(s);
+            Network.Send(s.workSocket, textBox_playerName.Text);
+
+            s.ConnectionDelegate = ReceivePlayer;
+        }
+
+        private static void ReceivePlayer (StateObject s)
+        {
+            
+
+        }
+
     }
 }
