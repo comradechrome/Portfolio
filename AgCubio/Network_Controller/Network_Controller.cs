@@ -223,11 +223,5 @@ namespace AgCubio
                 Console.WriteLine(e.ToString());
             }
         }
-
-
-
-
-
-
     }
 }

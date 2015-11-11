@@ -75,8 +75,8 @@
             <param name="argb_color"></param>
             <param name="uid"></param>
             <param name="food"></param>
-            <param name="Name"></param>
-            <param name="Mass"></param>
+            <param name="name"></param>
+            <param name="mass"></param>
         </member>
         <member name="T:AgCubio.World">
             <summary>
@@ -118,6 +118,18 @@
             <param name="width"></param>
             <param name="name"></param>
             <param name="server"></param>
+        </member>
+        <member name="M:AgCubio.World.newCube(System.Double,System.Double,System.Int32,System.Int32,System.Boolean,System.String,System.Double)">
+            <summary>
+            
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+            <param name="color"></param>
+            <param name="uid"></param>
+            <param name="food"></param>
+            <param name="name"></param>
+            <param name="mass"></param>
         </member>
         <member name="M:AgCubio.World.addCube(AgCubio.Cube)">
             <summary>

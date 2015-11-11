@@ -186,7 +186,6 @@
             this.label_serverName.Size = new System.Drawing.Size(38, 13);
             this.label_serverName.TabIndex = 8;
             this.label_serverName.Text = "Server";
-            this.label_serverName.Click += new System.EventHandler(this.label_serverName_Click);
             // 
             // PlayerConsole
             // 

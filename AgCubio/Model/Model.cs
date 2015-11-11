@@ -21,6 +21,8 @@ namespace AgCubio
    /// </summary>
    public class Cube
    {
+      private const int scalingFactor = 10;
+
       /// <summary>
       /// x coordinate of the center of the cube
       /// </summary>
@@ -56,9 +58,7 @@ namespace AgCubio
       /// <summary>
       /// mass of the cube - if set attempts a value less than 1, we'll default to 1
       /// </summary>
-      public Double Mass
-
-      { get; set; }
+      public Double Mass { get; set; }
 
 
       /// <summary>
@@ -67,10 +67,7 @@ namespace AgCubio
       /// </summary>
       public Double Width
       {
-         get { if (this.food)
-               return 4;
-            else
-               return Math.Sqrt(Mass); }
+         get { return Math.Sqrt(Mass * scalingFactor); }
       }
 
       /// <summary>
@@ -90,17 +87,17 @@ namespace AgCubio
       /// <param name="argb_color"></param>
       /// <param name="uid"></param>
       /// <param name="food"></param>
-      /// <param name="Name"></param>
-      /// <param name="Mass"></param>
-      public Cube(Double loc_x, Double loc_y, int argb_color, int uid, bool food, String Name, Double Mass)
+      /// <param name="name"></param>
+      /// <param name="mass"></param>
+      public Cube(Double loc_x, Double loc_y, int argb_color, int uid, bool food, String name, Double mass)
       {
          this.loc_x = loc_x;
          this.loc_y = loc_y;
          this.argb_color = argb_color;
          this.uid = uid;
          this.food = food;
-         this.Name = Name;
-         this.Mass = Mass;
+         Name = name;
+         Mass = mass;
       }
    }
 
@@ -120,13 +117,9 @@ namespace AgCubio
       /// </summary>
       public int worldWidth { get; }
       /// <summary>
-      /// 
+      /// Our players UID
       /// </summary>
-      public String playerName { get; }
-      /// <summary>
-      /// 
-      /// </summary>
-      public String Server { get; }
+      public int ourID { get; }
       /// <summary>
       /// 
       /// </summary>
@@ -138,33 +131,31 @@ namespace AgCubio
       /// </summary>
       /// <param name="hieght"></param>
       /// <param name="width"></param>
-      /// <param name="name"></param>
-      /// <param name="server"></param>
-      public World(int hieght, int width, String name, String server)
+      /// <param name="id"></param>
+      public World(int hieght, int width, int id)
       {
          this.worldHieght = hieght;
          this.worldWidth = width;
-         this.playerName = name;
-         this.Server = server;
+         this.ourID = id;
          cubes = new Dictionary<int,Cube>();
       }
 
-      ///// <summary>
-      ///// 
-      ///// </summary>
-      ///// <param name="x"></param>
-      ///// <param name="y"></param>
-      ///// <param name="color"></param>
-      ///// <param name="uid"></param>
-      ///// <param name="food"></param>
-      ///// <param name="name"></param>
-      ///// <param name="mass"></param>
-      //public void newCube(Double x, Double y, int color, int uid, bool food, String name, Double mass)
-      //{
-      //   Cube cube = new Cube(x, y, color, uid, food, name, mass);
-      //   cubes.Add(uid, cube);
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="x"></param>
+      /// <param name="y"></param>
+      /// <param name="color"></param>
+      /// <param name="uid"></param>
+      /// <param name="food"></param>
+      /// <param name="name"></param>
+      /// <param name="mass"></param>
+      public void newCube(Double x, Double y, int color, int uid, bool food, String name, Double mass)
+      {
+         Cube cube = new Cube(x, y, color, uid, food, name, mass);
+         cubes.Add(uid, cube);
          
-      //}
+      }
 
       /// <summary>
       /// 
@@ -178,31 +169,28 @@ namespace AgCubio
       /// <summary>
       /// 
       /// </summary>
-      /// <param name="uid"></param>
-      /// <param name="x"></param>
-      /// <param name="y"></param>
-      /// <param name="mass"></param>
-      public void moveCube(int uid, Double x, Double y, Double mass)
+      /// <param name="cube"></param>
+      public void moveCube(Cube cube)
       {
-         if (cubes.ContainsKey(uid))
+         if (cubes.ContainsKey(cube.uid))
          {
-            cubes[uid].Mass = mass;
-            cubes[uid].loc_x = x;
-            cubes[uid].loc_y = y;
+            cubes[cube.uid].Mass = cube.Mass;
+            cubes[cube.uid].loc_x = cube.loc_x;
+            cubes[cube.uid].loc_y = cube.loc_y;
          }
          // do nothing if uid doesn't exist -
-         // TODO: may need to handle this, but we'll ignore for now 
+         // TODO: may need to handle this, but we'll ignore for now - we already checked for this condition in view
 
       }
 
       /// <summary>
       /// 
       /// </summary>
-      /// <param name="uid"></param>
-      public void removecube(int uid)
+      /// <param name="cube"></param>
+      public void removecube(Cube cube)
       {
-         if (cubes.ContainsKey(uid))
-            cubes.Remove(uid);
+         if (cubes.ContainsKey(cube.uid))
+            cubes.Remove(cube.uid);
       }
 
    }
