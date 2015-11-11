@@ -61,7 +61,7 @@ namespace AgCubio
             {
                 // Establish the remote endpoint for the socket.
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(hostname);
-                IPAddress ipAddress = ipHostInfo.AddressList[0];
+                IPAddress ipAddress = ipHostInfo.AddressList[1];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
                 // Create a TCP/IP socket.
@@ -98,6 +98,11 @@ namespace AgCubio
         private static void EndConnect(IAsyncResult ar)
         {
             StateObject state = (StateObject)ar.AsyncState;
+            state.workSocket.EndConnect(ar);
+
+
+            state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, ReceiveCallback, state);
+
             state.ConnectionDelegate(state);
   
         }
@@ -120,12 +125,48 @@ namespace AgCubio
         /// If 0, the connection has been closed (presumably by the server). 
         /// On greater than zero data, this method should call the callback function provided above.
         /// </summary>
-        /// <param name="state_in_an_ar_object"></param>
-        static void ReceiveCallback(IAsyncResult state_in_an_ar_object)
+        /// <param name="ar"></param>
+        static void ReceiveCallback(IAsyncResult ar)
         {
 
             //For our purposes, this function should not request more data. 
             //It is up to the code in the callback function above to request more data.
+
+            try
+            {
+                // Retrieve the state object and the client socket 
+                // from the asynchronous state object.
+                StateObject state = (StateObject)ar.AsyncState;
+                Socket client = state.workSocket;
+
+                // Read data from the remote device.
+                int bytesRead = client.EndReceive(ar);
+
+                if (bytesRead > 0)
+                {
+                    // There might be more data, so store the data received so far.
+                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+
+                    // Get the rest of the data.
+                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                        new AsyncCallback(ReceiveCallback), state);
+                }
+                else
+                {
+                    // All the data has arrived; put it in response.
+                    if (state.sb.Length > 1)
+                    {
+                        // send to JSON for object creation????
+                        //response = state.sb.ToString();
+                    }
+                    // Signal that all bytes have been received.
+                    //receiveDone.Set();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
 
         }
 
@@ -147,19 +188,40 @@ namespace AgCubio
         /// <param name="data"></param>
         public static void Send(Socket socket, String data)
         {
+            // Convert the string data to byte data using ASCII encoding.
+            byte[] byteData = Encoding.Unicode.GetBytes(data);
 
+            // Begin sending the data to the remote device.
+            socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
         }
 
         /// <summary>
         /// Assists 'Send'. Do nothing if all data has been sent, otherwise arrange to send remaining data
         /// </summary>
-        static void SendCallBack()
+        static void SendCallBack(IAsyncResult ar)
         {
 
             //If all the data has been sent, then life is good and nothing needs to be done 
             //(note: you may, when first prototyping your program, put a WriteLine in here to see when data goes out).
 
             //(see the ChatClient example program).
+
+            try
+            {
+                // Retrieve the socket from the state object.
+                Socket client = (Socket)ar.AsyncState;
+
+                // Complete sending the data to the remote device.
+                int bytesSent = client.EndSend(ar);
+                Console.WriteLine("Sent {0} bytes to server.", bytesSent);
+
+                // Signal that all bytes have been sent.
+                //sendDone.Set();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
 

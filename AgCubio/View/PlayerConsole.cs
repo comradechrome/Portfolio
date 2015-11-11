@@ -183,25 +183,30 @@ namespace AgCubio
             Network.Connect_to_Server(SendPlayerInfo, textBox_serverName.Text);
         }
 
-
-        private void label_serverName_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void SendPlayerInfo(StateObject s)
         {
-            Console.WriteLine(s);
-            Network.Send(s.workSocket, textBox_playerName.Text);
+            Network.Send(s.workSocket, textBox_playerName.Text + "\n");
 
             s.ConnectionDelegate = ReceivePlayer;
         }
 
         private static void ReceivePlayer (StateObject s)
         {
-            
+            try
+            {
+                // Begin receiving the data from the remote device.
+                //s.workSocket.BeginReceive(s.buffer, 0, StateObject.BufferSize, 0, s.ConnectionDelegate, s);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
 
         }
 
+        private void textBox_serverName_KeyDown_1(object sender, KeyEventArgs e)
+        {
+
+        }
     }
 }
