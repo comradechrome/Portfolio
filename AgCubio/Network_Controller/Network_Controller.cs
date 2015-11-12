@@ -27,6 +27,7 @@ namespace AgCubio
 
         public Action<StateObject> CallbackAction;
 
+
     }
 
     /// <summary>
@@ -86,15 +87,16 @@ namespace AgCubio
             StateObject state = ((StateObject)ar.AsyncState);
             state.workSocket.EndConnect(ar);
             state.CallbackAction(state);
-            Receive(ar);
+            
         }
-
-        private static void Receive(IAsyncResult ar)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="state"></param>
+        public static void Receive(StateObject state)
         {
             try
             {
-                // Create the state object.
-                StateObject state = (StateObject)ar.AsyncState;
 
                 // Begin receiving the data from the remote device.
                 state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, SocketFlags.None, ReceiveCallback, state);
@@ -174,10 +176,19 @@ namespace AgCubio
         /// Called when the View code wants more data.
         /// </summary>
         /// <param name="state"></param>
-        static void i_want_more_data(object state)
+        public static void i_want_more_data(StateObject state)
         {
             //Note: the client will probably want more data every time it gets data.
+            try
+            {
 
+                // Begin receiving the data from the remote device.
+                state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, SocketFlags.None, ReceiveCallback, state);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
         /// <summary>

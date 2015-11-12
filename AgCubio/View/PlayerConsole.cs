@@ -19,7 +19,7 @@ namespace AgCubio
         private System.Drawing.SolidBrush myBrush;
         private System.Drawing.SolidBrush textColor;
 
-        World world;
+        World mainWorld;
         /// <summary>
         /// 
         /// </summary>
@@ -41,10 +41,10 @@ namespace AgCubio
             //TODO: get playername and server name - then hide textbox and labels
 
          // TODO: may not have UID yet
-         world = new World(1000, 1000, world.cubes[world.ourID].uid);
+         mainWorld = new World(1000, 1000);
 
             //temporary data test method
-            buildWorld();
+            //buildWorld();
 
             InitializeComponent();
             DoubleBuffered = true;
@@ -67,7 +67,7 @@ namespace AgCubio
             foreach (string line in lines)
             {
                 Cube cube = JsonConvert.DeserializeObject<Cube>(line);
-                world.addCube(cube);
+                mainWorld.addCube(cube);
             }
 
         }
@@ -80,16 +80,16 @@ namespace AgCubio
         private void PlayerConsole_Paint(object sender, PaintEventArgs e)
         {
             foodCount = 0;
-         lock (world)
+         lock (mainWorld)
             {
-                foreach (KeyValuePair<int, Cube> cube in world.cubes)
+                foreach (KeyValuePair<int, Cube> cube in mainWorld.cubes)
                 {
                     //Need to reset food count to zero
 
                     if (cube.Value.food)
                         foodCount++;
        
-               if (world.ourID == cube.Value.uid)
+               if (mainWorld.ourID == cube.Value.uid)
                         ourMass = cube.Value.Mass;
 
                     Color color = Color.FromArgb(cube.Value.argb_color);
@@ -100,6 +100,9 @@ namespace AgCubio
                     Font myFont = new Font("Arial", 10);
                     e.Graphics.DrawString(cube.Value.Name, myFont, textColor, (int)cube.Value.loc_x, (int)cube.Value.loc_y);
                 }
+
+                //send mouse location to server
+
             }
         }
 
@@ -182,46 +185,52 @@ namespace AgCubio
 
         private void SendPlayerInfo(StateObject state)
         {
-            //textBox_playerName.Hide();
-            //label_playerName.Hide();
-            //textBox_serverName.Hide();
-            //label_serverName.Hide();
-
-            Network.Send(state.workSocket, textBox_playerName.Text);
+            this.Invoke(new Action(() =>
+            {
+                textBox_playerName.Hide();
+                label_playerName.Hide();
+                textBox_serverName.Hide();
+                label_serverName.Hide();
+            }));
+           
+            Network.Send(state.workSocket, textBox_playerName.Text + "\n");
 
             state.CallbackAction = ReceiveData;
+            Network.i_want_more_data(state);
 
         }
 
-        private static void ReceiveData (StateObject state)
+        private void ReceiveData (StateObject state)
         {
             StringBuilder test = state.sb;
             MessageBox.Show(state.sb.ToString());
+            mainWorld.firstCube(state.sb.ToString());
+            Network.i_want_more_data(state);
         }
 
       private void processCube(Cube cube)
       {
          // check if cube exists
-         if(world.cubes.ContainsKey(cube.uid))
+         if(mainWorld.cubes.ContainsKey(cube.uid))
          {
             // check if mass equals zero
             if(cube.Mass == 0.0)
             {
                // check if our mass is zero - end game if true
-               if(cube.uid == world.ourID)
+               if(cube.uid == mainWorld.ourID)
                {
                   // TODO: run code to end game
                }
                else
-                  world.removecube(cube);
+                  mainWorld.removeCube(cube);
             }
             // cube exists and is not zero mass
             else
-               world.moveCube(cube);
+               mainWorld.moveCube(cube);
          }
          // cube doesn't exist so we will add it
          else
-            world.addCube(cube);
+            mainWorld.addCube(cube);
 
       }
 

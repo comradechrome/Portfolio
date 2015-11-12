@@ -95,14 +95,9 @@
             
             </summary>
         </member>
-        <member name="P:AgCubio.World.playerName">
+        <member name="P:AgCubio.World.ourID">
             <summary>
-            
-            </summary>
-        </member>
-        <member name="P:AgCubio.World.Server">
-            <summary>
-            
+            Our players UID
             </summary>
         </member>
         <member name="P:AgCubio.World.cubes">
@@ -110,14 +105,13 @@
             
             </summary>
         </member>
-        <member name="M:AgCubio.World.#ctor(System.Int32,System.Int32,System.String,System.String)">
+        <member name="M:AgCubio.World.#ctor(System.Int32,System.Int32)">
             <summary>
             
             </summary>
             <param name="hieght"></param>
             <param name="width"></param>
-            <param name="name"></param>
-            <param name="server"></param>
+            <param name="id"></param>
         </member>
         <member name="M:AgCubio.World.newCube(System.Double,System.Double,System.Int32,System.Int32,System.Boolean,System.String,System.Double)">
             <summary>
@@ -137,20 +131,23 @@
             </summary>
             <param name="cube"></param>
         </member>
-        <member name="M:AgCubio.World.moveCube(System.Int32,System.Double,System.Double,System.Double)">
+        <member name="M:AgCubio.World.moveCube(AgCubio.Cube)">
             <summary>
             
             </summary>
-            <param name="uid"></param>
-            <param name="x"></param>
-            <param name="y"></param>
-            <param name="mass"></param>
+            <param name="cube"></param>
         </member>
-        <member name="M:AgCubio.World.removecube(System.Int32)">
+        <member name="M:AgCubio.World.removeCube(AgCubio.Cube)">
             <summary>
             
             </summary>
-            <param name="uid"></param>
+            <param name="cube"></param>
+        </member>
+        <member name="M:AgCubio.World.firstCube(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="jsonCube"></param>
         </member>
     </members>
 </doc>
