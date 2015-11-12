@@ -125,7 +125,7 @@ namespace AgCubio
       /// <summary>
       /// Our players UID
       /// </summary>
-      public int ourID { get; set; }
+      public int ourID { get; set; } = 0;
       /// <summary>
       /// 
       /// </summary>
@@ -146,6 +146,7 @@ namespace AgCubio
          this.worldHieght = hieght;
          this.worldWidth = width;
          worldCubes = new Dictionary<int, Cube>();
+         ourCubes = new Dictionary<int, Cube>();
       }
 
       /// <summary>

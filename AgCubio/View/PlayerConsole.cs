@@ -36,6 +36,9 @@ namespace AgCubio
       /// String to contain the reaminder of incomplete JSON text after each buffer read
       /// </summary>
       private String remainingJson = "";
+      /// <summary>
+      /// 
+      /// </summary>
       public PlayerConsole()
       {
 
@@ -50,12 +53,6 @@ namespace AgCubio
          InitializeComponent();
          DoubleBuffered = true;
 
-         Random rand = new Random(0);
-         //while (true)
-         //{
-         //    Cube cube = new Cube(rand.NextDouble()*1000, rand.NextDouble() * 1000, (int)rand.NextDouble() * -32000000, (int)rand.NextDouble() * 5000, true, "", 1.0);
-
-         //}
       }
 
 
@@ -81,6 +78,7 @@ namespace AgCubio
       private void PlayerConsole_Paint(object sender, PaintEventArgs e)
       {
          foodCount = 0;
+         
          lock (mainWorld)
          {
             foreach (KeyValuePair<int, Cube> cube in mainWorld.worldCubes)
@@ -102,6 +100,8 @@ namespace AgCubio
                e.Graphics.DrawString(cube.Value.Name, myFont, textColor, (int)cube.Value.loc_x, (int)cube.Value.loc_y);
             }
 
+            
+            ;
             //send mouse location to server
 
          }
@@ -208,14 +208,14 @@ namespace AgCubio
          // clear out the state buffer
          state.sb.Clear();
          // process the raw JSON data and return a string array of clean JSON
-         String[] jsonLines = processJson(remainingJson + newJson);
+         List<String> jsonLines = processJson(remainingJson + newJson);
          // JSON is now clean, we can process line by line
          foreach (String line in jsonLines)
          {
-            MessageBox.Show(line);
+            //MessageBox.Show(line);
             mainWorld.processCube(line);
          }
-
+         //MessageBox.Show("Get a new buffer");
          Network.i_want_more_data(state);
 
       }
@@ -226,11 +226,27 @@ namespace AgCubio
       /// </summary>
       /// <param name="rawJson"></param>
       /// <returns></returns>
-      private String[] processJson(String rawJson)
+      private List<String> processJson(String rawJson)
       {
+         // clear the remainingJson string
+         remainingJson = "";
+         List<String> cleanJson = new List<string>();
+         String[] lines = rawJson.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+         foreach(String line in lines)
+         {
+            if (line.StartsWith("{") & line.EndsWith("}"))
+            {
+               cleanJson.Add(line);
+            }
+            else if (line.StartsWith("{")) 
+            {
+               //TODO: may want ot use an out parameter with this 
+               remainingJson = line;
+            }
+            // ignore anything else
+         }
 
-
-         return null;
+         return cleanJson;
       }
 
    }
