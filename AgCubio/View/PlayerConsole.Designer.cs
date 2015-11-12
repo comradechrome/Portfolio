@@ -166,6 +166,7 @@
             this.textBox_serverName.Name = "textBox_serverName";
             this.textBox_serverName.Size = new System.Drawing.Size(100, 20);
             this.textBox_serverName.TabIndex = 6;
+            this.textBox_serverName.Text = "localHost";
             this.textBox_serverName.TextChanged += new System.EventHandler(this.textBox_serverName_TextChanged);
             this.textBox_serverName.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_serverName_KeyDown);
             // 
@@ -186,7 +187,6 @@
             this.label_serverName.Size = new System.Drawing.Size(38, 13);
             this.label_serverName.TabIndex = 8;
             this.label_serverName.Text = "Server";
-            this.label_serverName.Click += new System.EventHandler(this.label_serverName_Click);
             // 
             // PlayerConsole
             // 

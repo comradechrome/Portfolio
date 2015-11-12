@@ -175,38 +175,33 @@ namespace AgCubio
 
         private void startGame()
         {
-            textBox_playerName.Hide();
-            label_playerName.Hide();
-            textBox_serverName.Hide();
-            label_serverName.Hide();
-
             Network.Connect_to_Server(SendPlayerInfo, textBox_serverName.Text);
         }
 
-        private void SendPlayerInfo(StateObject s)
+        private static void EndConnectCallback(IAsyncResult ar)
         {
-            Network.Send(s.workSocket, textBox_playerName.Text + "\n");
-
-            s.ConnectionDelegate = ReceivePlayer;
+            StateObject state = (StateObject)ar.AsyncState;
+            state.workSocket.EndConnect(ar);
         }
 
-        private static void ReceivePlayer (StateObject s)
+        private void SendPlayerInfo(StateObject state)
         {
-            try
-            {
-                // Begin receiving the data from the remote device.
-                //s.workSocket.BeginReceive(s.buffer, 0, StateObject.BufferSize, 0, s.ConnectionDelegate, s);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
+            //textBox_playerName.Hide();
+            //label_playerName.Hide();
+            //textBox_serverName.Hide();
+            //label_serverName.Hide();
+
+            Network.Send(state.workSocket, textBox_playerName.Text);
+
+            state.CallbackAction = ReceiveData;
 
         }
 
-        private void textBox_serverName_KeyDown_1(object sender, KeyEventArgs e)
+        private static void ReceiveData (StateObject state)
         {
-            //removelater
+            StringBuilder test = state.sb;
+            MessageBox.Show(state.sb.ToString());
         }
+
     }
 }

@@ -25,7 +25,7 @@ namespace AgCubio
         // Received data string.
         public StringBuilder sb = new StringBuilder();
 
-        public Action<StateObject> ConnectionDelegate;
+        public Action<StateObject> CallbackAction;
 
     }
 
@@ -42,6 +42,7 @@ namespace AgCubio
     public static class Network
     {
         private const int port = 11000;
+
         /// <summary>
         /// Attempt to connect to the server via a provided hostname. Save the callback function (in a state object)
         ///  for use when data arrives.
@@ -51,8 +52,8 @@ namespace AgCubio
         /// <returns></returns>
         public static void Connect_to_Server(Action<StateObject> callback, String hostname)
         {
-            StateObject sb1 = new StateObject();
-            sb1.ConnectionDelegate = callback;
+            StateObject MainStateObject = new StateObject();
+            MainStateObject.CallbackAction = callback;
             // It will need to open a socket and then use the BeginConnect method.Note this method take the 
             // "state" object and "regurgitates" it back to you when a connection is made, thus allowing
             // "communication" between this function and the Connected_to_Server function.
@@ -65,48 +66,44 @@ namespace AgCubio
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
                 // Create a TCP/IP socket.
-                Socket client = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-
-                sb1.workSocket = client;
+                MainStateObject.workSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 // Connect to the remote endpoint.
-                client.BeginConnect(remoteEP, EndConnect, sb1);
-
-                // Send test data to the remote device.
-                //Send(client, "This is a test<EOF>");
-
-                // Receive the response from the remote device.
-                //Receive(client);
-
-                // Write the response to the console.
-                //Console.WriteLine("Response received : {0}", response);
-
-                // Release the socket.
-                //client.Shutdown(SocketShutdown.Both);
-                //client.Close();
-
-
-                //return client;
+                MainStateObject.workSocket.BeginConnect(remoteEP, Connected_to_Server, MainStateObject);
+                //Receive((IAsyncResult)MainStateObject);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
         }
-
-        private static void EndConnect(IAsyncResult ar)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ar"></param>
+        public static void Connected_to_Server(IAsyncResult ar)
         {
-            StateObject state = (StateObject)ar.AsyncState;
+            StateObject state = ((StateObject)ar.AsyncState);
             state.workSocket.EndConnect(ar);
-
-
-            state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, ReceiveCallback, state);
-
-            state.ConnectionDelegate(state);
-  
+            state.CallbackAction(state);
+            Receive(ar);
         }
 
+        private static void Receive(IAsyncResult ar)
+        {
+            try
+            {
+                // Create the state object.
+                StateObject state = (StateObject)ar.AsyncState;
+
+                // Begin receiving the data from the remote device.
+                state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, SocketFlags.None, ReceiveCallback, state);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
         ///// <summary>
         ///// Referenced by the BeginConnect method above and is "called" by the OS when the socket connects to the server.
         ///// 
@@ -142,26 +139,29 @@ namespace AgCubio
                 // Read data from the remote device.
                 int bytesRead = client.EndReceive(ar);
 
-                if (bytesRead > 0)
-                {
-                    // There might be more data, so store the data received so far.
-                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
 
-                    // Get the rest of the data.
-                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                        new AsyncCallback(ReceiveCallback), state);
-                }
-                else
-                {
-                    // All the data has arrived; put it in response.
-                    if (state.sb.Length > 1)
-                    {
-                        // send to JSON for object creation????
-                        //response = state.sb.ToString();
-                    }
-                    // Signal that all bytes have been received.
-                    //receiveDone.Set();
-                }
+                state.CallbackAction(state);
+
+                //if (bytesRead > 0)
+                //{
+                //    // There might be more data, so store the data received so far.
+                //    state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
+
+                //    // Get the rest of the data.
+                //    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                //        new AsyncCallback(ReceiveCallback), state);
+                //}
+                //else
+                //{
+                //    // All the data has arrived; put it in response.
+                //    if (state.sb.Length > 1)
+                //    {
+                //        state.CallbackAction(state);
+                //    }
+                //    // Signal that all bytes have been received.
+                //    //receiveDone.Set();
+                //}
             }
             catch (Exception e)
             {
@@ -189,7 +189,7 @@ namespace AgCubio
         public static void Send(Socket socket, String data)
         {
             // Convert the string data to byte data using ASCII encoding.
-            byte[] byteData = Encoding.Unicode.GetBytes(data);
+            byte[] byteData = Encoding.UTF8.GetBytes(data);
 
             // Begin sending the data to the remote device.
             socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
@@ -214,6 +214,7 @@ namespace AgCubio
                 // Complete sending the data to the remote device.
                 int bytesSent = client.EndSend(ar);
                 Console.WriteLine("Sent {0} bytes to server.", bytesSent);
+                Console.Read();
 
                 // Signal that all bytes have been sent.
                 //sendDone.Set();
