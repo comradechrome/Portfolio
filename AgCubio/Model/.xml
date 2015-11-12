@@ -54,6 +54,11 @@
             mass of the cube - if set attempts a value less than 1, we'll default to 1
             </summary>
         </member>
+        <member name="P:AgCubio.Cube.team_id">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="P:AgCubio.Cube.Width">
             <summary>
             Width is the square root of the mass. We will drop all decimal values.
@@ -66,7 +71,7 @@
             Radius is a read only property
             </summary>
         </member>
-        <member name="M:AgCubio.Cube.#ctor(System.Double,System.Double,System.Int32,System.Int32,System.Boolean,System.String,System.Double)">
+        <member name="M:AgCubio.Cube.#ctor(System.Double,System.Double,System.Int32,System.Int32,System.Int32,System.Boolean,System.String,System.Double)">
             <summary>
             Default contructor of the cube object
             </summary>
@@ -82,7 +87,7 @@
             <summary>
             Represents 'State' of world. Responsible for tracking:
             * the world Width and Height (read only 'constants')
-            * all the cubes in the game.
+            * all the worldCubes in the game.
             </summary>
         </member>
         <member name="P:AgCubio.World.worldHieght">
@@ -100,9 +105,14 @@
             Our players UID
             </summary>
         </member>
-        <member name="P:AgCubio.World.cubes">
+        <member name="P:AgCubio.World.worldCubes">
             <summary>
             
+            </summary>
+        </member>
+        <member name="P:AgCubio.World.ourCubes">
+            <summary>
+            List of our worldCubes - 
             </summary>
         </member>
         <member name="M:AgCubio.World.#ctor(System.Int32,System.Int32)">
@@ -111,29 +121,17 @@
             </summary>
             <param name="hieght"></param>
             <param name="width"></param>
-            <param name="id"></param>
-        </member>
-        <member name="M:AgCubio.World.newCube(System.Double,System.Double,System.Int32,System.Int32,System.Boolean,System.String,System.Double)">
-            <summary>
-            
-            </summary>
-            <param name="x"></param>
-            <param name="y"></param>
-            <param name="color"></param>
-            <param name="uid"></param>
-            <param name="food"></param>
-            <param name="name"></param>
-            <param name="mass"></param>
         </member>
         <member name="M:AgCubio.World.addCube(AgCubio.Cube)">
             <summary>
-            
+            Add worldCubes to our cube dictionary. Key is the cube UID. Also check the cube team ID.
+            IF the team ID is the same as our UID, add it to the ourCubes HashSet
             </summary>
             <param name="cube"></param>
         </member>
         <member name="M:AgCubio.World.moveCube(AgCubio.Cube)">
             <summary>
-            
+            TODO: do we need to modify mass and position of worldCubes in ourCubes?
             </summary>
             <param name="cube"></param>
         </member>
@@ -143,7 +141,7 @@
             </summary>
             <param name="cube"></param>
         </member>
-        <member name="M:AgCubio.World.firstCube(System.String)">
+        <member name="M:AgCubio.World.processCube(System.String)">
             <summary>
             
             </summary>
