@@ -27,16 +27,11 @@ namespace AgCubio
         /// <summary>
         /// 
         /// </summary>
-        public Double ourMass = 0;
+      public String ourServer;
         /// <summary>
-        /// 
+      /// the mass of our current cube
         /// </summary>
-        public String ourName;
-        /// <summary>
-        /// 
-        /// </summary>
-        public String ourServer;
-
+      public Double ourMass;
         /// <summary>
         /// 
         /// </summary>
@@ -45,7 +40,8 @@ namespace AgCubio
 
             //TODO: get playername and server name - then hide textbox and labels
 
-            world = new World(1000, 1000, ourName, ourServer);
+         // TODO: may not have UID yet
+         world = new World(1000, 1000, world.cubes[world.ourID].uid);
 
             //temporary data test method
             buildWorld();
@@ -84,7 +80,7 @@ namespace AgCubio
         private void PlayerConsole_Paint(object sender, PaintEventArgs e)
         {
             foodCount = 0;
-            lock(world)
+         lock (world)
             {
                 foreach (KeyValuePair<int, Cube> cube in world.cubes)
                 {
@@ -92,7 +88,8 @@ namespace AgCubio
 
                     if (cube.Value.food)
                         foodCount++;
-                    if (world.playerName == cube.Value.Name)
+       
+               if (world.ourID == cube.Value.uid)
                         ourMass = cube.Value.Mass;
 
                     Color color = Color.FromArgb(cube.Value.argb_color);
@@ -144,7 +141,6 @@ namespace AgCubio
 
         private void textBox_playerName_TextChanged(object sender, EventArgs e)
         {
-            ourName = textBox_playerName.ToString();
 
         }
 
@@ -202,6 +198,33 @@ namespace AgCubio
             StringBuilder test = state.sb;
             MessageBox.Show(state.sb.ToString());
         }
+
+      private void processCube(Cube cube)
+      {
+         // check if cube exists
+         if(world.cubes.ContainsKey(cube.uid))
+         {
+            // check if mass equals zero
+            if(cube.Mass == 0.0)
+            {
+               // check if our mass is zero - end game if true
+               if(cube.uid == world.ourID)
+               {
+                  // TODO: run code to end game
+               }
+               else
+                  world.removecube(cube);
+            }
+            // cube exists and is not zero mass
+            else
+               world.moveCube(cube);
+         }
+         // cube doesn't exist so we will add it
+         else
+            world.addCube(cube);
+
+      }
+
 
     }
 }
