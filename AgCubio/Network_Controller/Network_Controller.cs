@@ -51,7 +51,7 @@ namespace AgCubio
         /// <param name="callback">function inside the View to be called when a connection is made</param>
         /// <param name="hostname">name of the server to connect to</param>
         /// <returns></returns>
-        public static void Connect_to_Server(Action<StateObject> callback, String hostname)
+        public static Socket Connect_to_Server(Action<StateObject> callback, String hostname)
         {
             StateObject MainStateObject = new StateObject();
             MainStateObject.CallbackAction = callback;
@@ -77,6 +77,7 @@ namespace AgCubio
             {
                 Console.WriteLine(e.ToString());
             }
+            return MainStateObject.workSocket;
         }
         /// <summary>
         /// 
@@ -161,7 +162,6 @@ namespace AgCubio
             //Note: the client will probably want more data every time it gets data.
             try
             {
-
                 // Begin receiving the data from the remote device.
                 state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, SocketFlags.None, ReceiveCallback, state);
             }
@@ -204,8 +204,8 @@ namespace AgCubio
 
                 // Complete sending the data to the remote device.
                 int bytesSent = client.EndSend(ar);
-                Console.WriteLine("Sent {0} bytes to server.", bytesSent);
-                Console.Read();
+                //Console.WriteLine("Sent {0} bytes to server.", bytesSent);
+                //Console.Read();
 
                 // Signal that all bytes have been sent.
                 //sendDone.Set();

@@ -17,6 +17,7 @@
             These should be derived properties based on mass:
             * Width, Top, Left, Right, Bottom
             </summary>
+            
         </member>
         <member name="P:AgCubio.Cube.loc_x">
             <summary>
@@ -141,7 +142,7 @@
             </summary>
             <param name="cube"></param>
         </member>
-        <member name="M:AgCubio.World.processCube(System.String)">
+        <member name="M:AgCubio.World.processCube(System.String,AgCubio.World.endAction)">
             <summary>
             
             </summary>

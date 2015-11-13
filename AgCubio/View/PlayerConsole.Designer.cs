@@ -46,6 +46,7 @@
             this.textBox_serverName = new System.Windows.Forms.TextBox();
             this.label_playerName = new System.Windows.Forms.Label();
             this.label_serverName = new System.Windows.Forms.Label();
+            this.gameOverLabel = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -178,11 +179,25 @@
             this.label_serverName.TabIndex = 8;
             this.label_serverName.Text = "Server";
             // 
+            // gameOverLabel
+            // 
+            this.gameOverLabel.AutoSize = true;
+            this.gameOverLabel.BackColor = System.Drawing.SystemColors.WindowText;
+            this.gameOverLabel.Font = new System.Drawing.Font("mono 07_66", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gameOverLabel.ForeColor = System.Drawing.Color.Red;
+            this.gameOverLabel.Location = new System.Drawing.Point(-2, 219);
+            this.gameOverLabel.Name = "gameOverLabel";
+            this.gameOverLabel.Size = new System.Drawing.Size(775, 104);
+            this.gameOverLabel.TabIndex = 9;
+            this.gameOverLabel.Text = "You Died!!";
+            this.gameOverLabel.Visible = false;
+            // 
             // PlayerConsole
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(750, 596);
+            this.Controls.Add(this.gameOverLabel);
             this.Controls.Add(this.label_serverName);
             this.Controls.Add(this.label_playerName);
             this.Controls.Add(this.textBox_serverName);
@@ -193,10 +208,12 @@
             this.Controls.Add(this.fps);
             this.Controls.Add(this.menuStrip1);
             this.ForeColor = System.Drawing.SystemColors.AppWorkspace;
+            this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "PlayerConsole";
             this.Text = "PlayerConsole";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PlayerConsole_KeyDown);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -221,6 +238,7 @@
         private System.Windows.Forms.Label label_playerName;
         private System.Windows.Forms.Label label_serverName;
         private System.Windows.Forms.ToolStripMenuItem newGameToolStripMenuItem;
+        private System.Windows.Forms.Label gameOverLabel;
     }
 }
 
