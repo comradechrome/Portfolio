@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using Newtonsoft.Json;
 
+
 namespace AgCubio
 {
    /// <summary>
@@ -20,14 +21,16 @@ namespace AgCubio
    /// These should be derived properties based on mass:
    /// * Width, Top, Left, Right, Bottom
    /// </summary>
+   /// 
+
+
    public class Cube
    {
-      private const int scalingFactor = 10;
 
-      /// <summary>
-      /// x coordinate of the center of the cube
-      /// </summary>
-      public Double loc_x { get; set; }
+        /// <summary>
+        /// x coordinate of the center of the cube
+        /// </summary>
+        public Double loc_x { get; set; }
 
       /// <summary>
       /// y coordinate of the center of the cube
@@ -72,7 +75,7 @@ namespace AgCubio
       /// </summary>
       public Double Width
       {
-         get { return Math.Sqrt(Mass * scalingFactor); }
+         get { return Math.Sqrt(Mass); }
       }
 
       /// <summary>
@@ -114,10 +117,11 @@ namespace AgCubio
    /// </summary>
    public class World
    {
-      /// <summary>
-      /// 
-      /// </summary>
-      public int worldHieght { get; }
+        public delegate void endAction();
+        /// <summary>
+        /// 
+        /// </summary>
+        public int worldHieght { get; }
       /// <summary>
       /// 
       /// </summary>
@@ -125,7 +129,7 @@ namespace AgCubio
       /// <summary>
       /// Our players UID
       /// </summary>
-      public int ourID { get; set; } = 0;
+      public int ourID { get; set; }
       /// <summary>
       /// 
       /// </summary>
@@ -134,6 +138,8 @@ namespace AgCubio
       /// List of our worldCubes - 
       /// </summary>
       public Dictionary<int, Cube> ourCubes { get; }
+
+        
 
 
       /// <summary>
@@ -156,6 +162,7 @@ namespace AgCubio
       /// <param name="cube"></param>
       public void addCube(Cube cube)
       {
+
          worldCubes.Add(cube.uid, cube);
          if (cube.team_id == ourID)
             ourCubes.Add(cube.uid,cube);
@@ -214,6 +221,7 @@ namespace AgCubio
       /// <param name="jsonCube"></param>
       public void processCube(String jsonCube)
       {
+
          Cube cube = JsonConvert.DeserializeObject<Cube>(jsonCube);
          // check if cube exists
          if (worldCubes.ContainsKey(cube.uid))
@@ -224,7 +232,7 @@ namespace AgCubio
                // check if our mass is zero - end game if true
                if (cube.uid == ourID)
                {
-                  // TODO: run code to end game
+                        //?
                }
                else
                   removeCube(cube);
@@ -237,7 +245,7 @@ namespace AgCubio
          else
          {
             // if team_id == uid, this is our cube so we will set ourID
-            if (cube.uid == cube.team_id)
+            if (worldCubes.Count == 0)
                ourID = cube.uid;
             addCube(cube);
          }
