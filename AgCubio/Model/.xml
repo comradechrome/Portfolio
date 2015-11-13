@@ -142,7 +142,7 @@
             </summary>
             <param name="cube"></param>
         </member>
-        <member name="M:AgCubio.World.processCube(System.String,AgCubio.World.endAction)">
+        <member name="M:AgCubio.World.processCube(System.String)">
             <summary>
             
             </summary>
