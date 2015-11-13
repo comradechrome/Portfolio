@@ -74,14 +74,12 @@
             this.newGameToolStripMenuItem.Name = "newGameToolStripMenuItem";
             this.newGameToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.newGameToolStripMenuItem.Text = "New Game";
-            this.newGameToolStripMenuItem.Click += new System.EventHandler(this.newGameToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
             this.quitToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
             this.quitToolStripMenuItem.Text = "Quit";
-            this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -97,14 +95,12 @@
             this.aboutAgCubioToolStripMenuItem.Name = "aboutAgCubioToolStripMenuItem";
             this.aboutAgCubioToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.aboutAgCubioToolStripMenuItem.Text = "About AgCubio";
-            this.aboutAgCubioToolStripMenuItem.Click += new System.EventHandler(this.aboutAgCubioToolStripMenuItem_Click);
             // 
             // usingAgCubioToolStripMenuItem
             // 
             this.usingAgCubioToolStripMenuItem.Name = "usingAgCubioToolStripMenuItem";
             this.usingAgCubioToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.usingAgCubioToolStripMenuItem.Text = "Using AgCubio";
-            this.usingAgCubioToolStripMenuItem.Click += new System.EventHandler(this.usingAgCubioToolStripMenuItem_Click);
             // 
             // fps
             // 
@@ -116,7 +112,6 @@
             this.fps.ReadOnly = true;
             this.fps.Size = new System.Drawing.Size(80, 13);
             this.fps.TabIndex = 1;
-            this.fps.TextChanged += new System.EventHandler(this.fps_TextChanged);
             // 
             // food
             // 
@@ -127,7 +122,6 @@
             this.food.ReadOnly = true;
             this.food.Size = new System.Drawing.Size(80, 13);
             this.food.TabIndex = 2;
-            this.food.TextChanged += new System.EventHandler(this.food_TextChanged);
             // 
             // mass
             // 
@@ -138,7 +132,6 @@
             this.mass.ReadOnly = true;
             this.mass.Size = new System.Drawing.Size(80, 13);
             this.mass.TabIndex = 3;
-            this.mass.TextChanged += new System.EventHandler(this.mass_TextChanged);
             // 
             // width
             // 
@@ -149,7 +142,6 @@
             this.width.ReadOnly = true;
             this.width.Size = new System.Drawing.Size(80, 13);
             this.width.TabIndex = 4;
-            this.width.TextChanged += new System.EventHandler(this.width_TextChanged);
             // 
             // textBox_playerName
             // 
@@ -157,7 +149,6 @@
             this.textBox_playerName.Name = "textBox_playerName";
             this.textBox_playerName.Size = new System.Drawing.Size(100, 20);
             this.textBox_playerName.TabIndex = 5;
-            this.textBox_playerName.TextChanged += new System.EventHandler(this.textBox_playerName_TextChanged);
             this.textBox_playerName.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_playerName_KeyDown);
             // 
             // textBox_serverName
@@ -167,7 +158,6 @@
             this.textBox_serverName.Size = new System.Drawing.Size(100, 20);
             this.textBox_serverName.TabIndex = 6;
             this.textBox_serverName.Text = "localHost";
-            this.textBox_serverName.TextChanged += new System.EventHandler(this.textBox_serverName_TextChanged);
             this.textBox_serverName.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_serverName_KeyDown);
             // 
             // label_playerName
@@ -207,7 +197,6 @@
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "PlayerConsole";
             this.Text = "PlayerConsole";
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.PlayerConsole_Paint);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);

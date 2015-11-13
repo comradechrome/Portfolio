@@ -144,26 +144,6 @@ namespace AgCubio
                 state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
 
                 state.CallbackAction(state);
-
-                //if (bytesRead > 0)
-                //{
-                //    // There might be more data, so store the data received so far.
-                //    state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
-
-                //    // Get the rest of the data.
-                //    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                //        new AsyncCallback(ReceiveCallback), state);
-                //}
-                //else
-                //{
-                //    // All the data has arrived; put it in response.
-                //    if (state.sb.Length > 1)
-                //    {
-                //        state.CallbackAction(state);
-                //    }
-                //    // Signal that all bytes have been received.
-                //    //receiveDone.Set();
-                //}
             }
             catch (Exception e)
             {
