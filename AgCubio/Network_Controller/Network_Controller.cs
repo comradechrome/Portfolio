@@ -96,7 +96,16 @@ namespace AgCubio
         public static void Connected_to_Server(IAsyncResult ar)
         {
             StateObject state = ((StateObject)ar.AsyncState);
+
+         try
+         {
             state.workSocket.EndConnect(ar);
+         }
+         catch (Exception e)
+         {
+            Console.WriteLine(e.ToString());
+         }
+         
             state.CallbackAction(state);
             
         }

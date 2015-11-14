@@ -145,6 +145,8 @@ namespace AgCubio
       {
          isRunning = true;
          worldSocket = Network.Connect_to_Server(SendPlayerInfo, textBox_serverName.Text);
+
+         
       }
 
       private void EndConnectCallback(IAsyncResult ar)
@@ -199,10 +201,18 @@ namespace AgCubio
 
 
                Rectangle rectangle = new Rectangle(transformX,transformY,(int)cube.Value.Width,(int)cube.Value.Width );
+
                e.Graphics.FillRectangle(myBrush, rectangle);
-               Font myFont = new Font("Arial", 10);
-               e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX, transformY);
-               //e.Graphics.ScaleTransform(2, 2);
+               Font myFont = new Font("Arial", 8);
+               SizeF size = e.Graphics.MeasureString(cube.Value.Name, myFont);
+               // Draw text in our cube only if it can fit - center text in the cube
+               if ( (size.Width < rectangle.Size.Width) && (size.Height < rectangle.Size.Height))
+               {
+                  StringFormat sf = new StringFormat();
+                  sf.LineAlignment = StringAlignment.Center;
+                  sf.Alignment = StringAlignment.Center;
+                  e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX+(int)(cube.Value.Width/2), transformY + (int)(cube.Value.Width / 2), sf);
+               }
             }
          }
       }
