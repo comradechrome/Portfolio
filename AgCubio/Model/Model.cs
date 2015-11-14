@@ -269,8 +269,8 @@ namespace AgCubio
          x = (xValues.Max() + xValues.Min()) / 2;
          y = (yValues.Max() + yValues.Min()) / 2;
 
-         width = (xValues.Max() - xValues.Min() + ourCubes[0].Width);
-         height = (yValues.Max() - yValues.Min() + ourCubes[0].Width);
+         width = (xValues.Max() - xValues.Min() + ourCubes[ourID].Width);
+         height = (yValues.Max() - yValues.Min() + ourCubes[ourID].Width);
 
          // return the average x, y , and max width of our cube(s) 
          return Tuple.Create(x, y, Math.Max(width, height));
