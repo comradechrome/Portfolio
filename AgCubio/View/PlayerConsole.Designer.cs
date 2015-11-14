@@ -57,7 +57,7 @@
             this.helpToolStripMenuItem});
          this.menuStrip1.Location = new System.Drawing.Point(0, 0);
          this.menuStrip1.Name = "menuStrip1";
-         this.menuStrip1.Size = new System.Drawing.Size(984, 24);
+         this.menuStrip1.Size = new System.Drawing.Size(756, 24);
          this.menuStrip1.TabIndex = 0;
          this.menuStrip1.Text = "menuStrip1";
          // 
@@ -146,7 +146,7 @@
          // 
          // textBox_playerName
          // 
-         this.textBox_playerName.Location = new System.Drawing.Point(335, 219);
+         this.textBox_playerName.Location = new System.Drawing.Point(335, 222);
          this.textBox_playerName.Name = "textBox_playerName";
          this.textBox_playerName.Size = new System.Drawing.Size(100, 20);
          this.textBox_playerName.TabIndex = 5;
@@ -185,7 +185,7 @@
          this.gameOverLabel.BackColor = System.Drawing.SystemColors.WindowText;
          this.gameOverLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
          this.gameOverLabel.ForeColor = System.Drawing.Color.Red;
-         this.gameOverLabel.Location = new System.Drawing.Point(186, 208);
+         this.gameOverLabel.Location = new System.Drawing.Point(200, 208);
          this.gameOverLabel.Name = "gameOverLabel";
          this.gameOverLabel.Size = new System.Drawing.Size(342, 73);
          this.gameOverLabel.TabIndex = 9;
@@ -196,7 +196,7 @@
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
          this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-         this.ClientSize = new System.Drawing.Size(984, 733);
+         this.ClientSize = new System.Drawing.Size(756, 733);
          this.Controls.Add(this.gameOverLabel);
          this.Controls.Add(this.label_serverName);
          this.Controls.Add(this.label_playerName);

@@ -47,7 +47,7 @@ namespace AgCubio
          //TODO: get playername and server name - then hide textbox and labels
 
          // TODO: may not have UID yet
-         mainWorld = new World(1000, 1000);
+         mainWorld = new World(772, 772);
          //temporary data test method
          //buildWorld();
 
@@ -137,8 +137,6 @@ namespace AgCubio
          {
             var pointerLocation = getPointer();
             Network.Send(worldSocket, "(split, " + pointerLocation.Item1 + ", " + pointerLocation.Item2 + ")");
-           // Network.Send(worldSocket, "(split, " + (this.PointToClient(Cursor.Position).X) + ", " + (this.PointToClient(Cursor.Position).Y) + ")");
-
          }
 
       }
@@ -187,22 +185,24 @@ namespace AgCubio
             Double mainCubeX = mainCubeInfo.Item1;
             Double mainCubeY = mainCubeInfo.Item2;
             Double mainCubeWidth = mainCubeInfo.Item3;
+            int transformX,transformY;
 
             foreach (KeyValuePair<int, Cube> cube in mainWorld.worldCubes)
             {
+
+               transformX = (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth) / 2);
+               transformY = (int)((cube.Value.loc_y - mainCubeY) + (mainWorld.worldHieght - mainCubeWidth) / 2);
+
                Color color = Color.FromArgb(cube.Value.argb_color);
                myBrush = new System.Drawing.SolidBrush(color);
                textColor = new System.Drawing.SolidBrush(Color.Black);
 
 
-               Rectangle rectangle = new Rectangle((int)((cube.Value.loc_x - mainCubeX) + mainWorld.worldWidth / 2 - mainCubeWidth / 2),
-                                                   (int)((cube.Value.loc_y - mainCubeY) + mainWorld.worldHieght / 2 - mainCubeWidth / 2),
-                   (int)((cube.Value.Width) /** scaleConstant*/),
-                   (int)((cube.Value.Width) /** scaleConstant*/));
+               Rectangle rectangle = new Rectangle(transformX,transformY,(int)cube.Value.Width,(int)cube.Value.Width );
                e.Graphics.FillRectangle(myBrush, rectangle);
                Font myFont = new Font("Arial", 10);
-               e.Graphics.DrawString(cube.Value.Name, myFont, textColor, (int)((cube.Value.loc_x - mainCubeX) + mainWorld.worldWidth / 2 - mainCubeWidth / 2),
-                  (int)((cube.Value.loc_y - mainCubeY) + mainWorld.worldHieght / 2 - mainCubeWidth / 2));
+               e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX, transformY);
+               //e.Graphics.ScaleTransform(2, 2);
             }
          }
       }
