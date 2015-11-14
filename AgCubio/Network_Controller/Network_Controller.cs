@@ -16,15 +16,25 @@ namespace AgCubio
     /// </summary>
     public class StateObject
     {
-        // Client socket.
-        public Socket workSocket = null;
-        // Size of receive buffer.
-        public const int BufferSize = 2048;
-        // Receive buffer.
-        public byte[] buffer = new byte[BufferSize];
-        // Received data string.
-        public StringBuilder sb = new StringBuilder();
-
+      /// <summary>
+      /// Client socket.
+      /// </summary>
+      public Socket workSocket = null;
+      /// <summary>
+      /// Size of receive buffer.
+      /// </summary>
+      public const int BufferSize = 2048;
+      /// <summary>
+      /// Receive buffer.
+      /// </summary>
+      public byte[] buffer = new byte[BufferSize];
+      /// <summary>
+      /// Received data string.
+      /// </summary>
+      public StringBuilder sb = new StringBuilder();
+      /// <summary>
+      /// 
+      /// </summary>
         public Action<StateObject> CallbackAction;
 
 

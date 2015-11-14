@@ -80,6 +80,7 @@
             <param name="loc_y"></param>
             <param name="argb_color"></param>
             <param name="uid"></param>
+            <param name="team_id"></param>
             <param name="food"></param>
             <param name="name"></param>
             <param name="mass"></param>
@@ -147,6 +148,14 @@
             
             </summary>
             <param name="jsonCube"></param>
+        </member>
+        <member name="M:AgCubio.World.getOurInfo">
+            <summary>
+            Determines the average x,y coordiantes of our cube(s)
+            Determines the maximum of our cube(s) height and width
+            These three values are returned as a Tuple
+            </summary>
+            <returns>Tuple</returns>
         </member>
     </members>
 </doc>

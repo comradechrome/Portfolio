@@ -94,6 +94,7 @@ namespace AgCubio
       /// <param name="loc_y"></param>
       /// <param name="argb_color"></param>
       /// <param name="uid"></param>
+      /// <param name="team_id"></param>
       /// <param name="food"></param>
       /// <param name="name"></param>
       /// <param name="mass"></param>
@@ -117,11 +118,10 @@ namespace AgCubio
    /// </summary>
    public class World
    {
-        public delegate void endAction();
-        /// <summary>
-        /// 
-        /// </summary>
-        public int worldHieght { get; }
+      /// <summary>
+      /// 
+      /// </summary>
+      public int worldHieght { get; }
       /// <summary>
       /// 
       /// </summary>
@@ -139,7 +139,7 @@ namespace AgCubio
       /// </summary>
       public Dictionary<int, Cube> ourCubes { get; }
 
-        
+
 
 
       /// <summary>
@@ -162,11 +162,19 @@ namespace AgCubio
       /// <param name="cube"></param>
       public void addCube(Cube cube)
       {
+         if (worldCubes.Count == 0)
+         {
+            ourID = cube.uid;
+            ourCubes.Add(cube.uid, cube);
+         }
+         // add our split cubes to ourCubes dictionary
+         else if (cube.team_id == ourID)
+            ourCubes.Add(cube.uid, cube);
 
          worldCubes.Add(cube.uid, cube);
-         if (cube.team_id == ourID)
-            ourCubes.Add(cube.uid,cube);
       }
+
+
 
       /// <summary>
       /// TODO: do we need to modify mass and position of worldCubes in ourCubes?
@@ -181,7 +189,7 @@ namespace AgCubio
             worldCubes[cube.uid].loc_y = cube.loc_y;
          }
          // check if ourCubes contains cube, if so modify it
-         if (ourCubes.ContainsKey(cube.uid)) 
+         if (ourCubes.ContainsKey(cube.uid))
          {
             ourCubes[cube.uid].Mass = cube.Mass;
             ourCubes[cube.uid].loc_x = cube.loc_x;
@@ -201,19 +209,9 @@ namespace AgCubio
       {
          if (worldCubes.ContainsKey(cube.uid))
             worldCubes.Remove(cube.uid);
-         if (ourCubes.ContainsKey(cube.uid)) 
+         if (ourCubes.ContainsKey(cube.uid))
             ourCubes.Remove(cube.uid);
       }
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="jsonCube"></param>
-      //public void firstCube(string jsonCube)
-      //{
-      //   Cube cube = JsonConvert.DeserializeObject<Cube>(jsonCube);
-      //   ourID = cube.uid;
-      //   addCube(cube);
-      //}
 
       /// <summary>
       /// 
@@ -232,7 +230,7 @@ namespace AgCubio
                // check if our mass is zero - end game if true
                if (cube.uid == ourID)
                {
-                        //?
+                  //?
                }
                else
                   removeCube(cube);
@@ -244,13 +242,40 @@ namespace AgCubio
          // cube doesn't exist so we will add it
          else
          {
-            // if team_id == uid, this is our cube so we will set ourID
-            if (worldCubes.Count == 0)
-               ourID = cube.uid;
+            // add the cube
             addCube(cube);
          }
-
       }
+
+      /// <summary>
+      /// Determines the average x,y coordiantes of our cube(s)
+      /// Determines the maximum of our cube(s) height and width
+      /// These three values are returned as a Tuple
+      /// </summary>
+      /// <returns>Tuple</returns>
+      public Tuple<Double,Double,Double> getOurInfo()
+      {
+
+         List<Double> xValues = new List<Double>();
+         List<Double> yValues = new List<Double>();
+         Double x, y, width, height;
+
+         foreach(KeyValuePair<int, Cube> cube in ourCubes)
+         {
+            xValues.Add(cube.Value.loc_x);
+            yValues.Add(cube.Value.loc_y);
+         }
+
+         x = (xValues.Max() + xValues.Min()) / 2;
+         y = (yValues.Max() + yValues.Min()) / 2;
+
+         width = (xValues.Max() - xValues.Min() + ourCubes[0].Width);
+         height = (yValues.Max() - yValues.Min() + ourCubes[0].Width);
+
+         // return the average x, y , and max width of our cube(s) 
+         return Tuple.Create(x, y, Math.Max(width, height));
+      }
+
 
    }
 
