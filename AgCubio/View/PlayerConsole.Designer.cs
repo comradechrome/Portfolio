@@ -185,7 +185,7 @@
          this.gameOverLabel.BackColor = System.Drawing.SystemColors.WindowText;
          this.gameOverLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
          this.gameOverLabel.ForeColor = System.Drawing.Color.Red;
-         this.gameOverLabel.Location = new System.Drawing.Point(-2, 219);
+         this.gameOverLabel.Location = new System.Drawing.Point(186, 208);
          this.gameOverLabel.Name = "gameOverLabel";
          this.gameOverLabel.Size = new System.Drawing.Size(342, 73);
          this.gameOverLabel.TabIndex = 9;

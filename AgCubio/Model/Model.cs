@@ -262,12 +262,12 @@ namespace AgCubio
 
          foreach(KeyValuePair<int, Cube> cube in ourCubes)
          {
-            xValues.Add(cube.Value.loc_x);
-            yValues.Add(cube.Value.loc_y);
+            xValues.Add(cube.Value.loc_x + cube.Value.Width / 2);
+            yValues.Add(cube.Value.loc_y + cube.Value.Width / 2);
          }
 
-         x = (xValues.Max() + xValues.Min()) / 2;
-         y = (yValues.Max() + yValues.Min()) / 2;
+         x = xValues.Average() - ourCubes[ourID].Width;
+         y = yValues.Average() - ourCubes[ourID].Width;
 
          width = (xValues.Max() - xValues.Min() + ourCubes[ourID].Width);
          height = (yValues.Max() - yValues.Min() + ourCubes[ourID].Width);

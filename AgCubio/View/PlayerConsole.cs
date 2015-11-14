@@ -107,7 +107,6 @@ namespace AgCubio
          }
          int mainCubeX = (int)mainCubeInfo.Item1;
          int mainCubeY = (int)mainCubeInfo.Item2;
-         int mainCubeWidth = (int)mainCubeInfo.Item3;
 
          // adjust pointer location relative to where our cube is drawn
          x = this.PointToClient(Cursor.Position).X + (mainCubeX - mainWorld.worldWidth / 2);
@@ -136,7 +135,9 @@ namespace AgCubio
       {
          if (e.KeyCode == Keys.Space && isConnected)
          {
-            Network.Send(worldSocket, "(split, " + (this.PointToClient(Cursor.Position).X) + ", " + (this.PointToClient(Cursor.Position).Y) + ")");
+            var pointerLocation = getPointer();
+            Network.Send(worldSocket, "(split, " + pointerLocation.Item1 + ", " + pointerLocation.Item2 + ")");
+           // Network.Send(worldSocket, "(split, " + (this.PointToClient(Cursor.Position).X) + ", " + (this.PointToClient(Cursor.Position).Y) + ")");
 
          }
 
