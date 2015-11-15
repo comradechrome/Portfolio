@@ -79,15 +79,6 @@ namespace AgCubio
       }
 
       /// <summary>
-      /// Radius is half the square root of the mass. We will drop all decimal values.
-      /// Radius is a read only property
-      /// </summary>
-      public Double Radius
-      {
-         get { return this.Width / 2; }
-      }
-
-      /// <summary>
       /// Default contructor of the cube object
       /// </summary>
       /// <param name="loc_x"></param>
@@ -121,11 +112,11 @@ namespace AgCubio
       /// <summary>
       /// 
       /// </summary>
-      public int worldHieght { get; }
+      public int worldHieght { get; set; }
       /// <summary>
       /// 
       /// </summary>
-      public int worldWidth { get; }
+      public int worldWidth { get; set; }
       /// <summary>
       /// Our players UID
       /// </summary>

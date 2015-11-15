@@ -38,6 +38,8 @@ namespace AgCubio
       private bool isRunning;
       private bool isConnected;
       private bool hasCubes;
+
+      private int scaleFactor = 3;
       /// <summary>
       /// 
       /// </summary>
@@ -200,8 +202,8 @@ namespace AgCubio
             foreach (KeyValuePair<int, Cube> cube in mainWorld.worldCubes)
             {
 
-               transformX = (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth) / 2);
-               transformY = (int)((cube.Value.loc_y - mainCubeY) + (mainWorld.worldHieght - mainCubeWidth) / 2);
+               transformX = (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth)/2 - cube.Value.Width* scaleFactor/ 2);
+               transformY = (int)((cube.Value.loc_y - mainCubeY) + (mainWorld.worldHieght - mainCubeWidth)/2 - cube.Value.Width * scaleFactor / 2);
 
                Color color = Color.FromArgb(cube.Value.argb_color);
                myBrush = new System.Drawing.SolidBrush(color);
@@ -209,10 +211,10 @@ namespace AgCubio
                textColor = new System.Drawing.SolidBrush(ContrastColor(color));
 
 
-               Rectangle rectangle = new Rectangle(transformX,transformY,(int)cube.Value.Width,(int)cube.Value.Width );
+               Rectangle rectangle = new Rectangle(transformX,transformY,(int)cube.Value.Width*scaleFactor,(int)cube.Value.Width*scaleFactor );
 
                e.Graphics.FillRectangle(myBrush, rectangle);
-               Font myFont = new Font("Arial", 8);
+               Font myFont = new Font("Arial", 10);
                SizeF size = e.Graphics.MeasureString(cube.Value.Name, myFont);
                // Draw text in our cube only if it can fit - center text in the cube
                if ( (size.Width < rectangle.Size.Width) && (size.Height < rectangle.Size.Height))
@@ -220,8 +222,9 @@ namespace AgCubio
                   StringFormat sf = new StringFormat();
                   sf.LineAlignment = StringAlignment.Center;
                   sf.Alignment = StringAlignment.Center;
-                  e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX+(int)(cube.Value.Width/2), transformY + (int)(cube.Value.Width / 2), sf);
-               }
+                  e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX + (int)(cube.Value.Width * scaleFactor / 2), transformY + (int)(cube.Value.Width * scaleFactor / 2), sf);
+               
+}
             }
          }
       }

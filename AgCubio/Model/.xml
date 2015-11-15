@@ -66,12 +66,6 @@
             Width is a read only property
             </summary>
         </member>
-        <member name="P:AgCubio.Cube.Radius">
-            <summary>
-            Radius is half the square root of the mass. We will drop all decimal values.
-            Radius is a read only property
-            </summary>
-        </member>
         <member name="M:AgCubio.Cube.#ctor(System.Double,System.Double,System.Int32,System.Int32,System.Int32,System.Boolean,System.String,System.Double)">
             <summary>
             Default contructor of the cube object
