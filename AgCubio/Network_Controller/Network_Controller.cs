@@ -200,9 +200,16 @@ namespace AgCubio
         {
             // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = Encoding.UTF8.GetBytes(data);
-
+         try
+         {
             // Begin sending the data to the remote device.
             socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
+         }
+         catch (Exception e)
+         {
+            throw e;
+         }
+            
         }
 
         /// <summary>

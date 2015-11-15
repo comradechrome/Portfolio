@@ -166,8 +166,16 @@ namespace AgCubio
             textBox_serverName.Hide();
             label_serverName.Hide();
          }));
+         try
+         {
+            Network.Send(state.workSocket, textBox_playerName.Text + "\n");
+         }
+         catch (Exception e)
+         {
+            MessageBox.Show("Could not connect to server: " + textBox_serverName.Text);
+         }
 
-         Network.Send(state.workSocket, textBox_playerName.Text + "\n");
+         
 
          //drawWorld();
 
@@ -197,7 +205,8 @@ namespace AgCubio
 
                Color color = Color.FromArgb(cube.Value.argb_color);
                myBrush = new System.Drawing.SolidBrush(color);
-               textColor = new System.Drawing.SolidBrush(Color.Black);
+               // set text color in box to a color contrasting the cube color
+               textColor = new System.Drawing.SolidBrush(ContrastColor(color));
 
 
                Rectangle rectangle = new Rectangle(transformX,transformY,(int)cube.Value.Width,(int)cube.Value.Width );
@@ -217,6 +226,28 @@ namespace AgCubio
          }
       }
 
+      /// <summary>
+      /// Nice color contrast algorithm I found on source forge
+      /// http://stackoverflow.com/questions/1855884/determine-font-color-based-on-background-color
+      /// This will be used for creating the text color on the cubes
+      /// </summary>
+      /// <param name="color"></param>
+      /// <returns></returns>
+      Color ContrastColor(Color color)
+      {
+         int d = 0;
+
+         // Counting the perceptive luminance - human eye favors green color... 
+         double a = 1 - (0.299 * color.R + 0.587 * color.G + 0.114 * color.B) / 255;
+
+         if (a < 0.5)
+            d = 0; // bright colors - black font
+         else
+            d = 255; // dark colors - white font
+
+         return Color.FromArgb(d, d, d);
+      }
+
       private void ReceiveData(StateObject state)
       {
          // save our state string buffer to a new String
@@ -228,14 +259,25 @@ namespace AgCubio
          // JSON is now clean, we can process line by line
          foreach (String line in jsonLines)
          {
-            lock (mainWorld)
+            Double ourMass;
+            if (hasCubes)
             {
-               if (hasCubes && mainWorld.worldCubes[mainWorld.ourID].Mass == 0.0)
-                  gameOver();
-               //MessageBox.Show(line);
-               mainWorld.processCube(line);
-               hasCubes = true;
+               lock (mainWorld)
+               {
+                  ourMass = mainWorld.worldCubes[mainWorld.ourID].Mass;
+               }
+               if (ourMass == 0.0)
+                  this.gameOver();
             }
+            
+               //MessageBox.Show(line);
+               lock (mainWorld)
+            {
+               mainWorld.processCube(line);
+            }
+               
+               hasCubes = true;
+            
 
          }
          isConnected = true;
@@ -283,6 +325,19 @@ namespace AgCubio
          return cleanJson;
       }
 
+      private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
+      {
+         
+         this.Invoke(new Action(() =>
+         {
+            textBox_playerName.Show();
+            label_playerName.Show();
+            textBox_serverName.Show();
+            label_serverName.Show();
+            
+         }));
 
+         Invalidate();
+      }
    }
 }
