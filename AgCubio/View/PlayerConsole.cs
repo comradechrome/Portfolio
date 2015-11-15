@@ -109,10 +109,11 @@ namespace AgCubio
          }
          int mainCubeX = (int)mainCubeInfo.Item1;
          int mainCubeY = (int)mainCubeInfo.Item2;
+         int mainCubeWidth = (int)mainCubeInfo.Item3;
 
          // adjust pointer location relative to where our cube is drawn
-         x = this.PointToClient(Cursor.Position).X + (mainCubeX - mainWorld.worldWidth / 2);
-         y = this.PointToClient(Cursor.Position).Y + (mainCubeY - mainWorld.worldHieght / 2);
+         x = this.PointToClient(Cursor.Position).X + (mainCubeX - mainWorld.worldWidth / 2) + mainCubeWidth / 2;
+         y = this.PointToClient(Cursor.Position).Y + (mainCubeY - mainWorld.worldHieght / 2) + mainCubeWidth / 2;
 
          return Tuple.Create(x,y);
       }
@@ -197,13 +198,14 @@ namespace AgCubio
             Double mainCubeX = mainCubeInfo.Item1;
             Double mainCubeY = mainCubeInfo.Item2;
             Double mainCubeWidth = mainCubeInfo.Item3;
-            int transformX,transformY;
+            int transformX,transformY,transformWidth;
 
             foreach (KeyValuePair<int, Cube> cube in mainWorld.worldCubes)
             {
 
                transformX = (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth)/2 - cube.Value.Width* scaleFactor/ 2);
                transformY = (int)((cube.Value.loc_y - mainCubeY) + (mainWorld.worldHieght - mainCubeWidth)/2 - cube.Value.Width * scaleFactor / 2);
+               transformWidth = (int)cube.Value.Width * scaleFactor;
 
                Color color = Color.FromArgb(cube.Value.argb_color);
                myBrush = new System.Drawing.SolidBrush(color);
@@ -211,7 +213,7 @@ namespace AgCubio
                textColor = new System.Drawing.SolidBrush(ContrastColor(color));
 
 
-               Rectangle rectangle = new Rectangle(transformX,transformY,(int)cube.Value.Width*scaleFactor,(int)cube.Value.Width*scaleFactor );
+               Rectangle rectangle = new Rectangle(transformX,transformY,transformWidth,transformWidth);
 
                e.Graphics.FillRectangle(myBrush, rectangle);
                Font myFont = new Font("Arial", 10);
@@ -222,7 +224,7 @@ namespace AgCubio
                   StringFormat sf = new StringFormat();
                   sf.LineAlignment = StringAlignment.Center;
                   sf.Alignment = StringAlignment.Center;
-                  e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX + (int)(cube.Value.Width * scaleFactor / 2), transformY + (int)(cube.Value.Width * scaleFactor / 2), sf);
+                  e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX + (int)(transformWidth / 2), transformY + (int)(transformWidth / 2), sf);
                
 }
             }
