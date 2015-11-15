@@ -38,10 +38,10 @@
          this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
          this.aboutAgCubioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
          this.usingAgCubioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-         this.fps = new System.Windows.Forms.TextBox();
-         this.food = new System.Windows.Forms.TextBox();
-         this.mass = new System.Windows.Forms.TextBox();
-         this.width = new System.Windows.Forms.TextBox();
+         this.textBox_fps = new System.Windows.Forms.TextBox();
+         this.textBox_food = new System.Windows.Forms.TextBox();
+         this.textBox_mass = new System.Windows.Forms.TextBox();
+         this.textBox_width = new System.Windows.Forms.TextBox();
          this.textBox_playerName = new System.Windows.Forms.TextBox();
          this.textBox_serverName = new System.Windows.Forms.TextBox();
          this.label_playerName = new System.Windows.Forms.Label();
@@ -73,7 +73,7 @@
          // newGameToolStripMenuItem
          // 
          this.newGameToolStripMenuItem.Name = "newGameToolStripMenuItem";
-         this.newGameToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+         this.newGameToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
          this.newGameToolStripMenuItem.Text = "New Game";
          this.newGameToolStripMenuItem.Click += new System.EventHandler(this.newGameToolStripMenuItem_Click);
          // 
@@ -82,6 +82,7 @@
          this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
          this.quitToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
          this.quitToolStripMenuItem.Text = "Quit";
+         this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
          // 
          // helpToolStripMenuItem
          // 
@@ -104,46 +105,50 @@
          this.usingAgCubioToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
          this.usingAgCubioToolStripMenuItem.Text = "Using AgCubio";
          // 
-         // fps
+         // textBox_fps
          // 
-         this.fps.BackColor = System.Drawing.SystemColors.ButtonFace;
-         this.fps.BorderStyle = System.Windows.Forms.BorderStyle.None;
-         this.fps.ForeColor = System.Drawing.SystemColors.WindowText;
-         this.fps.Location = new System.Drawing.Point(670, 27);
-         this.fps.Name = "fps";
-         this.fps.ReadOnly = true;
-         this.fps.Size = new System.Drawing.Size(80, 13);
-         this.fps.TabIndex = 1;
+         this.textBox_fps.BackColor = System.Drawing.SystemColors.ButtonFace;
+         this.textBox_fps.BorderStyle = System.Windows.Forms.BorderStyle.None;
+         this.textBox_fps.ForeColor = System.Drawing.SystemColors.WindowText;
+         this.textBox_fps.Location = new System.Drawing.Point(670, 27);
+         this.textBox_fps.Name = "textBox_fps";
+         this.textBox_fps.ReadOnly = true;
+         this.textBox_fps.Size = new System.Drawing.Size(80, 13);
+         this.textBox_fps.TabIndex = 1;
+         this.textBox_fps.Text = "fps: ";
          // 
-         // food
+         // textBox_food
          // 
-         this.food.BackColor = System.Drawing.SystemColors.ButtonFace;
-         this.food.BorderStyle = System.Windows.Forms.BorderStyle.None;
-         this.food.Location = new System.Drawing.Point(670, 47);
-         this.food.Name = "food";
-         this.food.ReadOnly = true;
-         this.food.Size = new System.Drawing.Size(80, 13);
-         this.food.TabIndex = 2;
+         this.textBox_food.BackColor = System.Drawing.SystemColors.ButtonFace;
+         this.textBox_food.BorderStyle = System.Windows.Forms.BorderStyle.None;
+         this.textBox_food.Location = new System.Drawing.Point(670, 47);
+         this.textBox_food.Name = "textBox_food";
+         this.textBox_food.ReadOnly = true;
+         this.textBox_food.Size = new System.Drawing.Size(80, 13);
+         this.textBox_food.TabIndex = 2;
+         this.textBox_food.Text = "food: ";
          // 
-         // mass
+         // textBox_mass
          // 
-         this.mass.BackColor = System.Drawing.SystemColors.ButtonFace;
-         this.mass.BorderStyle = System.Windows.Forms.BorderStyle.None;
-         this.mass.Location = new System.Drawing.Point(670, 67);
-         this.mass.Name = "mass";
-         this.mass.ReadOnly = true;
-         this.mass.Size = new System.Drawing.Size(80, 13);
-         this.mass.TabIndex = 3;
+         this.textBox_mass.BackColor = System.Drawing.SystemColors.ButtonFace;
+         this.textBox_mass.BorderStyle = System.Windows.Forms.BorderStyle.None;
+         this.textBox_mass.Location = new System.Drawing.Point(670, 67);
+         this.textBox_mass.Name = "textBox_mass";
+         this.textBox_mass.ReadOnly = true;
+         this.textBox_mass.Size = new System.Drawing.Size(80, 13);
+         this.textBox_mass.TabIndex = 3;
+         this.textBox_mass.Text = "mass: ";
          // 
-         // width
+         // textBox_width
          // 
-         this.width.BackColor = System.Drawing.SystemColors.ButtonFace;
-         this.width.BorderStyle = System.Windows.Forms.BorderStyle.None;
-         this.width.Location = new System.Drawing.Point(670, 87);
-         this.width.Name = "width";
-         this.width.ReadOnly = true;
-         this.width.Size = new System.Drawing.Size(80, 13);
-         this.width.TabIndex = 4;
+         this.textBox_width.BackColor = System.Drawing.SystemColors.ButtonFace;
+         this.textBox_width.BorderStyle = System.Windows.Forms.BorderStyle.None;
+         this.textBox_width.Location = new System.Drawing.Point(670, 87);
+         this.textBox_width.Name = "textBox_width";
+         this.textBox_width.ReadOnly = true;
+         this.textBox_width.Size = new System.Drawing.Size(80, 13);
+         this.textBox_width.TabIndex = 4;
+         this.textBox_width.Text = "width: ";
          // 
          // textBox_playerName
          // 
@@ -203,10 +208,10 @@
          this.Controls.Add(this.label_playerName);
          this.Controls.Add(this.textBox_serverName);
          this.Controls.Add(this.textBox_playerName);
-         this.Controls.Add(this.width);
-         this.Controls.Add(this.mass);
-         this.Controls.Add(this.food);
-         this.Controls.Add(this.fps);
+         this.Controls.Add(this.textBox_width);
+         this.Controls.Add(this.textBox_mass);
+         this.Controls.Add(this.textBox_food);
+         this.Controls.Add(this.textBox_fps);
          this.Controls.Add(this.menuStrip1);
          this.ForeColor = System.Drawing.SystemColors.AppWorkspace;
          this.KeyPreview = true;
@@ -230,10 +235,10 @@
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutAgCubioToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem usingAgCubioToolStripMenuItem;
-        private System.Windows.Forms.TextBox fps;
-        private System.Windows.Forms.TextBox food;
-        private System.Windows.Forms.TextBox mass;
-        private System.Windows.Forms.TextBox width;
+        private System.Windows.Forms.TextBox textBox_fps;
+        private System.Windows.Forms.TextBox textBox_food;
+        private System.Windows.Forms.TextBox textBox_mass;
+        private System.Windows.Forms.TextBox textBox_width;
         private System.Windows.Forms.TextBox textBox_playerName;
         private System.Windows.Forms.TextBox textBox_serverName;
         private System.Windows.Forms.Label label_playerName;

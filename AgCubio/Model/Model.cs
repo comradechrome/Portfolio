@@ -168,7 +168,7 @@ namespace AgCubio
 
 
       /// <summary>
-      /// TODO: do we need to modify mass and position of worldCubes in ourCubes?
+      /// 
       /// </summary>
       /// <param name="cube"></param>
       public void moveCube(Cube cube)
@@ -188,7 +188,7 @@ namespace AgCubio
          }
 
          // do nothing if uid doesn't exist -
-         // TODO: may need to handle this, but we'll ignore for now - we already checked for this condition in view
+       
 
       }
 

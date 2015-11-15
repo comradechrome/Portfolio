@@ -22,12 +22,12 @@ namespace AgCubio
       /// <summary>
       /// 
       /// </summary>
-      public int foodCount = 0;
+      //public int foodCount = 0;
 
       /// <summary>
       /// the mass of our current cube
       /// </summary>
-      public Double ourMass;
+      //public Double ourMass;
       /// <summary>
       /// String to contain the reaminder of incomplete JSON text after each buffer read
       /// </summary>
@@ -46,12 +46,7 @@ namespace AgCubio
       public PlayerConsole()
       {
 
-         //TODO: get playername and server name - then hide textbox and labels
-
-         // TODO: may not have UID yet
          mainWorld = new World(772, 772);
-         //temporary data test method
-         //buildWorld();
 
          InitializeComponent();
          DoubleBuffered = true;
@@ -59,22 +54,9 @@ namespace AgCubio
       }
 
 
-      ///// <summary>
-      ///// Temporary method to read test data and populate our world
-      ///// </summary>
-      //private void buildWorld()
-      //{
-      //    string[] lines = System.IO.File.ReadAllLines(@"..\..\..\Resources\Libraries\sample.data");
-      //    foreach (string line in lines)
-      //    {
-      //        Cube cube = JsonConvert.DeserializeObject<Cube>(line);
-      //        mainWorld.addCube(cube);
-      //    }
-
-      //}
 
       /// <summary>
-      /// TODO: add this.Invalidate(); to end of method
+      /// 
       /// </summary>
       /// <param name="e"></param>
       protected override void OnPaint(PaintEventArgs e)
@@ -82,6 +64,7 @@ namespace AgCubio
 
          drawWorld(e);
          //this.textBox_playerName.Focused;
+
 
          //send mouse location to server
 
@@ -91,12 +74,19 @@ namespace AgCubio
             if (isConnected)
             {
                var pointerLocation = getPointer();
-               Network.Send(worldSocket, "(move, " + pointerLocation.Item1 + ", " + pointerLocation.Item2 + ")");
+               try
+               {
+                  Network.Send(worldSocket, "(move, " + pointerLocation.Item1 + ", " + pointerLocation.Item2 + ")");
+               }
+               catch
+               {
+                  MessageBox.Show("Could not connect to server: " + textBox_serverName.Text);
+               }
             }
          }
       }
 
-      private Tuple<int,int> getPointer()
+      private Tuple<int, int> getPointer()
       {
          Tuple<Double, Double, Double> mainCubeInfo;
 
@@ -115,7 +105,7 @@ namespace AgCubio
          x = this.PointToClient(Cursor.Position).X + (mainCubeX - mainWorld.worldWidth / 2) + mainCubeWidth / 2;
          y = this.PointToClient(Cursor.Position).Y + (mainCubeY - mainWorld.worldHieght / 2) + mainCubeWidth / 2;
 
-         return Tuple.Create(x,y);
+         return Tuple.Create(x, y);
       }
 
 
@@ -139,7 +129,15 @@ namespace AgCubio
          if (e.KeyCode == Keys.Space && isConnected)
          {
             var pointerLocation = getPointer();
-            Network.Send(worldSocket, "(split, " + pointerLocation.Item1 + ", " + pointerLocation.Item2 + ")");
+
+            try
+            {
+               Network.Send(worldSocket, "(split, " + pointerLocation.Item1 + ", " + pointerLocation.Item2 + ")");
+            }
+            catch 
+            {
+               MessageBox.Show("Could not connect to server: " + textBox_serverName.Text);
+            }
          }
 
       }
@@ -148,8 +146,6 @@ namespace AgCubio
       {
          isRunning = true;
          worldSocket = Network.Connect_to_Server(SendPlayerInfo, textBox_serverName.Text);
-
-         
       }
 
       private void EndConnectCallback(IAsyncResult ar)
@@ -178,7 +174,7 @@ namespace AgCubio
             MessageBox.Show("Could not connect to server: " + textBox_serverName.Text);
          }
 
-         
+
 
          //drawWorld();
 
@@ -190,6 +186,7 @@ namespace AgCubio
 
       private void drawWorld(PaintEventArgs e)
       {
+         int food = 0;
          lock (mainWorld)
          {
             if (!hasCubes) return;
@@ -198,13 +195,15 @@ namespace AgCubio
             Double mainCubeX = mainCubeInfo.Item1;
             Double mainCubeY = mainCubeInfo.Item2;
             Double mainCubeWidth = mainCubeInfo.Item3;
-            int transformX,transformY,transformWidth;
-
+            int transformX, transformY, transformWidth;
+            
             foreach (KeyValuePair<int, Cube> cube in mainWorld.worldCubes)
             {
+               if (cube.Value.food)
+                  food++;
 
-               transformX = (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth)/2 - cube.Value.Width* scaleFactor/ 2);
-               transformY = (int)((cube.Value.loc_y - mainCubeY) + (mainWorld.worldHieght - mainCubeWidth)/2 - cube.Value.Width * scaleFactor / 2);
+               transformX = (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth) / 2 - cube.Value.Width * scaleFactor / 2);
+               transformY = (int)((cube.Value.loc_y - mainCubeY) + (mainWorld.worldHieght - mainCubeWidth) / 2 - cube.Value.Width * scaleFactor / 2);
                transformWidth = (int)cube.Value.Width * scaleFactor;
 
                Color color = Color.FromArgb(cube.Value.argb_color);
@@ -213,22 +212,33 @@ namespace AgCubio
                textColor = new System.Drawing.SolidBrush(ContrastColor(color));
 
 
-               Rectangle rectangle = new Rectangle(transformX,transformY,transformWidth,transformWidth);
+               Rectangle rectangle = new Rectangle(transformX, transformY, transformWidth, transformWidth);
 
                e.Graphics.FillRectangle(myBrush, rectangle);
                Font myFont = new Font("Arial", 10);
                SizeF size = e.Graphics.MeasureString(cube.Value.Name, myFont);
                // Draw text in our cube only if it can fit - center text in the cube
-               if ( (size.Width < rectangle.Size.Width) && (size.Height < rectangle.Size.Height))
+               if ((size.Width < rectangle.Size.Width) && (size.Height < rectangle.Size.Height))
                {
                   StringFormat sf = new StringFormat();
                   sf.LineAlignment = StringAlignment.Center;
                   sf.Alignment = StringAlignment.Center;
                   e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX + (int)(transformWidth / 2), transformY + (int)(transformWidth / 2), sf);
-               
-}
+
+               }
             }
+
+            //TODO: This is not refreshing
+            this.Invoke(new Action(() =>
+            {
+               // textBox_food.Text = "food: " + food.ToString();
+               textBox_mass.Text = "mass: " + (int)mainWorld.worldCubes[mainWorld.ourID].Mass;
+               textBox_width.Text = "width: " + (int)mainWorld.worldCubes[mainWorld.ourID].Width;
+               textBox_fps.Text = "fps: ";
+            }));
+
          }
+
       }
 
       /// <summary>
@@ -272,17 +282,18 @@ namespace AgCubio
                   ourMass = mainWorld.worldCubes[mainWorld.ourID].Mass;
                }
                if (ourMass == 0.0)
-                  this.gameOver();
+                  //not working yet
+                  gameOver(state);
             }
-            
-               //MessageBox.Show(line);
-               lock (mainWorld)
+
+            //MessageBox.Show(line);
+            lock (mainWorld)
             {
                mainWorld.processCube(line);
             }
-               
-               hasCubes = true;
-            
+
+            hasCubes = true;
+
 
          }
          isConnected = true;
@@ -292,17 +303,20 @@ namespace AgCubio
 
       }
 
-      private void gameOver()
+      /// <summary>
+      /// TODO: This is not working
+      /// </summary>
+      /// <param name="state"></param>
+      private void gameOver(StateObject state)
       {
-         worldSocket.Close();
+         Network.Stop(state.workSocket);
          gameOverLabel.Show();
          //Invalidate();
          MessageBox.Show("WHAT");
       }
 
       /// <summary>
-      /// TODO: process our json - extra brackets - incomplete lines etc. - return a String Array of clean JSON
-      /// TODO: save the remainder in a 'remainingJson' string to prepend to our next set of incoming data
+      ///
       /// </summary>
       /// <param name="rawJson"></param>
       /// <returns></returns>
@@ -321,7 +335,7 @@ namespace AgCubio
             }
             else if (line.StartsWith("{"))
             {
-               //TODO: may want ot use an out parameter with this 
+               //TODO: may want to use an out parameter with this 
                remainingJson = line;
             }
             // ignore anything else
@@ -332,17 +346,32 @@ namespace AgCubio
 
       private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
       {
-         
+
          this.Invoke(new Action(() =>
          {
             textBox_playerName.Show();
             label_playerName.Show();
             textBox_serverName.Show();
             label_serverName.Show();
-            
+
          }));
 
          Invalidate();
       }
+
+      /// <summary>
+      /// TODO: This is not working
+      /// </summary>
+      /// <param name="sender"></param>
+      /// <param name="e"></param>
+      private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+      {
+         Network.Stop(worldSocket);
+         gameOverLabel.Show();
+         //Invalidate();
+         MessageBox.Show("WHAT");
+      
+      }
+
    }
 }

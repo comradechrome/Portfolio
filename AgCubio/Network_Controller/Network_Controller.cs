@@ -241,5 +241,10 @@ namespace AgCubio
                 Console.WriteLine(e.ToString());
             }
         }
-    }
+
+      public static void Stop(Socket socket)
+      {
+         socket.Close();
+      }
+   }
 }
