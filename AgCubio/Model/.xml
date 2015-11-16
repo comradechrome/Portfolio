@@ -86,7 +86,7 @@
             * all the worldCubes in the game.
             </summary>
         </member>
-        <member name="P:AgCubio.World.worldHieght">
+        <member name="P:AgCubio.World.worldHeight">
             <summary>
             
             </summary>
@@ -127,7 +127,7 @@
         </member>
         <member name="M:AgCubio.World.moveCube(AgCubio.Cube)">
             <summary>
-            TODO: do we need to modify mass and position of worldCubes in ourCubes?
+            
             </summary>
             <param name="cube"></param>
         </member>
@@ -143,13 +143,13 @@
             </summary>
             <param name="jsonCube"></param>
         </member>
-        <member name="M:AgCubio.World.getOurInfo">
+        <member name="M:AgCubio.World.getOurCubesAverage">
             <summary>
             Determines the average x,y coordiantes of our cube(s)
             Determines the maximum of our cube(s) height and width
             These three values are returned as a Tuple
             </summary>
-            <returns>Tuple</returns>
+            <returns>Tuple of the average x, y, and max width of our cube(s) </returns>
         </member>
     </members>
 </doc>

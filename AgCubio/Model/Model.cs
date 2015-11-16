@@ -112,7 +112,7 @@ namespace AgCubio
       /// <summary>
       /// 
       /// </summary>
-      public int worldHieght { get; set; }
+      public int worldHeight { get; set; }
       /// <summary>
       /// 
       /// </summary>
@@ -140,7 +140,7 @@ namespace AgCubio
       /// <param name="width"></param>
       public World(int hieght, int width)
       {
-         this.worldHieght = hieght;
+         this.worldHeight = hieght;
          this.worldWidth = width;
          worldCubes = new Dictionary<int, Cube>();
          ourCubes = new Dictionary<int, Cube>();
@@ -238,23 +238,22 @@ namespace AgCubio
          }
       }
 
-      /// <summary>
-      /// Determines the average x,y coordiantes of our cube(s)
-      /// Determines the maximum of our cube(s) height and width
-      /// These three values are returned as a Tuple
-      /// </summary>
-      /// <returns>Tuple</returns>
-      public Tuple<Double,Double,Double> getOurInfo()
+        /// <summary>
+        /// Determines the average x,y coordiantes of our cube(s)
+        /// Determines the maximum of our cube(s) height and width
+        /// These three values are returned as a Tuple
+        /// </summary>
+        /// <returns>Tuple of the average x, y, and max width of our cube(s) </returns>
+        public Tuple<Double,Double,Double> getOurCubesAverage()
       {
-
          List<Double> xValues = new List<Double>();
          List<Double> yValues = new List<Double>();
          Double x, y, width, height;
-
-         foreach(KeyValuePair<int, Cube> cube in ourCubes)
+        
+         foreach(Cube cube in ourCubes.Values)
          {
-            xValues.Add(cube.Value.loc_x + cube.Value.Width / 2);
-            yValues.Add(cube.Value.loc_y + cube.Value.Width / 2);
+            xValues.Add(cube.loc_x + cube.Width / 2);
+            yValues.Add(cube.loc_y + cube.Width / 2);
          }
 
          x = xValues.Average() - ourCubes[ourID].Width;
@@ -263,7 +262,6 @@ namespace AgCubio
          width = (xValues.Max() - xValues.Min() + ourCubes[ourID].Width);
          height = (yValues.Max() - yValues.Min() + ourCubes[ourID].Width);
 
-         // return the average x, y , and max width of our cube(s) 
          return Tuple.Create(x, y, Math.Max(width, height));
       }
 
