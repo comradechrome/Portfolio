@@ -38,8 +38,8 @@ namespace AgCubio
         private bool isRunning;
         private bool isConnected;
         private bool hasCubes;
+        private int scaleFactor = 3;
 
-        
         /// <summary>
         /// 
         /// </summary>
@@ -66,7 +66,7 @@ namespace AgCubio
             //this.textBox_playerName.Focused;
 
 
-            //send mouse location to server
+            //send mouse location to server?
 
             if (isRunning)
             {
@@ -183,7 +183,8 @@ namespace AgCubio
             Network.i_want_more_data(state);
         }
 
-        private int scaleFactor = 3;
+
+
         private void drawWorld(PaintEventArgs e)
         {
             int food = 0;
@@ -196,17 +197,24 @@ namespace AgCubio
                 Double mainCubeY = mainCubeInfo.Item2;
                 Double mainCubeWidth = mainCubeInfo.Item3;
                 int transformX, transformY, transformWidth;
+                //cubeFactor = (int)(this.Height / 2 mainCubeWidth);
 
-                foreach (KeyValuePair<int, Cube> cube in mainWorld.worldCubes)
+
+                foreach (Cube cube in mainWorld.worldCubes.Values)
                 {
-                    if (cube.Value.food)
+                    if (cube.food)
                         food++;
-                                                                        //mainWorld.worldWidth - mainCubeWidth removed
-                    transformX = (int)((cube.Value.loc_x - mainCubeX) + (this.Width) / 2 - cube.Value.Width * scaleFactor / 2);
-                    transformY = (int)((cube.Value.loc_y - mainCubeY) + (this.Height) / 2 - cube.Value.Width * scaleFactor / 2);
-                    transformWidth = (int)(cube.Value.Width * scaleFactor );
 
-                    Color color = Color.FromArgb(cube.Value.argb_color);
+                    //      from (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth) / 2 - cube.Value.Width * scaleFactor / 2);
+                    transformX = (int)((cube.loc_x - mainCubeX) + (this.Width - cube.Width * scaleFactor) / 2) ;
+                    transformY = (int)((cube.loc_y - mainCubeY) + (this.Height - cube.Width * scaleFactor) / 2 );
+                    transformWidth = (int)(cube.Width * scaleFactor);
+
+                    //  starting point      dist from center to point       exaggerated by main width
+                    //transformX = (int)(transformX + ((transformX - this.Width / 2) * mainCubeWidth / 30));
+                    //transformY = (int)(transformY + ((transformY - this.Height / 2) * mainCubeWidth / 30));
+
+                    Color color = Color.FromArgb(cube.argb_color);
                     myBrush = new System.Drawing.SolidBrush(color);
                     // set text color in box to a color contrasting the cube color
                     textColor = new System.Drawing.SolidBrush(ContrastColor(color));
@@ -216,14 +224,14 @@ namespace AgCubio
 
                     e.Graphics.FillRectangle(myBrush, rectangle);
                     Font myFont = new Font("Arial", 10);
-                    SizeF size = e.Graphics.MeasureString(cube.Value.Name, myFont);
+                    SizeF size = e.Graphics.MeasureString(cube.Name, myFont);
                     // Draw text in our cube only if it can fit - center text in the cube
                     if ((size.Width < rectangle.Size.Width) && (size.Height < rectangle.Size.Height))
                     {
                         StringFormat sf = new StringFormat();
                         sf.LineAlignment = StringAlignment.Center;
                         sf.Alignment = StringAlignment.Center;
-                        e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX + (int)(transformWidth / 2), transformY + (int)(transformWidth / 2), sf);
+                        e.Graphics.DrawString(cube.Name, myFont, textColor, transformX + (int)(transformWidth / 2), transformY + (int)(transformWidth / 2), sf);
 
                     }
                 }
