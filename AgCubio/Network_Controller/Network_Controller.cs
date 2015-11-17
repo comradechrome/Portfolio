@@ -16,25 +16,25 @@ namespace AgCubio
     /// </summary>
     public class StateObject
     {
-      /// <summary>
-      /// Client socket.
-      /// </summary>
-      public Socket workSocket = null;
-      /// <summary>
-      /// Size of receive buffer.
-      /// </summary>
-      public const int BufferSize = 2048;
-      /// <summary>
-      /// Receive buffer.
-      /// </summary>
-      public byte[] buffer = new byte[BufferSize];
-      /// <summary>
-      /// Received data string.
-      /// </summary>
-      public StringBuilder sb = new StringBuilder();
-      /// <summary>
-      /// 
-      /// </summary>
+        /// <summary>
+        /// Client socket.
+        /// </summary>
+        public Socket workSocket = null;
+        /// <summary>
+        /// Size of receive buffer.
+        /// </summary>
+        public const int BufferSize = 2048;
+        /// <summary>
+        /// Receive buffer.
+        /// </summary>
+        public byte[] buffer = new byte[BufferSize];
+        /// <summary>
+        /// Received data string.
+        /// </summary>
+        public StringBuilder sb = new StringBuilder();
+        /// <summary>
+        /// 
+        /// </summary>
         public Action<StateObject> CallbackAction;
 
 
@@ -97,17 +97,17 @@ namespace AgCubio
         {
             StateObject state = ((StateObject)ar.AsyncState);
 
-         try
-         {
-            state.workSocket.EndConnect(ar);
-         }
-         catch (Exception e)
-         {
-            Console.WriteLine(e.ToString());
-         }
-         
+            try
+            {
+                state.workSocket.EndConnect(ar);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
             state.CallbackAction(state);
-            
+
         }
         /// <summary>
         /// 
@@ -200,16 +200,16 @@ namespace AgCubio
         {
             // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = Encoding.UTF8.GetBytes(data);
-         try
-         {
-            // Begin sending the data to the remote device.
-            socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
-         }
-         catch (Exception e)
-         {
-            throw e;
-         }
-            
+            try
+            {
+                // Begin sending the data to the remote device.
+                socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
         }
 
         /// <summary>
@@ -242,9 +242,13 @@ namespace AgCubio
             }
         }
 
-      public static void Stop(Socket socket)
-      {
-         socket.Close();
-      }
-   }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="socket"></param>
+        public static void Stop(Socket socket)
+        {
+            socket.Close();
+        }
+    }
 }

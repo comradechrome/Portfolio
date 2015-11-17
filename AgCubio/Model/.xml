@@ -17,7 +17,6 @@
             These should be derived properties based on mass:
             * Width, Top, Left, Right, Bottom
             </summary>
-            
         </member>
         <member name="P:AgCubio.Cube.loc_x">
             <summary>
@@ -127,7 +126,7 @@
         </member>
         <member name="M:AgCubio.World.moveCube(AgCubio.Cube)">
             <summary>
-            TODO: do we need to modify mass and position of worldCubes in ourCubes?
+            
             </summary>
             <param name="cube"></param>
         </member>
