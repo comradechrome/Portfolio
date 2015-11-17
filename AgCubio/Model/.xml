@@ -12,6 +12,7 @@
             * A color
             * A name -- if this is a player cube
             * A mass
+            * A team ID (if the cube has been split)
             * Food status (is this cube food or a player)
             
             These should be derived properties based on mass:
@@ -56,12 +57,12 @@
         </member>
         <member name="P:AgCubio.Cube.team_id">
             <summary>
-            
+            If cube has been split, this will be the origial cube ID on all split cube instances
             </summary>
         </member>
         <member name="P:AgCubio.Cube.Width">
             <summary>
-            Width is the square root of the mass. We will drop all decimal values.
+            Width is the square root of the mass.
             Width is a read only property
             </summary>
         </member>
@@ -83,16 +84,17 @@
             Represents 'State' of world. Responsible for tracking:
             * the world Width and Height (read only 'constants')
             * all the worldCubes in the game.
+            * all split cubes for our player
             </summary>
         </member>
-        <member name="P:AgCubio.World.worldHieght">
+        <member name="P:AgCubio.World.worldHeight">
             <summary>
-            
+            total height of the world
             </summary>
         </member>
         <member name="P:AgCubio.World.worldWidth">
             <summary>
-            
+            total width of the world
             </summary>
         </member>
         <member name="P:AgCubio.World.ourID">
@@ -102,17 +104,18 @@
         </member>
         <member name="P:AgCubio.World.worldCubes">
             <summary>
-            
+            Dictionary of all the worlds cubes. Index by Cube ID
             </summary>
         </member>
         <member name="P:AgCubio.World.ourCubes">
             <summary>
-            List of our worldCubes - 
+            Dictionary of our split cubes - will always contain our initial cube
+            As cube plits, it will be indexed by Cube_id, but all team_id's should be our original UID
             </summary>
         </member>
         <member name="M:AgCubio.World.#ctor(System.Int32,System.Int32)">
             <summary>
-            
+            Default contructor for our World object
             </summary>
             <param name="hieght"></param>
             <param name="width"></param>
@@ -120,35 +123,37 @@
         <member name="M:AgCubio.World.addCube(AgCubio.Cube)">
             <summary>
             Add worldCubes to our cube dictionary. Key is the cube UID. Also check the cube team ID.
-            IF the team ID is the same as our UID, add it to the ourCubes HashSet
+            If the team ID is the same as our UID, add it to the ourCubes Dictionary
             </summary>
             <param name="cube"></param>
         </member>
         <member name="M:AgCubio.World.moveCube(AgCubio.Cube)">
             <summary>
-            
+            move the position and weight of a cube
             </summary>
             <param name="cube"></param>
         </member>
         <member name="M:AgCubio.World.removeCube(AgCubio.Cube)">
             <summary>
-            
+            remove a cube from the world object
             </summary>
             <param name="cube"></param>
         </member>
         <member name="M:AgCubio.World.processCube(System.String)">
             <summary>
-            
+            Main worker method for our world object. Processing begins by converting a JSON string to a cube object.
+            Check mass - if zero delete cube. (we have already cecked if our cube is mass=zero in the view as this will end the game).
+            If the cube has mass and already eists, we move ... otherwise we add the cube to the world.
             </summary>
             <param name="jsonCube"></param>
         </member>
-        <member name="M:AgCubio.World.getOurInfo">
+        <member name="M:AgCubio.World.getOurCubesAverage">
             <summary>
             Determines the average x,y coordiantes of our cube(s)
             Determines the maximum of our cube(s) height and width
             These three values are returned as a Tuple
             </summary>
-            <returns>Tuple</returns>
+            <returns>Tuple of the average x, y, and max width of our cube(s) </returns>
         </member>
     </members>
 </doc>

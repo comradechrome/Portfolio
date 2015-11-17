@@ -22,12 +22,12 @@ namespace AgCubio
       /// <summary>
       /// 
       /// </summary>
-      //public int foodCount = 0;
+      ///public int foodCount = 0;
 
       /// <summary>
       /// the mass of our current cube
       /// </summary>
-      //public Double ourMass;
+      ///public Double ourMass;
       /// <summary>
       /// String to contain the reaminder of incomplete JSON text after each buffer read
       /// </summary>
@@ -38,15 +38,18 @@ namespace AgCubio
       private bool isRunning;
       private bool isConnected;
       private bool hasCubes;
+      private static int lastTick;
+      private static int lastFrameRate;
+      private static int frameRate;
 
-      private int scaleFactor = 3;
+
       /// <summary>
       /// 
       /// </summary>
       public PlayerConsole()
       {
 
-         mainWorld = new World(772, 772);
+         mainWorld = new World(700, 700);
 
          InitializeComponent();
          DoubleBuffered = true;
@@ -66,7 +69,7 @@ namespace AgCubio
          //this.textBox_playerName.Focused;
 
 
-         //send mouse location to server
+         //send mouse location to server?
 
          if (isRunning)
          {
@@ -95,15 +98,15 @@ namespace AgCubio
 
          lock (mainWorld)
          {
-            mainCubeInfo = mainWorld.getOurInfo();
+            mainCubeInfo = mainWorld.getOurCubesAverage();
          }
          int mainCubeX = (int)mainCubeInfo.Item1;
          int mainCubeY = (int)mainCubeInfo.Item2;
          int mainCubeWidth = (int)mainCubeInfo.Item3;
 
-         // adjust pointer location relative to where our cube is drawn
-         x = this.PointToClient(Cursor.Position).X + (mainCubeX - mainWorld.worldWidth / 2) + mainCubeWidth / 2;
-         y = this.PointToClient(Cursor.Position).Y + (mainCubeY - mainWorld.worldHieght / 2) + mainCubeWidth / 2;
+         // adjust pointer location relative to where our cube is drawn          
+         x = this.PointToClient(Cursor.Position).X + (mainCubeX - this.Width / 2); //removed + mainCubeWidth / 2
+         y = this.PointToClient(Cursor.Position).Y + (mainCubeY - this.Height / 2);
 
          return Tuple.Create(x, y);
       }
@@ -134,7 +137,7 @@ namespace AgCubio
             {
                Network.Send(worldSocket, "(split, " + pointerLocation.Item1 + ", " + pointerLocation.Item2 + ")");
             }
-            catch 
+            catch
             {
                MessageBox.Show("Could not connect to server: " + textBox_serverName.Text);
             }
@@ -171,7 +174,7 @@ namespace AgCubio
          }
          catch (Exception e)
          {
-            MessageBox.Show("Could not connect to server: " + textBox_serverName.Text);
+            MessageBox.Show("Could not connect to server: " + textBox_serverName.Text + "\nError: " + e);
          }
 
 
@@ -184,6 +187,9 @@ namespace AgCubio
       }
 
 
+      private int scaleFactor = 1;
+      private double xAdjust;
+      private double yAdjust;
       private void drawWorld(PaintEventArgs e)
       {
          int food = 0;
@@ -191,54 +197,74 @@ namespace AgCubio
          {
             if (!hasCubes) return;
             // Cube mainCube = mainWorld.worldCubes[mainWorld.ourID];
-            var mainCubeInfo = mainWorld.getOurInfo();
+            var mainCubeInfo = mainWorld.getOurCubesAverage();
             Double mainCubeX = mainCubeInfo.Item1;
             Double mainCubeY = mainCubeInfo.Item2;
             Double mainCubeWidth = mainCubeInfo.Item3;
             int transformX, transformY, transformWidth;
-            
-            foreach (KeyValuePair<int, Cube> cube in mainWorld.worldCubes)
+            //cubeFactor = (int)(this.Height / 2 mainCubeWidth);
+
+            foreach (Cube cube in mainWorld.worldCubes.Values)
             {
-               if (cube.Value.food)
+               if (cube.food)
                   food++;
 
-               transformX = (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth) / 2 - cube.Value.Width * scaleFactor / 2);
-               transformY = (int)((cube.Value.loc_y - mainCubeY) + (mainWorld.worldHieght - mainCubeWidth) / 2 - cube.Value.Width * scaleFactor / 2);
-               transformWidth = (int)cube.Value.Width * scaleFactor;
+               //      from (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth) / 2 - cube.Value.Width * scaleFactor / 2);
+               transformX = (int)((cube.loc_x - mainCubeX) + (this.Width - cube.Width) / 2);
+               transformY = (int)((cube.loc_y - mainCubeY) + (this.Height - cube.Width) / 2);
 
-               Color color = Color.FromArgb(cube.Value.argb_color);
+               //xAdjust = (transformX - this.Width / 2);
+               //yAdjust = (transformY - this.Height / 2);
+
+               ////  starting point      dist from center to point       exaggerated by main width
+               //transformX = (int)(transformX + ((transformX - this.Width / 2) * 2));
+               //transformY = (int)(transformY + ((transformY - this.Height / 2) * 2));
+
+               transformWidth = (int)(cube.Width);
+
+               Color color = Color.FromArgb(cube.argb_color);
                myBrush = new System.Drawing.SolidBrush(color);
                // set text color in box to a color contrasting the cube color
                textColor = new System.Drawing.SolidBrush(ContrastColor(color));
 
 
-               Rectangle rectangle = new Rectangle(transformX, transformY, transformWidth, transformWidth);
+               Rectangle rectangle = new Rectangle(transformX, transformY, (transformWidth > 3 ? transformWidth : 3),
+                                                                           (transformWidth > 3 ? transformWidth : 3));
 
                e.Graphics.FillRectangle(myBrush, rectangle);
                Font myFont = new Font("Arial", 10);
-               SizeF size = e.Graphics.MeasureString(cube.Value.Name, myFont);
+               SizeF size = e.Graphics.MeasureString(cube.Name, myFont);
                // Draw text in our cube only if it can fit - center text in the cube
                if ((size.Width < rectangle.Size.Width) && (size.Height < rectangle.Size.Height))
                {
                   StringFormat sf = new StringFormat();
                   sf.LineAlignment = StringAlignment.Center;
                   sf.Alignment = StringAlignment.Center;
-                  e.Graphics.DrawString(cube.Value.Name, myFont, textColor, transformX + (int)(transformWidth / 2), transformY + (int)(transformWidth / 2), sf);
+                  e.Graphics.DrawString(cube.Name, myFont, textColor, transformX + (int)(transformWidth / 2), transformY + (int)(transformWidth / 2), sf);
 
                }
             }
 
-            //TODO: This is not refreshing
-            this.Invoke(new Action(() =>
-            {
-               // textBox_food.Text = "food: " + food.ToString();
-               textBox_mass.Text = "mass: " + (int)mainWorld.worldCubes[mainWorld.ourID].Mass;
-               textBox_width.Text = "width: " + (int)mainWorld.worldCubes[mainWorld.ourID].Width;
-               textBox_fps.Text = "fps: ";
-            }));
+            textBox_mass.Text = "mass: " + (int)mainWorld.worldCubes[mainWorld.ourID].Mass;
+            textBox_width.Text = "width: " + (int)mainWorld.worldCubes[mainWorld.ourID].Width;
+            textBox_food.Text = "food: " + food.ToString();
+            textBox_fps.Text = "fps: "+ CalcFrameRate();
+            refreshTextBoxes();
 
          }
 
+      }
+
+      private void refreshTextBoxes()
+      {
+         textBox_mass.Update();
+         textBox_mass.Refresh();
+         textBox_width.Update();
+         textBox_width.Refresh();
+         textBox_food.Update();
+         textBox_food.Refresh();
+         textBox_fps.Update();
+         textBox_fps.Refresh();
       }
 
       /// <summary>
@@ -263,6 +289,24 @@ namespace AgCubio
          return Color.FromArgb(d, d, d);
       }
 
+      
+      /// <summary>
+      /// Calculate the framerate
+      /// </summary>
+      /// <returns></returns>
+      public static int CalcFrameRate()
+      {
+       
+         if (System.Environment.TickCount - lastTick >= 1000)
+         {
+            lastFrameRate = frameRate;
+            frameRate = 0;
+            lastTick = System.Environment.TickCount;
+         }
+         frameRate++;
+         return lastFrameRate;
+      }
+
       private void ReceiveData(StateObject state)
       {
          // save our state string buffer to a new String
@@ -283,7 +327,13 @@ namespace AgCubio
                }
                if (ourMass == 0.0)
                   //not working yet
-                  gameOver(state);
+                  this.Invoke(new Action(() =>
+                  {
+                     // textBox_food.Text = "food: " + food.ToString();
+
+                     gameOver(state);
+                  }));
+               
             }
 
             //MessageBox.Show(line);
@@ -309,8 +359,11 @@ namespace AgCubio
       /// <param name="state"></param>
       private void gameOver(StateObject state)
       {
-         Network.Stop(state.workSocket);
          gameOverLabel.Show();
+         gameOverLabel.Update();
+         gameOverLabel.Refresh();
+         Network.Stop(state.workSocket);
+
          //Invalidate();
          MessageBox.Show("WHAT");
       }
@@ -366,11 +419,13 @@ namespace AgCubio
       /// <param name="e"></param>
       private void quitToolStripMenuItem_Click(object sender, EventArgs e)
       {
-         Network.Stop(worldSocket);
+         Invalidate();
          gameOverLabel.Show();
+         gameOverLabel.Update();
+         gameOverLabel.Refresh();
+         Network.Stop(worldSocket);
          //Invalidate();
-         MessageBox.Show("WHAT");
-      
+
       }
 
    }

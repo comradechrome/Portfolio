@@ -16,25 +16,25 @@ namespace AgCubio
     /// </summary>
     public class StateObject
     {
-        /// <summary>
-        /// Client socket.
-        /// </summary>
-        public Socket workSocket = null;
-        /// <summary>
-        /// Size of receive buffer.
-        /// </summary>
-        public const int BufferSize = 2048;
-        /// <summary>
-        /// Receive buffer.
-        /// </summary>
-        public byte[] buffer = new byte[BufferSize];
-        /// <summary>
-        /// Received data string.
-        /// </summary>
-        public StringBuilder sb = new StringBuilder();
-        /// <summary>
-        /// 
-        /// </summary>
+      /// <summary>
+      /// Client socket.
+      /// </summary>
+      public Socket workSocket = null;
+      /// <summary>
+      /// Size of receive buffer.
+      /// </summary>
+      public const int BufferSize = 2048;
+      /// <summary>
+      /// Receive buffer.
+      /// </summary>
+      public byte[] buffer = new byte[BufferSize];
+      /// <summary>
+      /// Received data string.
+      /// </summary>
+      public StringBuilder sb = new StringBuilder();
+      /// <summary>
+      /// Callback method
+      /// </summary>
         public Action<StateObject> CallbackAction;
 
 
@@ -90,27 +90,29 @@ namespace AgCubio
             return MainStateObject.workSocket;
         }
         /// <summary>
-        /// 
+        /// Connect to the server
         /// </summary>
         /// <param name="ar"></param>
         public static void Connected_to_Server(IAsyncResult ar)
         {
+            // create our state object
             StateObject state = ((StateObject)ar.AsyncState);
 
-            try
-            {
-                state.workSocket.EndConnect(ar);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-
+         try
+         {
+            // finalize the initial socket connection
+            state.workSocket.EndConnect(ar);
+         }
+         catch (Exception e)
+         {
+            Console.WriteLine(e.ToString());
+         }
+            // run callback defined in view - send Player name to server
             state.CallbackAction(state);
-
+            
         }
         /// <summary>
-        /// 
+        /// Receive data from the socket
         /// </summary>
         /// <param name="state"></param>
         public static void Receive(StateObject state)
@@ -126,17 +128,6 @@ namespace AgCubio
                 Console.WriteLine(e.ToString());
             }
         }
-        ///// <summary>
-        ///// Referenced by the BeginConnect method above and is "called" by the OS when the socket connects to the server.
-        ///// 
-        ///// </summary>
-        ///// <param name="state_in_an_ar_object">contains a field "AsyncState" which contains the "state" object saved in 'BeginConnect'</param>
-        //static void Connected_to_Server(IAsyncResult state_in_an_ar_object)
-        //{
-        //    // Once a connection is established the "saved away" callback function needs to called.
-        //    // Additionally, the network connection should "BeginReceive" expecting more data to arrive 
-        //    // (and provide the ReceiveCallback function for this purpose)
-        //}
 
         /// <summary>
         /// Called by the OS when new data arrives.
@@ -161,8 +152,9 @@ namespace AgCubio
                 // Read data from the remote device.
                 int bytesRead = client.EndReceive(ar);
 
+                // using UTF8 encoding, append buffer contents to our string buffer
                 state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
-
+                // run the Callback defined in the View - process JSON strings
                 state.CallbackAction(state);
             }
             catch (Exception e)
@@ -200,16 +192,16 @@ namespace AgCubio
         {
             // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = Encoding.UTF8.GetBytes(data);
-            try
-            {
-                // Begin sending the data to the remote device.
-                socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-
+         try
+         {
+            // Begin sending the data to the remote device.
+            socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
+         }
+         catch (Exception e)
+         {
+            throw e;
+         }
+            
         }
 
         /// <summary>
@@ -219,10 +211,6 @@ namespace AgCubio
         {
 
             //If all the data has been sent, then life is good and nothing needs to be done 
-            //(note: you may, when first prototyping your program, put a WriteLine in here to see when data goes out).
-
-            //(see the ChatClient example program).
-
             try
             {
                 // Retrieve the socket from the state object.
@@ -230,8 +218,6 @@ namespace AgCubio
 
                 // Complete sending the data to the remote device.
                 int bytesSent = client.EndSend(ar);
-                //Console.WriteLine("Sent {0} bytes to server.", bytesSent);
-                //Console.Read();
 
                 // Signal that all bytes have been sent.
                 //sendDone.Set();
@@ -242,13 +228,13 @@ namespace AgCubio
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="socket"></param>
-        public static void Stop(Socket socket)
-        {
-            socket.Close();
-        }
-    }
+      /// <summary>
+      /// Close the Asyc Socket
+      /// </summary>
+      /// <param name="socket"></param>
+      public static void Stop(Socket socket)
+      {
+         socket.Close();
+      }
+   }
 }
