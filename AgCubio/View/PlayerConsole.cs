@@ -251,15 +251,6 @@ namespace AgCubio
             textBox_fps.Text = "fps: "+ CalcFrameRate();
             refreshTextBoxes();
 
-
-            //TODO: This is not refreshing
-            this.Invoke(new Action(() =>
-            {
-                   // textBox_food.Text = "food: " + food.ToString();
-
-
-                }));
-
          }
 
       }
