@@ -217,7 +217,7 @@ namespace AgCubio
                     //transformX = (int)(transformX + ((transformX - this.Width / 2) * 2));
                     //transformY = (int)(transformY + ((transformY - this.Height / 2) * 2));
 
-                    transformWidth = (int)(cube.Width / 2);
+                    transformWidth = (int)(cube.Width);
 
                     Color color = Color.FromArgb(cube.argb_color);
                     myBrush = new System.Drawing.SolidBrush(color);
