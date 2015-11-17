@@ -16,6 +16,7 @@ namespace AgCubio
    /// * A color
    /// * A name -- if this is a player cube
    /// * A mass
+   /// * A team ID (if the cube has been split)
    /// * Food status (is this cube food or a player)
    /// 
    /// These should be derived properties based on mass:
@@ -65,12 +66,12 @@ namespace AgCubio
       public Double Mass { get; set; }
 
       /// <summary>
-      /// 
+      /// If cube has been split, this will be the origial cube ID on all split cube instances
       /// </summary>
       public int team_id { get; set; }
 
       /// <summary>
-      /// Width is the square root of the mass. We will drop all decimal values.
+      /// Width is the square root of the mass.
       /// Width is a read only property
       /// </summary>
       public Double Width
@@ -106,15 +107,16 @@ namespace AgCubio
    /// Represents 'State' of world. Responsible for tracking:
    /// * the world Width and Height (read only 'constants')
    /// * all the worldCubes in the game.
+   /// * all split cubes for our player
    /// </summary>
    public class World
    {
       /// <summary>
-      /// 
+      /// total height of the world
       /// </summary>
       public int worldHeight { get; set; }
       /// <summary>
-      /// 
+      /// total width of the world
       /// </summary>
       public int worldWidth { get; set; }
       /// <summary>
@@ -122,19 +124,17 @@ namespace AgCubio
       /// </summary>
       public int ourID { get; set; }
       /// <summary>
-      /// 
+      /// Dictionary of all the worlds cubes. Index by Cube ID
       /// </summary>
       public Dictionary<int, Cube> worldCubes { get; }
       /// <summary>
-      /// List of our worldCubes - 
+      /// Dictionary of our split cubes - will always contain our initial cube
+      /// As cube plits, it will be indexed by Cube_id, but all team_id's should be our original UID
       /// </summary>
       public Dictionary<int, Cube> ourCubes { get; }
 
-
-
-
       /// <summary>
-      /// 
+      /// Default contructor for our World object
       /// </summary>
       /// <param name="hieght"></param>
       /// <param name="width"></param>
@@ -148,7 +148,7 @@ namespace AgCubio
 
       /// <summary>
       /// Add worldCubes to our cube dictionary. Key is the cube UID. Also check the cube team ID.
-      /// IF the team ID is the same as our UID, add it to the ourCubes HashSet
+      /// If the team ID is the same as our UID, add it to the ourCubes Dictionary
       /// </summary>
       /// <param name="cube"></param>
       public void addCube(Cube cube)
@@ -168,7 +168,7 @@ namespace AgCubio
 
 
       /// <summary>
-      /// 
+      /// move the position and weight of a cube
       /// </summary>
       /// <param name="cube"></param>
       public void moveCube(Cube cube)
@@ -193,7 +193,7 @@ namespace AgCubio
       }
 
       /// <summary>
-      /// 
+      /// remove a cube from the world object
       /// </summary>
       /// <param name="cube"></param>
       public void removeCube(Cube cube)
@@ -205,7 +205,9 @@ namespace AgCubio
       }
 
       /// <summary>
-      /// 
+      /// Main worker method for our world object. Processing begins by converting a JSON string to a cube object.
+      /// Check mass - if zero delete cube. (we have already cecked if our cube is mass=zero in the view as this will end the game).
+      /// If the cube has mass and already eists, we move ... otherwise we add the cube to the world.
       /// </summary>
       /// <param name="jsonCube"></param>
       public void processCube(String jsonCube)

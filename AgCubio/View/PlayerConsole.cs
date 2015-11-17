@@ -22,12 +22,12 @@ namespace AgCubio
         /// <summary>
         /// 
         /// </summary>
-        //public int foodCount = 0;
+        ///public int foodCount = 0;
 
         /// <summary>
         /// the mass of our current cube
         /// </summary>
-        //public Double ourMass;
+        ///public Double ourMass;
         /// <summary>
         /// String to contain the reaminder of incomplete JSON text after each buffer read
         /// </summary>
@@ -171,7 +171,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                MessageBox.Show("Could not connect to server: " + textBox_serverName.Text);
+                MessageBox.Show("Could not connect to server: " + textBox_serverName.Text + "\nError: " + e);
             }
 
 
