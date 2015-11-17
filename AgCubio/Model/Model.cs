@@ -22,12 +22,8 @@ namespace AgCubio
    /// These should be derived properties based on mass:
    /// * Width, Top, Left, Right, Bottom
    /// </summary>
-   /// 
-
-
    public class Cube
    {
-
         /// <summary>
         /// x coordinate of the center of the cube
         /// </summary>
@@ -240,18 +236,18 @@ namespace AgCubio
          }
       }
 
-        /// <summary>
-        /// Determines the average x,y coordiantes of our cube(s)
-        /// Determines the maximum of our cube(s) height and width
-        /// These three values are returned as a Tuple
-        /// </summary>
+      /// <summary>
+      /// Determines the average x,y coordiantes of our cube(s)
+      /// Determines the maximum of our cube(s) height and width
+      /// These three values are returned as a Tuple
+      /// </summary>
         /// <returns>Tuple of the average x, y, and max width of our cube(s) </returns>
         public Tuple<Double,Double,Double> getOurCubesAverage()
       {
          List<Double> xValues = new List<Double>();
          List<Double> yValues = new List<Double>();
          Double x, y, width, height;
-        
+
          foreach(Cube cube in ourCubes.Values)
          {
             xValues.Add(cube.loc_x + cube.Width / 2);
