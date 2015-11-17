@@ -75,7 +75,7 @@ namespace AgCubio
       /// </summary>
       public Double Width
       {
-         get { return Math.Sqrt(Mass); }
+         get { return Math.Pow(Mass, 0.65); }
       }
 
       /// <summary>

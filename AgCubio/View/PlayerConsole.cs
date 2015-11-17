@@ -38,7 +38,7 @@ namespace AgCubio
         private bool isRunning;
         private bool isConnected;
         private bool hasCubes;
-        private int scaleFactor = 3;
+        
 
         /// <summary>
         /// 
@@ -184,7 +184,9 @@ namespace AgCubio
         }
 
 
-
+        private int scaleFactor = 1;
+        private double xAdjust;
+        private double yAdjust;
         private void drawWorld(PaintEventArgs e)
         {
             int food = 0;
@@ -199,20 +201,23 @@ namespace AgCubio
                 int transformX, transformY, transformWidth;
                 //cubeFactor = (int)(this.Height / 2 mainCubeWidth);
 
-
                 foreach (Cube cube in mainWorld.worldCubes.Values)
                 {
                     if (cube.food)
                         food++;
 
                     //      from (int)((cube.Value.loc_x - mainCubeX) + (mainWorld.worldWidth - mainCubeWidth) / 2 - cube.Value.Width * scaleFactor / 2);
-                    transformX = (int)((cube.loc_x - mainCubeX) + (this.Width - cube.Width * scaleFactor) / 2) ;
-                    transformY = (int)((cube.loc_y - mainCubeY) + (this.Height - cube.Width * scaleFactor) / 2 );
-                    transformWidth = (int)(cube.Width * scaleFactor);
+                    transformX = (int)((cube.loc_x - mainCubeX) + (this.Width - cube.Width) / 2) ;
+                    transformY = (int)((cube.loc_y - mainCubeY) + (this.Height - cube.Width) / 2 );
 
-                    //  starting point      dist from center to point       exaggerated by main width
-                    //transformX = (int)(transformX + ((transformX - this.Width / 2) * mainCubeWidth / 30));
-                    //transformY = (int)(transformY + ((transformY - this.Height / 2) * mainCubeWidth / 30));
+                    //xAdjust = (transformX - this.Width / 2);
+                    //yAdjust = (transformY - this.Height / 2);
+
+                    ////  starting point      dist from center to point       exaggerated by main width
+                    //transformX = (int)(transformX + ((transformX - this.Width / 2) * 2));
+                    //transformY = (int)(transformY + ((transformY - this.Height / 2) * 2));
+
+                    transformWidth = (int)(cube.Width / 2);
 
                     Color color = Color.FromArgb(cube.argb_color);
                     myBrush = new System.Drawing.SolidBrush(color);
@@ -220,7 +225,8 @@ namespace AgCubio
                     textColor = new System.Drawing.SolidBrush(ContrastColor(color));
 
 
-                    Rectangle rectangle = new Rectangle(transformX, transformY, transformWidth, transformWidth);
+                    Rectangle rectangle = new Rectangle(transformX, transformY, (transformWidth > 3 ? transformWidth : 3), 
+                                                                                (transformWidth > 3 ? transformWidth : 3));
 
                     e.Graphics.FillRectangle(myBrush, rectangle);
                     Font myFont = new Font("Arial", 10);
