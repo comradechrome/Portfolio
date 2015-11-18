@@ -219,7 +219,7 @@ namespace AgCubio
                // check if our mass is zero - end game if true
                if (cube.uid == ourID)
                {
-                  //?
+                        moveCube(cube);
                }
                else
                   removeCube(cube);
