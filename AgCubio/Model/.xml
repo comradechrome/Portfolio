@@ -62,7 +62,7 @@
         </member>
         <member name="P:AgCubio.Cube.Width">
             <summary>
-            Width is the square root of the mass.
+            Width is  mass ^ .65 which gets us close to the supplied client
             Width is a read only property
             </summary>
         </member>

@@ -67,7 +67,7 @@ namespace AgCubio
       public int team_id { get; set; }
 
       /// <summary>
-      /// Width is the square root of the mass.
+      /// Width is  mass ^ .65 which gets us close to the supplied client
       /// Width is a read only property
       /// </summary>
       public Double Width
@@ -216,7 +216,7 @@ namespace AgCubio
             // check if mass equals zero
             if (cube.Mass == 0.0)
             {
-               // check if our mass is zero - end game if true
+               // check if our mass is zero - end game if true (check is done in the view)
                if (cube.uid == ourID)
                {
                         moveCube(cube);
@@ -250,6 +250,7 @@ namespace AgCubio
 
          foreach(Cube cube in ourCubes.Values)
          {
+            // get the cube centers and add to X and Y lists
             xValues.Add(cube.loc_x + cube.Width / 2);
             yValues.Add(cube.loc_y + cube.Width / 2);
          }
