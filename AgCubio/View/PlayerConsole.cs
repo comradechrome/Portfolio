@@ -368,7 +368,7 @@ namespace AgCubio
             gameOverLabel.Update();
             Network.Stop(worldSocket);
 
-            //MessageBox.Show("WHAT");
+            MessageBox.Show("Gamestats: ");
         }
 
         /// <summary>
