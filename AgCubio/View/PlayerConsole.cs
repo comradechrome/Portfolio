@@ -190,7 +190,7 @@ namespace AgCubio
         }
 
 
-        private double scaleFactor = 1.2;
+        private double scaleFactor;
         private void drawWorld(PaintEventArgs e)
         {
             int food = 0;
@@ -215,13 +215,14 @@ namespace AgCubio
                     transformX = (int)((cube.loc_x - mainCubeX) + (this.Width - cube.Width - mainCubeWidth) / 2);
                     transformY = (int)((cube.loc_y - mainCubeY) + (this.Height - cube.Width - mainCubeWidth) / 2);
 
-                    //scaleFactor = (transformX - this.Width / 2);
+                    scaleFactor = (300 - mainCubeWidth)/ 300 ;
+                    //scaleFactor = 0.5;
 
                     ////  starting point      dist from center to point       exaggerated by main width
-                    transformX = (int)((transformX + (transformX - this.Width / 2)));
-                    transformY = (int)((transformY + (transformY - this.Height / 2)));
+                    transformX = (int)((transformX + (transformX - this.Width / 2) * scaleFactor) );
+                    transformY = (int)((transformY + (transformY - this.Height / 2)* scaleFactor) );
 
-                    transformWidth = (int)(cube.Width * 2);
+                    transformWidth = (int)((cube.Width) * (1 + scaleFactor));
 
                     Color color = Color.FromArgb(cube.argb_color);
                     myBrush = new System.Drawing.SolidBrush(color);
