@@ -42,6 +42,7 @@ namespace AgCubio
         private static int lastTick;
         private static int lastFrameRate;
         private static int frameRate;
+        private double scaleFactor;
 
 
         /// <summary>
@@ -148,6 +149,7 @@ namespace AgCubio
 
         private void startGame()
         {
+            isDead = false;
             isRunning = true;
             worldSocket = Network.Connect_to_Server(SendPlayerInfo, textBox_serverName.Text);
         }
@@ -157,6 +159,8 @@ namespace AgCubio
             StateObject state = (StateObject)ar.AsyncState;
 
             state.workSocket.EndConnect(ar);
+
+
         }
 
         private void SendPlayerInfo(StateObject state)
@@ -189,8 +193,6 @@ namespace AgCubio
             Network.i_want_more_data(state);
         }
 
-
-        private double scaleFactor;
         private void drawWorld(PaintEventArgs e)
         {
             int food = 0;
@@ -215,12 +217,12 @@ namespace AgCubio
                     transformX = (int)((cube.loc_x - mainCubeX) + (this.Width - cube.Width - mainCubeWidth) / 2);
                     transformY = (int)((cube.loc_y - mainCubeY) + (this.Height - cube.Width - mainCubeWidth) / 2);
 
-                    scaleFactor = (300 - mainCubeWidth)/ 300 ;
+                    scaleFactor = (300 - mainCubeWidth)/ 150 ;
                     //scaleFactor = 0.5;
 
-                    ////  starting point      dist from center to point       exaggerated by main width
-                    transformX = (int)((transformX + (transformX - this.Width / 2) * scaleFactor) );
-                    transformY = (int)((transformY + (transformY - this.Height / 2)* scaleFactor) );
+                    //         starting point    dist from center to point    exaggerated by main width
+                    transformX += (int)((transformX - this.Width / 2) * scaleFactor);
+                    transformY += (int)((transformY - this.Height / 2)* scaleFactor);
 
                     transformWidth = (int)((cube.Width) * (1 + scaleFactor));
 
@@ -334,7 +336,7 @@ namespace AgCubio
                         {
                             // textBox_food.Text = "food: " + food.ToString();
                             isDead = true;
-                            gameOver(state);
+                            gameOver();
                         }));
                         return;
                     }
@@ -351,7 +353,7 @@ namespace AgCubio
 
             }
             isConnected = true;
-            //MessageBox.Show("Get a new buffer");
+
             Network.i_want_more_data(state);
             worldSocket = state.workSocket;
 
@@ -360,12 +362,11 @@ namespace AgCubio
         /// <summary>
         /// TODO: This is not working
         /// </summary>
-        /// <param name="state"></param>
-        private void gameOver(StateObject state)
+        private void gameOver()
         {
             gameOverLabel.Show();
             gameOverLabel.Update();
-            Network.Stop(state.workSocket);
+            Network.Stop(worldSocket);
 
             //MessageBox.Show("WHAT");
         }
@@ -401,34 +402,39 @@ namespace AgCubio
 
         private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            gameOver();
             this.Invoke(new Action(() =>
             {
+                gameOverLabel.Hide();
                 textBox_playerName.Show();
                 label_playerName.Show();
                 textBox_serverName.Show();
                 label_serverName.Show();
-
             }));
 
             Invalidate();
         }
 
         /// <summary>
-        /// TODO: This is not working
+        /// If there is no connection, then closes window
+        /// Otherwise, kills player
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Invalidate();
-            gameOverLabel.Show();
-            gameOverLabel.Update();
-            gameOverLabel.Refresh();
-            Network.Stop(worldSocket);
-            //Invalidate();
-
+            if (worldSocket == null || isDead)
+            {
+                this.Close();
+            }
+            else
+            {
+                Invalidate();
+                isDead = true;
+                gameOverLabel.Show();
+                gameOverLabel.Update();
+                Network.Stop(worldSocket);
+            } 
         }
-
     }
 }
