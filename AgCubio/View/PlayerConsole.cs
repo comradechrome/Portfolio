@@ -410,7 +410,7 @@ namespace AgCubio
          gameOverLabel.Update();
          Network.Stop(worldSocket);
 
-         MessageBox.Show("Gamestats: ");
+         //MessageBox.Show("Gamestats: ");
       }
 
       /// <summary>
@@ -482,5 +482,13 @@ namespace AgCubio
             Network.Stop(worldSocket);
          }
       }
+
+      //private void aboutAgCubioToolStripMenuItem_Click(object sender, EventArgs e)
+      //{
+      //   this.Invoke(new Action(() =>
+      //   {
+      //      MessageBox.Show("AgCubio version 0.1\nCreated by team ellefsakishev");
+      //   }));
+      //}
    }
 }
