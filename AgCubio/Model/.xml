@@ -18,7 +18,6 @@
             These should be derived properties based on mass:
             * Width, Top, Left, Right, Bottom
             </summary>
-            
         </member>
         <member name="P:AgCubio.Cube.loc_x">
             <summary>

@@ -234,7 +234,7 @@ namespace AgCubio
       /// <param name="socket"></param>
       public static void Stop(Socket socket)
       {
-         socket.Close();
+            socket.Close();
       }
    }
 }
