@@ -73,7 +73,7 @@ namespace AgCubio
             {
                 // Establish the remote endpoint for the socket.
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(hostname);
-                IPAddress ipAddress = ipHostInfo.AddressList[1];
+                IPAddress ipAddress = ipHostInfo.AddressList[ipHostInfo.AddressList.Length-1];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
                 // Create a TCP/IP socket.
