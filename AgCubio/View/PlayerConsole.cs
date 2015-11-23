@@ -55,7 +55,7 @@ namespace AgCubio
         private static long elapsedSecs;
 
         private double biggestMass = 0;
-
+        Font myFont = new Font("Arial", 10);
 
         /// <summary>
         /// Create our world at 700 X 700 and begin drawing our form
@@ -270,7 +270,6 @@ namespace AgCubio
                     transformY += (int)((transformY - this.Height / 2) * scaleFactor);
 
                     transformWidth = (int)((cube.Width) * (1 + scaleFactor));
-
                     Color color = Color.FromArgb(cube.argb_color);
                     myBrush = new System.Drawing.SolidBrush(color);
                     // set text color in box to a color contrasting the cube color
@@ -281,7 +280,7 @@ namespace AgCubio
                                                                                 (transformWidth > 3 ? transformWidth : 3));
                     // draw cube
                     e.Graphics.FillRectangle(myBrush, rectangle);
-                    Font myFont = new Font("Arial", 10);
+                    
                     SizeF size = e.Graphics.MeasureString(cube.Name, myFont);
                     // Draw text in our cube only if it can fit - center text in the cube
                     if ((size.Width < rectangle.Size.Width) && (size.Height < rectangle.Size.Height))
@@ -369,7 +368,7 @@ namespace AgCubio
         private void ReceiveData(StateObject state)
         {
             // save our state string buffer to a new String
-            String newJson = new StringBuilder(state.sb.ToString()).ToString();
+            String newJson = state.sb.ToString();
             // clear out the state buffer
             state.sb.Clear();
             // process the raw JSON data and return a string array of clean JSON
