@@ -55,6 +55,7 @@ namespace AgCubio
         private static long elapsedSecs;
 
         private double biggestMass = 0;
+        Font myFont = new Font("Arial", 10);
 
 
         /// <summary>
@@ -281,7 +282,6 @@ namespace AgCubio
                                                                                 (transformWidth > 3 ? transformWidth : 3));
                     // draw cube
                     e.Graphics.FillRectangle(myBrush, rectangle);
-                    Font myFont = new Font("Arial", 10);
                     SizeF size = e.Graphics.MeasureString(cube.Name, myFont);
                     // Draw text in our cube only if it can fit - center text in the cube
                     if ((size.Width < rectangle.Size.Width) && (size.Height < rectangle.Size.Height))

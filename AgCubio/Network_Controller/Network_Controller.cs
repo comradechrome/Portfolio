@@ -23,7 +23,7 @@ namespace AgCubio
       /// <summary>
       /// Size of receive buffer.
       /// </summary>
-      public const int BufferSize = 2048;
+      public const int BufferSize = 1024;
       /// <summary>
       /// Receive buffer.
       /// </summary>
@@ -236,5 +236,13 @@ namespace AgCubio
       {
             socket.Close();
       }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="callback"></param>
+        public static void Server_Awaiting_Client(Action<StateObject> callback)
+        {
+
+        }
    }
 }
