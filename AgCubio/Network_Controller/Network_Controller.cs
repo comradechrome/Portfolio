@@ -63,8 +63,8 @@ namespace AgCubio
         /// <returns></returns>
         public static Socket Connect_to_Server(Action<StateObject> callback, String hostname)
         {
-            StateObject MainStateObject = new StateObject();
-            MainStateObject.CallbackAction = callback;
+            StateObject ClientStateObject = new StateObject();
+            ClientStateObject.CallbackAction = callback;
             // It will need to open a socket and then use the BeginConnect method.Note this method take the 
             // "state" object and "regurgitates" it back to you when a connection is made, thus allowing
             // "communication" between this function and the Connected_to_Server function.
@@ -77,17 +77,17 @@ namespace AgCubio
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
                 // Create a TCP/IP socket.
-                MainStateObject.workSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                ClientStateObject.workSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 // Connect to the remote endpoint.
-                MainStateObject.workSocket.BeginConnect(remoteEP, Connected_to_Server, MainStateObject);
+                ClientStateObject.workSocket.BeginConnect(remoteEP, Connected_to_Server, ClientStateObject);
                 //Receive((IAsyncResult)MainStateObject);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
-            return MainStateObject.workSocket;
+            return ClientStateObject.workSocket;
         }
         /// <summary>
         /// Connect to the server
@@ -190,7 +190,7 @@ namespace AgCubio
         /// <param name="data"></param>
         public static void Send(Socket socket, String data)
         {
-            // Convert the string data to byte data using ASCII encoding.
+            // Convert the string data to byte data using UTF8 encoding.
             byte[] byteData = Encoding.UTF8.GetBytes(data);
          try
          {
@@ -242,7 +242,87 @@ namespace AgCubio
         /// <param name="callback"></param>
         public static void Server_Awaiting_Client(Action<StateObject> callback)
         {
+            StateObject serverStateObject = new StateObject();
+            serverStateObject.CallbackAction = callback;
 
+
+            // Establish the local endpoint for the socket.
+            // The DNS name of the computer
+            // running the listener is "host.contoso.com".
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+            IPAddress ipAddress = ipHostInfo.AddressList[ipHostInfo.AddressList.Length - 1];
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
+
+            // Create a TCP/IP socket.
+            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            serverStateObject.workSocket = listener;
+
+            // Bind the socket to the local endpoint and listen for incoming connections.
+            try
+            {
+                listener.Bind(localEndPoint);
+                listener.Listen(20);
+
+                
+                    // Start an asynchronous socket to listen for connections.
+                    Console.WriteLine("Waiting for a connection...");
+                    listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
+
+                    // Wait until a connection is made before continuing.
+                    //callback();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            Console.WriteLine("\nPress ENTER to continue...");
+            Console.Read();
         }
-   }
+
+        private static void AcceptCallback(IAsyncResult ar)
+        {
+            StateObject state = (StateObject)ar;
+            state.workSocket.EndAccept(ar);
+
+            state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), ar);
+        }
+
+        //public static void ReadCallback(IAsyncResult ar)
+        //{
+        //    String content = String.Empty;
+
+        //    // Retrieve the state object and the handler socket
+        //    // from the asynchronous state object.
+        //    StateObject state = (StateObject)ar.AsyncState;
+        //    Socket handler = state.workSocket;
+
+        //    // Read data from the client socket. 
+        //    int bytesRead = handler.EndReceive(ar);
+
+        //    if (bytesRead > 0)
+        //    {
+        //        // There  might be more data, so store the data received so far.
+        //        state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
+
+        //        // Check for end-of-file tag. If it is not there, read more data.
+        //        content = state.sb.ToString();
+        //        if (content.IndexOf("<EOF>") > -1)
+        //        {
+        //            // All the data has been read from the client. Display it on the console.
+        //            Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", content.Length, content);
+        //            // Echo the data back to the client.
+        //            Send(handler, content);
+        //        }
+        //        else
+        //        {
+        //            // Not all data received. Get more.
+        //            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+        //            new AsyncCallback(ReadCallback), state);
+        //        }
+        //    }
+        //}
+    }
 }
