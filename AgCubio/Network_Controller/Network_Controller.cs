@@ -16,26 +16,27 @@ namespace AgCubio
     /// </summary>
     public class StateObject
     {
-      /// <summary>
-      /// Client socket.
-      /// </summary>
-      public Socket workSocket = null;
-      /// <summary>
-      /// Size of receive buffer.
-      /// </summary>
-      public const int BufferSize = 1024;
-      /// <summary>
-      /// Receive buffer.
-      /// </summary>
-      public byte[] buffer = new byte[BufferSize];
-      /// <summary>
-      /// Received data string.
-      /// </summary>
-      public StringBuilder sb = new StringBuilder();
-      /// <summary>
-      /// Callback method
-      /// </summary>
+        /// <summary>
+        /// Client socket.
+        /// </summary>
+        public Socket workSocket = null;
+        /// <summary>
+        /// Size of receive buffer.
+        /// </summary>
+        public const int BufferSize = 1024;
+        /// <summary>
+        /// Receive buffer.
+        /// </summary>
+        public byte[] buffer = new byte[BufferSize];
+        /// <summary>
+        /// Received data string.
+        /// </summary>
+        public StringBuilder sb = new StringBuilder();
+        /// <summary>
+        /// Callback method
+        /// </summary>
         public Action<StateObject> CallbackAction;
+        
 
 
     }
@@ -73,7 +74,7 @@ namespace AgCubio
             {
                 // Establish the remote endpoint for the socket.
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(hostname);
-                IPAddress ipAddress = ipHostInfo.AddressList[ipHostInfo.AddressList.Length-1];
+                IPAddress ipAddress = ipHostInfo.AddressList[ipHostInfo.AddressList.Length - 1];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
                 // Create a TCP/IP socket.
@@ -98,18 +99,18 @@ namespace AgCubio
             // create our state object
             StateObject state = ((StateObject)ar.AsyncState);
 
-         try
-         {
-            // finalize the initial socket connection
-            state.workSocket.EndConnect(ar);
-         }
-         catch (Exception e)
-         {
-            Console.WriteLine(e.ToString());
-         }
+            try
+            {
+                // finalize the initial socket connection
+                state.workSocket.EndConnect(ar);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
             // run callback defined in view - send Player name to server
             state.CallbackAction(state);
-            
+
         }
         /// <summary>
         /// Receive data from the socket
@@ -192,16 +193,16 @@ namespace AgCubio
         {
             // Convert the string data to byte data using UTF8 encoding.
             byte[] byteData = Encoding.UTF8.GetBytes(data);
-         try
-         {
-            // Begin sending the data to the remote device.
-            socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
-         }
-         catch (Exception e)
-         {
-            throw e;
-         }
-            
+            try
+            {
+                // Begin sending the data to the remote device.
+                socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
         }
 
         /// <summary>
@@ -228,14 +229,14 @@ namespace AgCubio
             }
         }
 
-      /// <summary>
-      /// Close the Asyc Socket
-      /// </summary>
-      /// <param name="socket"></param>
-      public static void Stop(Socket socket)
-      {
+        /// <summary>
+        /// Close the Asyc Socket
+        /// </summary>
+        /// <param name="socket"></param>
+        public static void Stop(Socket socket)
+        {
             socket.Close();
-      }
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -264,13 +265,13 @@ namespace AgCubio
                 listener.Bind(localEndPoint);
                 listener.Listen(20);
 
-                
-                    // Start an asynchronous socket to listen for connections.
-                    Console.WriteLine("Waiting for a connection...");
-                    listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
 
-                    // Wait until a connection is made before continuing.
-                    //callback();
+                // Start an asynchronous socket to listen for connections.
+                Console.WriteLine("Waiting for a connection...");
+                listener.BeginAccept(new AsyncCallback(Accept_a_New_Client), serverStateObject);
+
+                // Wait until a connection is made before continuing.
+                //callback();
 
             }
             catch (Exception e)
@@ -278,17 +279,31 @@ namespace AgCubio
                 Console.WriteLine(e.ToString());
             }
 
-            Console.WriteLine("\nPress ENTER to continue...");
-            Console.Read();
         }
 
-        private static void AcceptCallback(IAsyncResult ar)
+
+        private static void Accept_a_New_Client(IAsyncResult ar)
         {
-            StateObject state = (StateObject)ar;
-            state.workSocket.EndAccept(ar);
+            //get socket to handle client requests
+            StateObject listenerState = (StateObject)ar.AsyncState;
+            Socket handler = listenerState.workSocket.EndAccept(ar);
 
-            state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), ar);
+            //create the client state object
+            StateObject clientState = new StateObject();
+            clientState.workSocket = handler;
+            clientState.CallbackAction = listenerState.CallbackAction; // not sure if this is needed
+
+            listenerState.CallbackAction(clientState);
+
+            handler.BeginReceive(clientState.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(Accept_a_New_Client), clientState);
+
+
+
         }
+
+
+
+
 
         //public static void ReadCallback(IAsyncResult ar)
         //{

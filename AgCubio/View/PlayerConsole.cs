@@ -369,7 +369,7 @@ namespace AgCubio
         private void ReceiveData(StateObject state)
         {
             // save our state string buffer to a new String
-            String newJson = new StringBuilder(state.sb.ToString()).ToString();
+            String newJson = state.sb.ToString();
             // clear out the state buffer
             state.sb.Clear();
             // process the raw JSON data and return a string array of clean JSON
