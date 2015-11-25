@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Drawing;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Server
@@ -18,7 +21,8 @@ namespace Server
         private static World mainWorld = new World(1000, 1000);
         private static int uid = 100000;
         private static StringBuilder jsonCubes = new StringBuilder();
-        private static Dictionary<string, Tuple<int, int>> mousePoints;
+        private static Dictionary<Socket, Tuple<int,int>> mousePoints;
+
         //private TcpListener server;
 
         public static void Main(string[] args)
@@ -110,7 +114,31 @@ namespace Server
 
         private static void ActionReceived(StateObject state)
         {
-            Network.i_want_more_data(state);
+         // save our state string buffer to a new String
+         String actionString = state.sb.ToString();
+         // clear out the state buffer
+         state.sb.Clear();
+           Tuple<int, int> mouseLocation;
+           int x = 0;
+           int y = 0;
+
+           if (actionString.StartsWith("(move"))
+           {
+            Regex pattern = new Regex(@"\(move,\s*(\-?\d+),\s*(\-?\d+).*");
+            Match match = pattern.Match(actionString);
+            x = int.Parse(match.Groups[1].Value);
+            y = int.Parse(match.Groups[2].Value);
+           }
+           // add to our mousePoints dictionary. we should Lock this
+           // not sure what to key off of ... state? state.socket?
+           // maybe add player name to state object?
+          // mousePoints.Add(state.workSocket,Tuple.Create(x,y));
+
+
+         Console.WriteLine(actionString + "\nX: " + x + " Y: " + y);
+
+
+         Network.i_want_more_data(state);
 
             //process moves and splits
         }
