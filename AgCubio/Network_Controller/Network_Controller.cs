@@ -112,23 +112,6 @@ namespace AgCubio
             state.CallbackAction(state);
 
         }
-        /// <summary>
-        /// Receive data from the socket
-        /// </summary>
-        /// <param name="state"></param>
-        public static void Receive(StateObject state)
-        {
-            try
-            {
-
-                // Begin receiving the data from the remote device.
-                state.workSocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, SocketFlags.None, ReceiveCallback, state);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
 
         /// <summary>
         /// Called by the OS when new data arrives.
@@ -250,20 +233,19 @@ namespace AgCubio
             // Establish the local endpoint for the socket.
             // The DNS name of the computer
             // running the listener is "host.contoso.com".
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress = ipHostInfo.AddressList[ipHostInfo.AddressList.Length - 1];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
+
 
             // Create a TCP/IP socket.
-            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Socket listener = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+            listener.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.IPv6Only, false);
 
             serverStateObject.workSocket = listener;
 
             // Bind the socket to the local endpoint and listen for incoming connections.
             try
             {
-                listener.Bind(localEndPoint);
-                listener.Listen(20);
+                listener.Bind(new IPEndPoint(IPAddress.IPv6Any, port));
+                listener.Listen(100);
 
 
                 // Start an asynchronous socket to listen for connections.
@@ -286,19 +268,16 @@ namespace AgCubio
         {
             //get socket to handle client requests
             StateObject listenerState = (StateObject)ar.AsyncState;
-            Socket handler = listenerState.workSocket.EndAccept(ar);
+            Socket clientSocket = listenerState.workSocket.EndAccept(ar);
 
             //create the client state object
             StateObject clientState = new StateObject();
-            clientState.workSocket = handler;
+            clientState.workSocket = clientSocket;
             clientState.CallbackAction = listenerState.CallbackAction; // not sure if this is needed
 
-            listenerState.CallbackAction(clientState);
+            clientSocket.BeginReceive(clientState.buffer, 0, StateObject.BufferSize, 0, ReceiveCallback, clientState);
 
-            handler.BeginReceive(clientState.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(Accept_a_New_Client), clientState);
-
-
-
+            listenerState.workSocket.BeginAccept(new AsyncCallback(Accept_a_New_Client), listenerState);
         }
 
 
