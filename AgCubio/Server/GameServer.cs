@@ -18,6 +18,7 @@ namespace Server
         private static World mainWorld = new World(1000, 1000);
         private static int uid = 100000;
         private static StringBuilder jsonCubes = new StringBuilder();
+        private static Dictionary<string, Tuple<int, int>> mousePoints;
         //private TcpListener server;
 
         public static void Main(string[] args)
@@ -68,13 +69,14 @@ namespace Server
 
             clientStates.Add(playerName, state);
             Console.WriteLine(playerName + " connected to: " + state.workSocket.RemoteEndPoint.ToString());
-            
+
             //TODO process player name
 
             Network.Send(state.workSocket, GeneratePlayerCube(playerName));
+            //Network.Send(state.workSocket, "{\"loc_x\":279.0,\"loc_y\":458.0,\"argb_color\":-7381092,\"uid\":21,\"food\":true,\"Name\":\"\",\"Mass\":1000.0}\n");
             sendWorld(state.workSocket);
 
-            //state.CallbackAction = ActionReceived;
+            state.CallbackAction = ActionReceived;
 
 
             //{ "loc_x":395.0,"loc_y":561.0,"argb_color":-2210515,"uid":7,"food":true,"Name":"","Mass":1.0}
@@ -93,7 +95,7 @@ namespace Server
             //isConnected = true;
 
             //// request more cube data from server
-            //Network.i_want_more_data(state);
+            Network.i_want_more_data(state);
             //worldSocket = state.workSocket;
 
         }
