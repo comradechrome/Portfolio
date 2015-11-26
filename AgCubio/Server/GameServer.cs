@@ -125,10 +125,24 @@ namespace Server
 
       private static string GeneratePlayerCube(string playerName)
       {
-         Cube playerCube = new Cube(rand.NextDouble() * mainWorld.worldHeight, rand.NextDouble() * mainWorld.worldWidth,
-                                     (int)(rand.NextDouble() * -3000000), uid++, 0, false, playerName, 100.0);
+         
+         Cube playerCube = new Cube(rand.Next(mainWorldParams.height), rand.Next(mainWorldParams.width),
+                                     randomColor(), uid++, 0, false, playerName, mainWorldParams.playerStartMass);
          mainWorld.addCube(playerCube);
          return JsonConvert.SerializeObject(playerCube) + "\n";
+      }
+
+      private static string GenerateFoodCube()
+      {
+         Cube foodCube = new Cube(rand.Next(mainWorldParams.height), rand.Next(mainWorldParams.width), 
+                             randomColor(), uid++, 0, true, "", mainWorldParams.foodValue);
+         mainWorld.addCube(foodCube);
+         return JsonConvert.SerializeObject(foodCube) + "\n";
+      }
+
+      private static int randomColor()
+      {
+         return Color.FromArgb(rand.Next(255), rand.Next(255), rand.Next(255)).ToArgb();
       }
 
       private static void ActionReceived(StateObject state)
