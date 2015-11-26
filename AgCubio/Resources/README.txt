@@ -2,6 +2,25 @@
 
 We installed Installed NewtonSoft Json.NET 7.0.1
 
+** Server **
+Server can be started with an argument of a file path to an XML parameter file of the following format:
+	<?xml version="1.0" encoding="utf-8" ?>
+		<parameters>
+		  <width>1000</width>
+		  <height>1000</height>
+		  <max_split_distance>150</max_split_distance>  
+		  <top_speed>5</top_speed>
+		  <low_speed>1</low_speed>
+		  <attrition_rate>200</attrition_rate>
+		  <food_value>1</food_value>
+		  <player_start_mass>1000</player_start_mass>
+		  <max_food>5000</max_food>
+		  <min_split_mass>100</min_split_mass>
+		  <absorb_constant>1.25</absorb_constant>
+		  <max_view_range>10000</max_view_range>
+		  <heartbeats_per_second>25</heartbeats_per_second>
+		</parameters>
+
 ** Model **
 Our cube and world objects are defined here:
 Cubes have loc_x, loc_y, argb_color, uid, team_id, food, name, and mass properties
@@ -10,6 +29,7 @@ The world object contains a hight, width, our UID, a dictionary of 'world' cubes
 Our primary method is the 'processCubes' method which takes a JSON string and creates a cube. It checks for cube mass, 
 team_id values, and cube existence to determine if cube should be added, removed, or moved. If the team_id is equal to 
 our ID it will add that cube to the ourCubes dictionary (in the case of a split).
+World Paramters are setup to include parameters for game mechanics.
 
 ** Network Project **
 Server name is sent to the network to create an Async Socket connection
