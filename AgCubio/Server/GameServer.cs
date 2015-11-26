@@ -32,13 +32,14 @@ namespace Server
 
       public static void Main(string[] args)
       {
-
+         // check if parameter file was supplied as an argument
          if (args.Length == 1)
          {
             String fileName = args[0];
             mainWorldParams = new WorldParams(fileName);
 
          }
+         // no argument so create world using defaults
          else
          {
             mainWorldParams = new WorldParams();
@@ -53,7 +54,9 @@ namespace Server
          Network.Server_Awaiting_Client(NameReceived);
          Console.Read();
       }
-
+      /// <summary>
+      /// Temporary functino to build our worls cubes from sample data
+      /// </summary>
       private static void buildWorld()
       {
          string[] lines = System.IO.File.ReadAllLines(@"..\..\..\Resources\Libraries\sample.data");
@@ -63,6 +66,8 @@ namespace Server
             mainWorld.addCube(cube);
          }
       }
+
+
 
       private static void sendWorld(Socket socket)
       {
@@ -143,6 +148,16 @@ namespace Server
       private static int randomColor()
       {
          return Color.FromArgb(rand.Next(255), rand.Next(255), rand.Next(255)).ToArgb();
+      }
+
+      /// <summary>
+      /// Given the width of a new Cube, finds an unoccupied x,y coordinate
+      /// </summary>
+      /// <param name="width"></param>
+      /// <returns></returns>
+      private Tuple<int,int> availablePosition(int width)
+      {
+         
       }
 
       private static void ActionReceived(StateObject state)
