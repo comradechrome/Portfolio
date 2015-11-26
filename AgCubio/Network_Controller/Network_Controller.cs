@@ -36,9 +36,10 @@ namespace AgCubio
         /// Callback method
         /// </summary>
         public Action<StateObject> CallbackAction;
-        
-
-
+      /// <summary>
+      /// State Object Identifier
+      /// </summary>
+       public String ID = "";
     }
 
     /// <summary>

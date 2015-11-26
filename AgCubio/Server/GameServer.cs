@@ -23,7 +23,8 @@ namespace Server
       private static World mainWorld = new World(1000, 1000);
       private static int uid = 100000;
       private static StringBuilder jsonCubes = new StringBuilder();
-      private static Dictionary<Socket, Tuple<int, int>> mousePoints;
+      private static Dictionary<string, Tuple<int, int>> mousePoints;
+      private static Dictionary<string, Tuple<int, int>> splitPoints;
       private static WorldParams mainWorldParams;
 
 
@@ -46,7 +47,7 @@ namespace Server
          //GameServer server = new GameServer(11000);
          clientStates = new Dictionary<string, StateObject>();
 
-         buildWorld();
+         Server.GameServer.buildWorld();
 
 
          Network.Server_Awaiting_Client(NameReceived);
@@ -86,6 +87,8 @@ namespace Server
          String playerName = state.sb.ToString().Trim();
          // clear out the state buffer
          state.sb.Clear();
+         // save the player name into the State object
+         state.ID = playerName;
 
          clientStates.Add(playerName, state);
          Console.WriteLine(playerName + " connected to: " + state.workSocket.RemoteEndPoint.ToString());
@@ -134,7 +137,6 @@ namespace Server
          String actionString = state.sb.ToString();
          // clear out the state buffer
          state.sb.Clear();
-         Tuple<int, int> mouseLocation;
          int x = 0;
          int y = 0;
 
@@ -144,19 +146,31 @@ namespace Server
             Match match = pattern.Match(actionString);
             x = int.Parse(match.Groups[1].Value);
             y = int.Parse(match.Groups[2].Value);
+
+            // add to our mousePoints dictionary. should we Lock this ??
+            lock (mousePoints)
+            {
+               mousePoints.Add(state.ID, Tuple.Create(x, y));
+            }
+            
+
+            Console.WriteLine(actionString + "\nX: " + x + " Y: " + y);
          }
-         // add to our mousePoints dictionary. we should Lock this
-         // not sure what to key off of ... state? state.socket?
-         // maybe add player name to state object?
-         // mousePoints.Add(state.workSocket,Tuple.Create(x,y));
+         else if (actionString.StartsWith("(split"))
+         {
+            Regex pattern = new Regex(@"\(split,\s*(\-?\d+),\s*(\-?\d+).*");
+            Match match = pattern.Match(actionString);
+            x = int.Parse(match.Groups[1].Value);
+            y = int.Parse(match.Groups[2].Value);
 
+            // add to our mousePoints dictionary. should we Lock this ??
+            lock (splitPoints)
+            {
+               splitPoints.Add(state.ID, Tuple.Create(x, y));
+            }
 
-         Console.WriteLine(actionString + "\nX: " + x + " Y: " + y);
-
-
+         }
          Network.i_want_more_data(state);
-
-         //process moves and splits
       }
 
 
