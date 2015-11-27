@@ -20,11 +20,13 @@ namespace Server
 
       private static Dictionary<string, StateObject> clientStates;
       private static Random rand = new Random();
-      private static World mainWorld = new World(mainWorldParams.height, mainWorldParams.width);
+      private static World mainWorld;
       private static int uid = 0;
       private static StringBuilder jsonCubes = new StringBuilder();
-      private static Dictionary<string, Tuple<int, int>> mousePoints;
-      private static Dictionary<string, Tuple<int, int>> splitPoints;
+      private static Dictionary<string, Tuple<int, int>> mousePoints 
+                              = new Dictionary<string, Tuple<int, int>>();
+      private static Dictionary<string, Tuple<int, int>> splitPoints 
+                              = new Dictionary<string, Tuple<int, int>>();
       private static WorldParams mainWorldParams;
 
 
@@ -45,11 +47,16 @@ namespace Server
             mainWorldParams = new WorldParams();
          }
 
+         mainWorld = new World(mainWorldParams.height, mainWorldParams.width);
+
          //GameServer server = new GameServer(11000);
          clientStates = new Dictionary<string, StateObject>();
 
-         Server.GameServer.buildWorld();
-
+         // add food cubes to world
+         for (int i = 0; i < mainWorldParams.maxFood; i++)
+         {
+            GenerateFoodCube();
+         }
 
          Network.Server_Awaiting_Client(NameReceived);
          Console.Read();
@@ -57,15 +64,15 @@ namespace Server
       /// <summary>
       /// Temporary functino to build our worls cubes from sample data
       /// </summary>
-      private static void buildWorld()
-      {
-         string[] lines = System.IO.File.ReadAllLines(@"..\..\..\Resources\Libraries\sample.data");
-         foreach (string line in lines)
-         {
-            Cube cube = JsonConvert.DeserializeObject<Cube>(line);
-            mainWorld.addCube(cube);
-         }
-      }
+      //private static void buildWorld()
+      //{
+      //   string[] lines = System.IO.File.ReadAllLines(@"..\..\..\Resources\Libraries\sample.data");
+      //   foreach (string line in lines)
+      //   {
+      //      Cube cube = JsonConvert.DeserializeObject<Cube>(line);
+      //      mainWorld.addCube(cube);
+      //   }
+      //}
 
 
 
@@ -106,7 +113,7 @@ namespace Server
 
          state.CallbackAction = ActionReceived;
 
-
+         Network.i_want_more_data(state);
          //{ "loc_x":395.0,"loc_y":561.0,"argb_color":-2210515,"uid":7,"food":true,"Name":"","Mass":1.0}
 
 
@@ -123,24 +130,27 @@ namespace Server
          //isConnected = true;
 
          //// request more cube data from server
-         Network.i_want_more_data(state);
+
          //worldSocket = state.workSocket;
 
       }
 
       private static string GeneratePlayerCube(string playerName)
       {
-         
-         Cube playerCube = new Cube(rand.Next(mainWorldParams.height), rand.Next(mainWorldParams.width),
+         double width = Cube.getWidth(mainWorldParams.playerStartMass);
+         int radius = (int)Math.Ceiling(width / 2.0); // round up
+         Cube playerCube = new Cube(rand.Next(radius,mainWorldParams.height - radius), rand.Next(radius, mainWorldParams.width - radius),
                                      randomColor(), uid++, 0, false, playerName, mainWorldParams.playerStartMass);
          mainWorld.addCube(playerCube);
+         //run method to absorb any cubes we landed on
          return JsonConvert.SerializeObject(playerCube) + "\n";
       }
 
       private static string GenerateFoodCube()
       {
-         Cube foodCube = new Cube(rand.Next(mainWorldParams.height), rand.Next(mainWorldParams.width), 
-                             randomColor(), uid++, 0, true, "", mainWorldParams.foodValue);
+         Tuple<double, double> coordinates = availablePosition(mainWorldParams.foodValue);
+         Cube foodCube = new Cube(coordinates.Item1, coordinates.Item2, randomColor(),
+                                   uid++, 0, true, "", mainWorldParams.foodValue);
          mainWorld.addCube(foodCube);
          return JsonConvert.SerializeObject(foodCube) + "\n";
       }
@@ -151,14 +161,15 @@ namespace Server
       }
 
       /// <summary>
-      /// Given the width of a new Cube, finds an unoccupied x,y coordinate
+      /// Given the mass of a new Cube, finds an unoccupied x,y coordinate
       /// x1,y1,x2,y2 will be the upper left and lower right coordiantes of the random 'proposed' newcube
       /// x3,y3,x4,y4 will be the upper left and lower right coordiantes of the existing cube we are checking
       /// </summary>
       /// <param name="width"></param>
       /// <returns></returns>
-      private Tuple<double,double> availablePosition(double width)
+      public static Tuple<double,double> availablePosition(double mass)
       {
+         double width = Cube.getWidth(mass);
          int x = 0;
          int y = 0;
          bool available = false;
@@ -176,30 +187,38 @@ namespace Server
             int x2 = x + newRadius;
             int y2 = y + newRadius;
 
-
-            foreach (var cube in mainWorld.worldCubes)
-            { 
-               cubeRadius = (int)Math.Ceiling(cube.Value.Width / 2.0); // round up
-               // get diagonal corners of current cube
-               int x3 = (int)cube.Value.loc_x - cubeRadius;
-               int y3 = (int)cube.Value.loc_y - cubeRadius;
-               int x4 = (int)cube.Value.loc_x + cubeRadius;
-               int y4 = (int)cube.Value.loc_y + cubeRadius;
-
-               // this algorithm checks to see if new cube [(x1,y1),(x2,y2)] overlaps current cube [(x3,y3),(x4,y4)]
-               // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
-
-               if (!(y2 < y3 || y1 > y4 || x2 < x3 || x1 > x4))
-                  // cubes overlap; break, generate a new cube, check again
+            if (mainWorld.worldCubes.Count > 0)
+            {
+               // we have cubes so we'll need to check for overlaps
+               foreach (var cube in mainWorld.worldCubes)
                {
-                  available = false;
-                  break;
+                  cubeRadius = (int) Math.Ceiling(cube.Value.Width/2.0); // round up
+                  // get diagonal corners of current cube
+                  int x3 = (int) cube.Value.loc_x - cubeRadius;
+                  int y3 = (int) cube.Value.loc_y - cubeRadius;
+                  int x4 = (int) cube.Value.loc_x + cubeRadius;
+                  int y4 = (int) cube.Value.loc_y + cubeRadius;
+
+                  // this algorithm checks to see if new cube [(x1,y1),(x2,y2)] overlaps current cube [(x3,y3),(x4,y4)]
+                  // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
+
+                  if (!(y2 < y3 || y1 > y4 || x2 < x3 || x1 > x4))
+                     // cubes overlap; break, generate a new cube, check again
+                  {
+                     available = false;
+                     break;
+                  }
+                  else
+                  // cubes do not overlap, set flag to true and check another cube
+                  {
+                     available = true;
+                  }
                }
-               else
-               // cubes do not overlap, set flag to true and check another cube
-               {
-                  available = true;
-               }
+            }
+            else
+            {
+               // no cubes yet, so we'll set flag to true
+               available = true;
             }
          }
          
@@ -209,7 +228,8 @@ namespace Server
       private static void ActionReceived(StateObject state)
       {
          // save our state string buffer to a new String
-         String actionString = state.sb.ToString();
+         string actionString = state.sb.ToString();
+         string playerName = state.ID;
          // clear out the state buffer
          state.sb.Clear();
          int x = 0;
@@ -221,15 +241,16 @@ namespace Server
             Match match = pattern.Match(actionString);
             x = int.Parse(match.Groups[1].Value);
             y = int.Parse(match.Groups[2].Value);
+            
 
             // add to our mousePoints dictionary. should we Lock this ??
-            lock (mousePoints)
+         //   lock (mousePoints)
             {
-               mousePoints.Add(state.ID, Tuple.Create(x, y));
+               mousePoints[playerName] = Tuple.Create(x, y);
             }
             
 
-            Console.WriteLine(actionString + "\nX: " + x + " Y: " + y);
+            
          }
          else if (actionString.StartsWith("(split"))
          {
@@ -241,10 +262,14 @@ namespace Server
             // add to our mousePoints dictionary. should we Lock this ??
             lock (splitPoints)
             {
-               splitPoints.Add(state.ID, Tuple.Create(x, y));
+               splitPoints[playerName] = Tuple.Create(x, y);
+               //splitPoints.Add(playerName, Tuple.Create(x, y));
             }
 
          }
+
+         Console.WriteLine(actionString + "\nX: " + x + " Y: " + y);
+
          Network.i_want_more_data(state);
       }
 

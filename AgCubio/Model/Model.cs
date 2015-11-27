@@ -73,7 +73,17 @@ namespace AgCubio
       /// </summary>
       public Double Width
       {
-         get { return Math.Pow(Mass, 0.65); }
+         get { return getWidth(Mass); }
+      }
+
+      /// <summary>
+      /// Calculates the width of a cube
+      /// </summary>
+      /// <param name="mass"></param>
+      /// <returns></returns>
+      public static double getWidth(double mass)
+      {
+         return Math.Pow(mass, 0.65);
       }
 
       /// <summary>
@@ -187,8 +197,6 @@ namespace AgCubio
          }
 
          // do nothing if uid doesn't exist -
-
-
       }
 
       /// <summary>
