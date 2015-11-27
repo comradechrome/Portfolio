@@ -20,8 +20,8 @@ namespace Server
 
       private static Dictionary<string, StateObject> clientStates;
       private static Random rand = new Random();
-      private static World mainWorld = new World(1000, 1000);
-      private static int uid = 100000;
+      private static World mainWorld = new World(mainWorldParams.height, mainWorldParams.width);
+      private static int uid = 0;
       private static StringBuilder jsonCubes = new StringBuilder();
       private static Dictionary<string, Tuple<int, int>> mousePoints;
       private static Dictionary<string, Tuple<int, int>> splitPoints;
@@ -152,12 +152,58 @@ namespace Server
 
       /// <summary>
       /// Given the width of a new Cube, finds an unoccupied x,y coordinate
+      /// x1,y1,x2,y2 will be the upper left and lower right coordiantes of the random 'proposed' newcube
+      /// x3,y3,x4,y4 will be the upper left and lower right coordiantes of the existing cube we are checking
       /// </summary>
       /// <param name="width"></param>
       /// <returns></returns>
-      private Tuple<int,int> availablePosition(int width)
+      private Tuple<double,double> availablePosition(double width)
       {
+         int x = 0;
+         int y = 0;
+         bool available = false;
+         int newRadius = (int)Math.Ceiling(width/2.0); // round up
+         int cubeRadius;
+
+
+         while (!available)
+         {
+            // generate random coordiantes that fall withing the world. Then generate the cube diagonal points.
+            x = rand.Next(newRadius, mainWorldParams.height - newRadius);
+            y = rand.Next(newRadius, mainWorldParams.width - newRadius);
+            int x1 = x - newRadius;
+            int y1 = y - newRadius;
+            int x2 = x + newRadius;
+            int y2 = y + newRadius;
+
+
+            foreach (var cube in mainWorld.worldCubes)
+            { 
+               cubeRadius = (int)Math.Ceiling(cube.Value.Width / 2.0); // round up
+               // get diagonal corners of current cube
+               int x3 = (int)cube.Value.loc_x - cubeRadius;
+               int y3 = (int)cube.Value.loc_y - cubeRadius;
+               int x4 = (int)cube.Value.loc_x + cubeRadius;
+               int y4 = (int)cube.Value.loc_y + cubeRadius;
+
+               // this algorithm checks to see if new cube [(x1,y1),(x2,y2)] overlaps current cube [(x3,y3),(x4,y4)]
+               // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
+
+               if (!(y2 < y3 || y1 > y4 || x2 < x3 || x1 > x4))
+                  // cubes overlap; break, generate a new cube, check again
+               {
+                  available = false;
+                  break;
+               }
+               else
+               // cubes do not overlap, set flag to true and check another cube
+               {
+                  available = true;
+               }
+            }
+         }
          
+         return Tuple.Create((double)x, (double)y);
       }
 
       private static void ActionReceived(StateObject state)
