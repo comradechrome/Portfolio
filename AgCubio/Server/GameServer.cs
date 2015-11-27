@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml;
+using System.Timers;
 
 namespace Server
 {
@@ -22,18 +23,18 @@ namespace Server
       private static Random rand = new Random();
       private static World mainWorld;
       private static int uid = 0;
-      private static StringBuilder jsonCubes = new StringBuilder();
       private static Dictionary<string, Tuple<int, int>> mousePoints 
                               = new Dictionary<string, Tuple<int, int>>();
       private static Dictionary<string, Tuple<int, int>> splitPoints 
                               = new Dictionary<string, Tuple<int, int>>();
       private static WorldParams mainWorldParams;
-
+      private static Timer heartbeat;
 
       //private TcpListener server;
 
       public static void Main(string[] args)
       {
+         
          // check if parameter file was supplied as an argument
          if (args.Length == 1)
          {
@@ -47,6 +48,7 @@ namespace Server
             mainWorldParams = new WorldParams();
          }
 
+         
          mainWorld = new World(mainWorldParams.height, mainWorldParams.width);
 
          //GameServer server = new GameServer(11000);
@@ -59,8 +61,103 @@ namespace Server
          }
 
          Network.Server_Awaiting_Client(NameReceived);
+
+         SetTimer();
          Console.Read();
       }
+
+      private static void SetTimer()
+      {
+    
+         // Create a timer based on the heartbeatsPerSecond parameter
+         heartbeat = new Timer(1000.0/mainWorldParams.heartbeatsPerSecond);
+         // Hook up the Elapsed event for the timer. 
+         heartbeat.Elapsed += OnHeartbeat;
+         heartbeat.AutoReset = true;
+         heartbeat.Enabled = true;
+      
+   }
+
+      private static void OnHeartbeat(object sender, ElapsedEventArgs e)
+      {
+         // String Builder to hold all cubes needing an update.
+         StringBuilder jsonCubes = new StringBuilder();
+         // stop the heartbeat
+         heartbeat.Stop();
+         // grow new food if needed
+         growFood();
+         // shrink players
+         attrition();
+         // food growth
+         foodGrowth();
+         processMoves();
+         processSplits();
+         // virus mechanics
+         virusUpdates();
+         // players eating food and players
+         absorb();
+         // send world update to all players
+         sendUpdates(jsonCubes);
+         //start the heartbeat back up
+         heartbeat.Start();
+
+      }
+
+      private static void growFood()
+      {
+         int foodCount = 0;
+         lock (mainWorld.ourCubes)
+         {
+            if (mainWorld.worldCubes.Count > 0)
+            {
+               foreach (var cube in mainWorld.worldCubes)
+               {
+                  if (cube.Value.food)
+                     foodCount++;
+               }
+            }
+         }
+         if (foodCount < mainWorldParams.maxFood)
+            GenerateFoodCube();
+      }
+
+      private static void attrition()
+      {
+         //At each heartbeat of the game every player cube should lose some portion of its mass. 
+         //Larger cubes should lose mass faster than smaller cubes. Cubes less than some mass (say 200) should not lose mass. 
+         //Cubes less than some mass (say 800) should only lose mass very slowly. 
+         //Cubes above 800 should rapidly start losing mass. (Again this should be tweakable).
+      }
+
+      private static void foodGrowth()
+      {
+         
+      }
+
+      private static void processMoves()
+      {
+         
+      }
+
+      private static void processSplits()
+      {
+         
+      }
+
+      private static void virusUpdates()
+      {
+        
+      }
+      private static void absorb()
+      {
+         
+      }
+
+      private static void sendUpdates(StringBuilder jsonCubes)
+      {
+         
+      }
+
       /// <summary>
       /// Temporary functino to build our worls cubes from sample data
       /// </summary>
@@ -78,9 +175,13 @@ namespace Server
 
       private static void sendWorld(Socket socket)
       {
-         foreach (Cube cube in mainWorld.worldCubes.Values)
+         StringBuilder jsonCubes = new StringBuilder();
+         lock (mainWorld.worldCubes)
          {
-            jsonCubes.Append(JsonConvert.SerializeObject(cube) + "\n");
+            foreach (Cube cube in mainWorld.worldCubes.Values)
+            {
+               jsonCubes.Append(JsonConvert.SerializeObject(cube) + "\n");
+            }
          }
          Network.Send(socket, jsonCubes.ToString());
 
@@ -141,8 +242,11 @@ namespace Server
          int radius = (int)Math.Ceiling(width / 2.0); // round up
          Cube playerCube = new Cube(rand.Next(radius,mainWorldParams.height - radius), rand.Next(radius, mainWorldParams.width - radius),
                                      randomColor(), uid++, 0, false, playerName, mainWorldParams.playerStartMass);
-         mainWorld.addCube(playerCube);
-         //run method to absorb any cubes we landed on
+         lock (mainWorld.worldCubes)
+         {
+            mainWorld.addCube(playerCube);
+         }
+         //TODO: run method to absorb any cubes we landed on
          return JsonConvert.SerializeObject(playerCube) + "\n";
       }
 
@@ -151,7 +255,10 @@ namespace Server
          Tuple<double, double> coordinates = availablePosition(mainWorldParams.foodValue);
          Cube foodCube = new Cube(coordinates.Item1, coordinates.Item2, randomColor(),
                                    uid++, 0, true, "", mainWorldParams.foodValue);
-         mainWorld.addCube(foodCube);
+         lock (mainWorld.worldCubes)
+         {
+            mainWorld.addCube(foodCube);
+         }
          return JsonConvert.SerializeObject(foodCube) + "\n";
       }
 
@@ -174,7 +281,7 @@ namespace Server
          int y = 0;
          bool available = false;
          int newRadius = (int)Math.Ceiling(width/2.0); // round up
-         int cubeRadius;
+
 
 
          while (!available)
@@ -190,28 +297,33 @@ namespace Server
             if (mainWorld.worldCubes.Count > 0)
             {
                // we have cubes so we'll need to check for overlaps
-               foreach (var cube in mainWorld.worldCubes)
+               lock (mainWorld.worldCubes)
                {
-                  cubeRadius = (int) Math.Ceiling(cube.Value.Width/2.0); // round up
-                  // get diagonal corners of current cube
-                  int x3 = (int) cube.Value.loc_x - cubeRadius;
-                  int y3 = (int) cube.Value.loc_y - cubeRadius;
-                  int x4 = (int) cube.Value.loc_x + cubeRadius;
-                  int y4 = (int) cube.Value.loc_y + cubeRadius;
 
-                  // this algorithm checks to see if new cube [(x1,y1),(x2,y2)] overlaps current cube [(x3,y3),(x4,y4)]
-                  // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
 
-                  if (!(y2 < y3 || y1 > y4 || x2 < x3 || x1 > x4))
-                     // cubes overlap; break, generate a new cube, check again
+                  foreach (var cube in mainWorld.worldCubes)
                   {
-                     available = false;
-                     break;
-                  }
-                  else
-                  // cubes do not overlap, set flag to true and check another cube
-                  {
-                     available = true;
+                     int cubeRadius = (int) Math.Ceiling(cube.Value.Width/2.0); // round up
+                     // get diagonal corners of current cube
+                     int x3 = (int) cube.Value.loc_x - cubeRadius;
+                     int y3 = (int) cube.Value.loc_y - cubeRadius;
+                     int x4 = (int) cube.Value.loc_x + cubeRadius;
+                     int y4 = (int) cube.Value.loc_y + cubeRadius;
+
+                     // this algorithm checks to see if new cube [(x1,y1),(x2,y2)] overlaps current cube [(x3,y3),(x4,y4)]
+                     // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
+
+                     if (!(y2 < y3 || y1 > y4 || x2 < x3 || x1 > x4))
+                        // cubes overlap; break, generate a new cube, check again
+                     {
+                        available = false;
+                        break;
+                     }
+                     else
+                     // cubes do not overlap, set flag to true and check another cube
+                     {
+                        available = true;
+                     }
                   }
                }
             }
@@ -244,12 +356,10 @@ namespace Server
             
 
             // add to our mousePoints dictionary. should we Lock this ??
-         //   lock (mousePoints)
+            lock (mousePoints)
             {
                mousePoints[playerName] = Tuple.Create(x, y);
             }
-            
-
             
          }
          else if (actionString.StartsWith("(split"))
