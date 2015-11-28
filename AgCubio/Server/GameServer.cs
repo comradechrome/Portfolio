@@ -180,14 +180,17 @@ namespace Server
 
       private static double smoothingFactor(double mass)
       {
-         // TODO: need to come up with a formula
-         // 1500 - 1 *  (.15)
-         // 2000 - 2 * 
-         // 2500 - 3 * 
-         // 3000 - 4 *
-         // 3500 - 5 *  (.075)
+         double scaleConst = .00125;
+         double minFactor = 3 * scaleConst + mainWorldParams.lowSpeed * scaleConst;
+         double maxFactor = 3 * scaleConst + mainWorldParams.topSpeed * scaleConst;
+         
+         // 1500 - 5 *  (.01)
+         // 2000 - 4 *  (.00875)
+         // 2500 - 3 *  (.0075)
+         // 3000 - 2 *  (.00625)
+         // 3500 - 1 *  (.005)
 
-         return .15;
+         return .005;
 
       }
 
