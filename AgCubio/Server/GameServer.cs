@@ -268,14 +268,12 @@ namespace Server
          //TODO process player name
 
          Network.Send(state.workSocket, GeneratePlayerCube(playerName));
-         //Network.Send(state.workSocket, "{\"loc_x\":279.0,\"loc_y\":458.0,\"argb_color\":-7381092,\"uid\":21,\"food\":true,\"Name\":\"\",\"Mass\":1000.0}\n");
          sendWorld(state.workSocket);
 
          state.CallbackAction = ActionReceived;
 
          Network.i_want_more_data(state);
-         //{ "loc_x":395.0,"loc_y":561.0,"argb_color":-2210515,"uid":7,"food":true,"Name":"","Mass":1.0}
-
+         
 
          //    // create cubes in world
          //    lock (mainWorld)

@@ -157,6 +157,7 @@ namespace AgCubio
          this.worldWidth = width;
          worldCubes = new Dictionary<int, Cube>();
          ourCubes = new Dictionary<int, Cube>();
+         playerCubes = new Dictionary<string, Cube>();
       }
 
       /// <summary>
