@@ -178,19 +178,29 @@ namespace Server
          return jsonCubes.ToString();
       }
 
+      /// <summary>
+      /// f(mass) = factor
+      /// f(200) = .01 (top_speed = 5)
+      /// f(2700) = .00875
+      /// f(3200) = .0075
+      /// f(4700) = .00625
+      /// f(6200) = .005 (low_speed = 1)
+      /// </summary>
+      /// <param name="mass"></param>
+      /// <returns></returns>
       private static double smoothingFactor(double mass)
       {
          double scaleConst = .00125;
+         double smoothingIncrement = 1500;
          double minFactor = 3 * scaleConst + mainWorldParams.lowSpeed * scaleConst;
          double maxFactor = 3 * scaleConst + mainWorldParams.topSpeed * scaleConst;
-         
-         // 1500 - 5 *  (.01)
-         // 2000 - 4 *  (.00875)
-         // 2500 - 3 *  (.0075)
-         // 3000 - 2 *  (.00625)
-         // 3500 - 1 *  (.005)
 
-         return .005;
+         double factor = 3 * scaleConst + mainWorldParams.topSpeed + 
+                              ((mainWorldParams.minSplitMass - mass) / smoothingIncrement) * scaleConst;
+
+         if (factor < minFactor) { return minFactor; }
+         if (factor > maxFactor) { return maxFactor; }
+         return factor;
 
       }
 
