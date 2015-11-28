@@ -410,25 +410,29 @@ namespace Server
       /// <summary>
       /// ensures that our stored X values fall within the range of the world 
       /// </summary>
-      /// <param name="value"></param>
+      /// <param name="xValue"></param>
+      /// <param name="width"></param>
       /// <returns></returns>
-      public static int widthRange(int value)
+      public static int widthRange(int xValue,double width)
       {
-         if (value < 0) { return 0; }
-         if (value > mainWorldParams.width) { return mainWorldParams.width; }
-         return value;
+         int radius = (int)(width / 4); // if we set this to 'width / 2' cube is too slo when it gets near the edges
+         if (xValue < radius) { return radius; }
+         if (xValue > mainWorldParams.width - radius) { return mainWorldParams.width - radius; }
+         return xValue;
       }
-
+      
       /// <summary>
       /// ensures that our stored Y values fall within the range of the world 
       /// </summary>
-      /// <param name="value"></param>
+      /// <param name="yValue"></param>
+      /// <param name="width"></param>
       /// <returns></returns>
-      public static int heightRange(int value)
+      public static int heightRange(int yValue,double width)
       {
-         if (value < 0) { return 0; }
-         if (value > mainWorldParams.height) { return mainWorldParams.height; }
-         return value;
+         int radius = (int)(width / 4); // if we set this to 'width / 2' cube is too slo when it gets near the edges
+         if (yValue < radius) { return radius; }
+         if (yValue > mainWorldParams.height - radius) { return mainWorldParams.height - radius; }
+         return yValue;
       }
 
       private static void ActionReceived(StateObject state)
@@ -447,8 +451,8 @@ namespace Server
             Regex pattern = new Regex(@"\(move,\s*(\-?\d+),\s*(\-?\d+).*");
             Match match = pattern.Match(actionString);
             // save x,y values but ensure that they fall within valide ranges
-            x = widthRange(int.Parse(match.Groups[1].Value));
-            y = heightRange(int.Parse(match.Groups[2].Value));
+            x = widthRange(int.Parse(match.Groups[1].Value), mainWorld.playerCubes[playerName].Width);
+            y = heightRange(int.Parse(match.Groups[2].Value), mainWorld.playerCubes[playerName].Width);
             
 
             // add to our mousePoints dictionary. should we Lock this ??
@@ -462,8 +466,8 @@ namespace Server
          {
             Regex pattern = new Regex(@"\(split,\s*(\-?\d+),\s*(\-?\d+).*");
             Match match = pattern.Match(actionString);
-            x = widthRange(int.Parse(match.Groups[1].Value));
-            y = heightRange(int.Parse(match.Groups[2].Value));
+            x = widthRange(int.Parse(match.Groups[1].Value), mainWorld.playerCubes[playerName].Width);
+            y = heightRange(int.Parse(match.Groups[2].Value), mainWorld.playerCubes[playerName].Width);
 
             // add to our mousePoints dictionary. should we Lock this ??
             lock (splitPoints)
