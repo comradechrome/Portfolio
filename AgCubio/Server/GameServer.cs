@@ -30,8 +30,6 @@ namespace Server
       private static WorldParams mainWorldParams;
       private static Timer heartbeat;
 
-      //private TcpListener server;
-
       public static void Main(string[] args)
       {
          
@@ -90,14 +88,17 @@ namespace Server
          attrition();
          // food growth
          foodGrowth();
-         processMoves();
+         // process cube movements
+         jsonCubes.Append(processMoves());
+         // process cube splits
          processSplits();
          // virus mechanics
          virusUpdates();
          // players eating food and players
          absorb();
          // send world update to all players
-         sendUpdates(jsonCubes);
+         if(jsonCubes.Length > 0)
+            sendUpdates(jsonCubes);
          //start the heartbeat back up
          heartbeat.Start();
 
@@ -134,9 +135,60 @@ namespace Server
          
       }
 
-      private static void processMoves()
+      private static string processMoves()
       {
-         
+         StringBuilder jsonCubes = new StringBuilder();
+
+         lock (mousePoints)
+         {
+            if (mousePoints.Count > 0)
+            {
+               foreach (var coordinates in mousePoints)
+               {
+                  // player name and mouse coordinates
+                  string playerName = coordinates.Key;
+                  int x = coordinates.Value.Item1;
+                  int y = coordinates.Value.Item2;
+
+                  // get players cube current position and mass
+                  double cubeX = mainWorld.playerCubes[playerName].loc_x;
+                  double cubeY = mainWorld.playerCubes[playerName].loc_y;
+                  double mass = mainWorld.playerCubes[playerName].Mass;
+
+                  // calculate the distance from our mouse to the cube
+                  double distX = x - cubeX;
+                  double distY = y - cubeY;
+
+                  // make sure distace is greater than 1
+                  double distance = Math.Sqrt(distX*distX + distY*distY);
+
+                  //TODO: need to handle overlaps and world edges
+
+                  if (distance > 1.0)
+                  {
+                     mainWorld.playerCubes[playerName].loc_x += distX * smoothingFactor(mass);
+                     mainWorld.playerCubes[playerName].loc_y += distY * smoothingFactor(mass);
+                  }
+                  jsonCubes.Append(JsonConvert.SerializeObject(mainWorld.playerCubes[playerName]) + "\n");
+
+               }
+            }
+         }
+
+         return jsonCubes.ToString();
+      }
+
+      private static double smoothingFactor(double mass)
+      {
+         // TODO: need to come up with a formula
+         // 1500 - 1 *  (.15)
+         // 2000 - 2 * 
+         // 2500 - 3 * 
+         // 3000 - 4 *
+         // 3500 - 5 *  (.075)
+
+         return .15;
+
       }
 
       private static void processSplits()
@@ -155,7 +207,13 @@ namespace Server
 
       private static void sendUpdates(StringBuilder jsonCubes)
       {
-         
+         if (clientStates.Count > 0)
+         {
+            foreach (var clients in clientStates)
+            {
+               Network.Send(clients.Value.workSocket, jsonCubes.ToString());
+            }
+         }
       }
 
       /// <summary>
@@ -186,6 +244,7 @@ namespace Server
          Network.Send(socket, jsonCubes.ToString());
 
       }
+
       //public GameServer(int port)
       //{
       //    worldSockets = new Dictionary<string, Socket>();
@@ -245,8 +304,8 @@ namespace Server
          lock (mainWorld.worldCubes)
          {
             mainWorld.addCube(playerCube);
+            mainWorld.playerCubes[playerName] = playerCube;
          }
-         //TODO: run method to absorb any cubes we landed on
          return JsonConvert.SerializeObject(playerCube) + "\n";
       }
 
@@ -337,8 +396,33 @@ namespace Server
          return Tuple.Create((double)x, (double)y);
       }
 
+      /// <summary>
+      /// ensures that our stored X values fall within the range of the world 
+      /// </summary>
+      /// <param name="value"></param>
+      /// <returns></returns>
+      public static int widthRange(int value)
+      {
+         if (value < 0) { return 0; }
+         if (value > mainWorldParams.width) { return mainWorldParams.width; }
+         return value;
+      }
+
+      /// <summary>
+      /// ensures that our stored Y values fall within the range of the world 
+      /// </summary>
+      /// <param name="value"></param>
+      /// <returns></returns>
+      public static int heightRange(int value)
+      {
+         if (value < 0) { return 0; }
+         if (value > mainWorldParams.height) { return mainWorldParams.height; }
+         return value;
+      }
+
       private static void ActionReceived(StateObject state)
       {
+
          // save our state string buffer to a new String
          string actionString = state.sb.ToString();
          string playerName = state.ID;
@@ -351,8 +435,9 @@ namespace Server
          {
             Regex pattern = new Regex(@"\(move,\s*(\-?\d+),\s*(\-?\d+).*");
             Match match = pattern.Match(actionString);
-            x = int.Parse(match.Groups[1].Value);
-            y = int.Parse(match.Groups[2].Value);
+            // save x,y values but ensure that they fall within valide ranges
+            x = widthRange(int.Parse(match.Groups[1].Value));
+            y = heightRange(int.Parse(match.Groups[2].Value));
             
 
             // add to our mousePoints dictionary. should we Lock this ??
@@ -366,8 +451,8 @@ namespace Server
          {
             Regex pattern = new Regex(@"\(split,\s*(\-?\d+),\s*(\-?\d+).*");
             Match match = pattern.Match(actionString);
-            x = int.Parse(match.Groups[1].Value);
-            y = int.Parse(match.Groups[2].Value);
+            x = widthRange(int.Parse(match.Groups[1].Value));
+            y = heightRange(int.Parse(match.Groups[2].Value));
 
             // add to our mousePoints dictionary. should we Lock this ??
             lock (splitPoints)

@@ -135,10 +135,14 @@ namespace AgCubio
       /// </summary>
       public Dictionary<int, Cube> worldCubes { get; }
       /// <summary>
-      /// Dictionary of our split cubes - will always contain our initial cube
-      /// As cube plits, it will be indexed by Cube_id, but all team_id's should be our original UID
+      /// Dictionary of our split cubes - will always contain our initial cube - used by the client
+      /// As cube splits, it will be indexed by Cube_id, but all team_id's should be our original UID
       /// </summary>
       public Dictionary<int, Cube> ourCubes { get; }
+      /// <summary>
+      /// Dictionary of payer cubes used by the server
+      /// </summary>
+      public Dictionary<string,Cube> playerCubes { get; }
 
 
 
