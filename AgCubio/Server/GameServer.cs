@@ -107,7 +107,7 @@ namespace Server
       private static void growFood()
       {
          int foodCount = 0;
-         lock (mainWorld.ourCubes)
+         lock (mainWorld)
          {
             if (mainWorld.worldCubes.Count > 0)
             {
@@ -128,6 +128,25 @@ namespace Server
          //Larger cubes should lose mass faster than smaller cubes. Cubes less than some mass (say 200) should not lose mass. 
          //Cubes less than some mass (say 800) should only lose mass very slowly. 
          //Cubes above 800 should rapidly start losing mass. (Again this should be tweakable).
+
+         int minMass = 200;
+         int massAttrition = 0;
+
+         if (mainWorld.playerCubes.Count > 0)
+         {
+            lock (mainWorld)
+            {
+               foreach (var cube in mainWorld.playerCubes)
+               {
+                  // decrease mass if cube is above minimum mass
+                  if (cube.Value.Mass > minMass)
+                  {
+                     massAttrition = (int)((minMass*mainWorldParams.attritionRate)/
+                                     (cube.Value.Mass*mainWorldParams.heartbeatsPerSecond));
+                  }
+               }
+            }
+         }
       }
 
       private static void foodGrowth()
@@ -139,7 +158,7 @@ namespace Server
       {
          StringBuilder jsonCubes = new StringBuilder();
 
-         lock (mousePoints)
+         lock (mainWorld)
          {
             if (mousePoints.Count > 0)
             {
@@ -161,8 +180,6 @@ namespace Server
 
                   // make sure distace is greater than 1
                   double distance = Math.Sqrt(distX*distX + distY*distY);
-
-                  //TODO: need to handle overlaps and world edges
 
                   if (distance > 1.0)
                   {
@@ -247,7 +264,7 @@ namespace Server
       private static void sendWorld(Socket socket)
       {
          StringBuilder jsonCubes = new StringBuilder();
-         lock (mainWorld.worldCubes)
+         lock (mainWorld)
          {
             foreach (Cube cube in mainWorld.worldCubes.Values)
             {
@@ -312,7 +329,7 @@ namespace Server
          int radius = (int)Math.Ceiling(width / 2.0); // round up
          Cube playerCube = new Cube(rand.Next(radius,mainWorldParams.height - radius), rand.Next(radius, mainWorldParams.width - radius),
                                      randomColor(), uid++, 0, false, playerName, mainWorldParams.playerStartMass);
-         lock (mainWorld.worldCubes)
+         lock (mainWorld)
          {
             mainWorld.addCube(playerCube);
             mainWorld.playerCubes[playerName] = playerCube;
@@ -325,7 +342,7 @@ namespace Server
          Tuple<double, double> coordinates = availablePosition(mainWorldParams.foodValue);
          Cube foodCube = new Cube(coordinates.Item1, coordinates.Item2, randomColor(),
                                    uid++, 0, true, "", mainWorldParams.foodValue);
-         lock (mainWorld.worldCubes)
+         lock (mainWorld)
          {
             mainWorld.addCube(foodCube);
          }
@@ -367,7 +384,7 @@ namespace Server
             if (mainWorld.worldCubes.Count > 0)
             {
                // we have cubes so we'll need to check for overlaps
-               lock (mainWorld.worldCubes)
+               lock (mainWorld)
                {
 
 
@@ -456,7 +473,7 @@ namespace Server
             
 
             // add to our mousePoints dictionary. should we Lock this ??
-            lock (mousePoints)
+            lock (mainWorld)
             {
                mousePoints[playerName] = Tuple.Create(x, y);
             }
@@ -470,7 +487,7 @@ namespace Server
             y = heightRange(int.Parse(match.Groups[2].Value), mainWorld.playerCubes[playerName].Width);
 
             // add to our mousePoints dictionary. should we Lock this ??
-            lock (splitPoints)
+            lock (mainWorld)
             {
                splitPoints[playerName] = Tuple.Create(x, y);
                //splitPoints.Add(playerName, Tuple.Create(x, y));
