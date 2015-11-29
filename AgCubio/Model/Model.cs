@@ -7,6 +7,7 @@ using System.Drawing;
 using Newtonsoft.Json;
 using System.Timers;
 using System.Xml;
+using Microsoft.SqlServer.Server;
 
 namespace AgCubio
 {
@@ -74,6 +75,58 @@ namespace AgCubio
       public Double Width
       {
          get { return getWidth(Mass); }
+      }
+
+      /// <summary>
+      /// Overloaded equals method
+      /// </summary>
+      /// <param name="obj"></param>
+      /// <returns></returns>
+      public override bool Equals(object obj)
+      {
+         Cube cube = obj as Cube;
+
+         if (obj == null)
+            return false;
+
+         if (this.uid == cube.uid)
+            return true;
+         else
+            return false;
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="c1"></param>
+      /// <param name="c2"></param>
+      /// <returns></returns>
+      public static bool operator ==(Cube c1, Cube c2)
+      {
+         if (c1 == null && c2 == null)
+            return true;
+         else
+            return Equals(c1.uid, c2.uid);
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="c1"></param>
+      /// <param name="c2"></param>
+      /// <returns></returns>
+      public static bool operator !=(Cube c1, Cube c2)
+      {
+         return !(c1 == c2);
+      }
+
+      /// <summary>
+      /// HashCode based on unique ID
+      /// </summary>
+      /// <returns></returns>
+      public override int GetHashCode()
+      {
+         return this.uid.GetHashCode();
       }
 
       /// <summary>
