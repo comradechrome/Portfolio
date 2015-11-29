@@ -75,38 +75,50 @@ namespace Server
          heartbeat.Enabled = true;
       
    }
-
+      /// <summary>
+      /// TODO: rather than return JSON strings, it would be better to create a HashSet 
+      /// of cube UID's that need to be updated. We then add a function towards the end 
+      /// that creats the JSON string builder and then removes all cubes of zero mass.
+      /// </summary>
+      /// <param name="sender"></param>
+      /// <param name="e"></param>
       private static void OnHeartbeat(object sender, ElapsedEventArgs e)
       {
          // String Builder to hold all cubes needing an update.
          StringBuilder jsonCubes = new StringBuilder();
+         HashSet<int> modifiedCubes = new HashSet<int>();
          // stop the heartbeat
          heartbeat.Stop();
-         // grow new food if needed
-         growFood();
+         // grow new food if needed - append new fod to the json string builder
+         jsonCubes.Append(growFood());
          // shrink players
          attrition();
-         // food growth
-         foodGrowth();
+         // randomly increate the mass of food cubes
+         randomFoodGrowth();
          // process cube movements
-         jsonCubes.Append(processMoves());
+         processMoves();
          // process cube splits
-         processSplits();
-         // virus mechanics
-         virusUpdates();
-         // players eating food and players
-         absorb();
-         // send world update to all players
-         if(jsonCubes.Length > 0)
+         // TODO: processSplits();
+         // virus mechanics - append any created or destroyed virus cubes to the json string builder
+         // TODO: jsonCubes.Append(virusUpdates());
+         // players eating food and players eating players - append any 0 mass cubes to the json string builder 
+         // and remove them from the world (players and food)
+         // TODO: jsonCubes.Append(absorb());
+         // add all player cubes to the json string builder
+         jsonCubes.Append(addPlayers());
+         // send update to all players of all added and eaten food along will all players
+         if (jsonCubes.Length > 0)
             sendUpdates(jsonCubes);
          //start the heartbeat back up
          heartbeat.Start();
 
       }
 
-      private static void growFood()
+      private static string growFood()
       {
          int foodCount = 0;
+         StringBuilder jsonCubes = new StringBuilder();
+
          lock (mainWorld)
          {
             if (mainWorld.worldCubes.Count > 0)
@@ -119,7 +131,9 @@ namespace Server
             }
          }
          if (foodCount < mainWorldParams.maxFood)
-            GenerateFoodCube();
+            jsonCubes.Append(GenerateFoodCube());
+
+         return jsonCubes.ToString();
       }
 
       /// <summary>
@@ -141,8 +155,8 @@ namespace Server
                   // decrease mass if cube is above minimum mass - 2%/sec if attrition rate is 200
                   if (cube.Value.Mass > acceleratedMass)
                   {
-                     cube.Value.Mass -= cube.Value.Mass*mainWorldParams.attritionRate/
-                                        (10000*mainWorldParams.heartbeatsPerSecond);
+                     cube.Value.Mass -= cube.Value.Mass * mainWorldParams.attritionRate /
+                                        (10000 * mainWorldParams.heartbeatsPerSecond);
                   }
                   else if (cube.Value.Mass > minMass)
                   {
@@ -155,9 +169,25 @@ namespace Server
          }
       }
 
-      private static void foodGrowth()
+      /// <summary>
+      /// 
+      /// </summary>
+      private static string randomFoodGrowth()
       {
-         
+         int randomFactor = 100; // TODO: add this to parameter file
+         int growthFactor = 5;
+         StringBuilder jsonCubes = new StringBuilder("");
+
+         int randomFoodID = rand.Next(1, randomFactor * mainWorldParams.maxFood);
+         lock (mainWorld)
+         {
+            if (mainWorld.worldCubes.ContainsKey(randomFoodID))
+            {
+               mainWorld.worldCubes[randomFoodID].Mass = mainWorld.worldCubes[randomFoodID].Mass*growthFactor;
+               jsonCubes.Append(JsonConvert.SerializeObject(mainWorld.worldCubes[randomFoodID]));
+            }
+         }
+         return jsonCubes.ToString();
       }
 
       private static string processMoves()
@@ -185,7 +215,7 @@ namespace Server
                   double distY = y - cubeY;
 
                   // make sure distace is greater than 1
-                  double distance = Math.Sqrt(distX*distX + distY*distY);
+                  double distance = Math.Sqrt(distX * distX + distY * distY);
 
                   if (distance > 1.0)
                   {
@@ -227,27 +257,73 @@ namespace Server
 
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
       private static void processSplits()
       {
          
       }
 
-      private static void virusUpdates()
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
+      private static string virusUpdates()
       {
-        
+         StringBuilder jsonCubes = new StringBuilder();
+
+         return jsonCubes.ToString();
       }
-      private static void absorb()
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
+      private static string absorb()
       {
-         
+         StringBuilder jsonCubes = new StringBuilder();
+
+         return jsonCubes.ToString();
+      }
+      /// <summary>
+      /// Generate a json string for all player cubes
+      /// </summary>
+      /// <returns></returns>
+      private static string addPlayers()
+      {
+         StringBuilder jsonCubes = new StringBuilder();
+
+         if (mainWorld.playerCubes.Count > 0)
+         {
+            lock (mainWorld)
+            {
+               //append all player cubes to the string builder
+               foreach (var cube in mainWorld.playerCubes)
+               {
+                  jsonCubes.Append(JsonConvert.SerializeObject(cube.Value) + "\n");
+               }
+            }
+         }
+
+         return jsonCubes.ToString();
       }
 
+      /// <summary>
+      /// receives a string in JSON format of all food cubes that have ben updated
+      /// We convert all Player cubes to JSON and append to the passed in string
+      /// </summary>
+      /// <param name="jsonCubes"></param>
       private static void sendUpdates(StringBuilder jsonCubes)
       {
          if (clientStates.Count > 0)
          {
-            foreach (var clients in clientStates)
+            lock (mainWorld)
             {
-               Network.Send(clients.Value.workSocket, jsonCubes.ToString());
+               //send all player and updated food cubes to all clients in JSON format
+               foreach (var clients in clientStates)
+               {
+                  Network.Send(clients.Value.workSocket, jsonCubes.ToString());
+               }
             }
          }
       }
@@ -297,11 +373,11 @@ namespace Server
          state.sb.Clear();
          // save the player name into the State object
          state.ID = playerName;
-
-         clientStates.Add(playerName, state);
+         lock (mainWorld)
+         {
+            clientStates.Add(playerName, state);
+         }
          Console.WriteLine(playerName + " connected to: " + state.workSocket.RemoteEndPoint.ToString());
-
-         //TODO process player name
 
          Network.Send(state.workSocket, GeneratePlayerCube(playerName));
          sendWorld(state.workSocket);
@@ -501,7 +577,7 @@ namespace Server
 
          }
 
-         Console.WriteLine(actionString + "\nX: " + x + " Y: " + y);
+        // Console.WriteLine(actionString + "\nX: " + x + " Y: " + y);
 
          Network.i_want_more_data(state);
       }
