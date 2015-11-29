@@ -122,15 +122,15 @@ namespace Server
             GenerateFoodCube();
       }
 
+      /// <summary>
+      /// At each heartbeat of the game every player cube above the minMass value will lose mass
+      /// below the acceleratedMass value a player will lose 1% per second with an attritionRate of 200
+      /// Above the acceleratedMass value a player will lose 2% per second with an attritionRate of 200
+      /// </summary>
       private static void attrition()
       {
-         //At each heartbeat of the game every player cube should lose some portion of its mass. 
-         //Larger cubes should lose mass faster than smaller cubes. Cubes less than some mass (say 200) should not lose mass. 
-         //Cubes less than some mass (say 800) should only lose mass very slowly. 
-         //Cubes above 800 should rapidly start losing mass. (Again this should be tweakable).
-
          int minMass = 200;
-         int massAttrition = 0;
+         int acceleratedMass = 800;
 
          if (mainWorld.playerCubes.Count > 0)
          {
@@ -138,11 +138,17 @@ namespace Server
             {
                foreach (var cube in mainWorld.playerCubes)
                {
-                  // decrease mass if cube is above minimum mass
-                  if (cube.Value.Mass > minMass)
+                  // decrease mass if cube is above minimum mass - 2%/sec if attrition rate is 200
+                  if (cube.Value.Mass > acceleratedMass)
                   {
-                     massAttrition = (int)((minMass*mainWorldParams.attritionRate)/
-                                     (cube.Value.Mass*mainWorldParams.heartbeatsPerSecond));
+                     cube.Value.Mass -= cube.Value.Mass*mainWorldParams.attritionRate/
+                                        (10000*mainWorldParams.heartbeatsPerSecond);
+                  }
+                  else if (cube.Value.Mass > minMass)
+                  {
+                     // decrease mass by 1%/sec if attrition rate is 200
+                     cube.Value.Mass -= cube.Value.Mass * mainWorldParams.attritionRate /
+                                        (20000 * mainWorldParams.heartbeatsPerSecond);
                   }
                }
             }
