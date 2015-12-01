@@ -84,6 +84,7 @@ namespace AgCubio
                 // Connect to the remote endpoint.
                 ClientStateObject.workSocket.BeginConnect(remoteEP, Connected_to_Server, ClientStateObject);
                 //Receive((IAsyncResult)MainStateObject);
+
             }
             catch (Exception e)
             {

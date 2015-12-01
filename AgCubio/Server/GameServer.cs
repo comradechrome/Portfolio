@@ -234,24 +234,28 @@ namespace Server
                   int x = coordinates.Value.Item1;
                   int y = coordinates.Value.Item2;
 
-                  // get players cube current position and mass
-                  // TODO: when eating another player, we get an exception here
-                  Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
-                  double cubeX = cube.loc_x;
-                  double cubeY = cube.loc_y;
-                  double mass = cube.Mass;
-
-                  // calculate the distance from our mouse to the cube
-                  double distX = x - cubeX;
-                  double distY = y - cubeY;
-
-                  // make sure distace is greater than 1
-                  double distance = Math.Sqrt(distX * distX + distY * distY);
-
-                  if (distance > 1.0)
+                  // get players cube current position and mass - 1st check if player exists
+                  if (mainWorld.playerCubes.ContainsKey(playerName))
                   {
-                     cube.loc_x += distX * smoothingFactor(mass);
-                     cube.loc_y += distY * smoothingFactor(mass);
+
+
+                     Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
+                     double cubeX = cube.loc_x;
+                     double cubeY = cube.loc_y;
+                     double mass = cube.Mass;
+
+                     // calculate the distance from our mouse to the cube
+                     double distX = x - cubeX;
+                     double distY = y - cubeY;
+
+                     // make sure distace is greater than 1
+                     double distance = Math.Sqrt(distX*distX + distY*distY);
+
+                     if (distance > 1.0)
+                     {
+                        cube.loc_x += distX*smoothingFactor(mass);
+                        cube.loc_y += distY*smoothingFactor(mass);
+                     }
                   }
                }
             }
@@ -374,14 +378,14 @@ namespace Server
                               // cube mass is greater than player so we remove player cube
                               else if (cube.Value.Mass > playerCube.Mass)
                               {
-                                 //TODO: once we have figured out splitting, we need to add logic here to figure out if this is last of the players cubes
+                                 //TODO: once we have figured out splitting, we need to add logic here to figure out if this is last of the players cubes - close socket connection
                                  cube.Value.Mass += playerCube.Mass;
                                  playerCube.Mass = 0;
                               }
                               else
                               // cube is smaller (or equal) than the player cube so we will remove the cube
                               {
-                                 // TODO: just as the case above, we need method to determine if this is the last of a players cubes
+                                 // TODO: just as the case above, we need method to determine if this is the last of a players cubes - close socket connection
                                  playerCube.Mass += cube.Value.Mass;
                                  cube.Value.Mass = 0;
                               }
