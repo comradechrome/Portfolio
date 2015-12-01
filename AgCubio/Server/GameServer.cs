@@ -235,6 +235,7 @@ namespace Server
                   int y = coordinates.Value.Item2;
 
                   // get players cube current position and mass
+                  // TODO: when eating another player, we get an exception here
                   Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
                   double cubeX = cube.loc_x;
                   double cubeY = cube.loc_y;
@@ -497,12 +498,13 @@ namespace Server
          {
             clientStates.Add(playerName, state);
          }
-         Console.WriteLine(playerName + " connected to: " + state.workSocket.RemoteEndPoint.ToString());
+         Console.WriteLine(playerName + " connecting from: " + state.workSocket.RemoteEndPoint.ToString());
 
          Network.Send(state.workSocket, GeneratePlayerCube(playerName));
          // absorb and remove any cubes we landed on before sending anything else to client
          absorb();
          removeDead();
+         // send world cubes to client
          sendWorld(state.workSocket);
 
          state.CallbackAction = ActionReceived;
