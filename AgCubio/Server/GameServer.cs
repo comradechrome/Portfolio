@@ -77,9 +77,7 @@ namespace Server
       
    }
       /// <summary>
-      /// TODO: rather than return JSON strings, it would be better to create a HashSet 
-      /// of cube UID's that need to be updated. We then add a function towards the end 
-      /// that creats the JSON string builder and then removes all cubes of zero mass.
+      /// 
       /// </summary>
       /// <param name="sender"></param>
       /// <param name="e"></param>
@@ -91,7 +89,7 @@ namespace Server
          // stop the heartbeat
          heartbeat.Stop();
          // grow new food if needed and append to modifiedCubes set
-         modifiedCubes.UnionWith(createFood());
+         modifiedCubes.Add(createFood());
          // shrink players
          attrition();
          // randomly increate the mass of food cubes
@@ -141,9 +139,8 @@ namespace Server
          return deadCubes;
       }
 
-      private static HashSet<Cube> createFood()
+      private static Cube createFood()
       {
-         HashSet<Cube> newCubes = new HashSet<Cube>();
          int foodCount = 0;
 
          lock (mainWorld)
@@ -158,9 +155,9 @@ namespace Server
             }
          }
          if (foodCount < mainWorldParams.maxFood)
-            newCubes.Add(GenerateFoodCube());
-
-         return newCubes;
+            return GenerateFoodCube();
+         else
+            return null;
       }
 
       /// <summary>
@@ -236,8 +233,6 @@ namespace Server
                   // get players cube current position and mass - 1st check if player exists
                   if (mainWorld.playerCubes.ContainsKey(playerName))
                   {
-
-
                      Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
                      double cubeX = cube.loc_x;
                      double cubeY = cube.loc_y;
@@ -288,7 +283,10 @@ namespace Server
       }
 
       /// <summary>
-      /// 
+      /// TODO: Split cubes when space bar has been hit. create team_id
+      /// TODO: handle cube ID when main cube is eaten and there are additional cubes
+      /// TODO: remove player and disconnect socket when last cube has been eaten (maybe handle in absorb mehtod)
+      /// TODO: gather statisics for PS9 - Play Time, Max mass, mass at death, etc
       /// </summary>
       private static void processSplits()
       {
