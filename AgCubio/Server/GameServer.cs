@@ -92,7 +92,7 @@ namespace Server
          // stop the heartbeat
          heartbeat.Stop();
          // grow new food if needed and append to modifiedCubes set
-         modifiedCubes.UnionWith(growFood());
+         modifiedCubes.UnionWith(createFood());
          // shrink players
          attrition();
          // randomly increate the mass of food cubes
@@ -142,7 +142,7 @@ namespace Server
          return deadCubes;
       }
 
-      private static HashSet<Cube> growFood()
+      private static HashSet<Cube> createFood()
       {
          HashSet<Cube> newCubes = new HashSet<Cube>();
          int foodCount = 0;
@@ -500,6 +500,9 @@ namespace Server
          Console.WriteLine(playerName + " connected to: " + state.workSocket.RemoteEndPoint.ToString());
 
          Network.Send(state.workSocket, GeneratePlayerCube(playerName));
+         // absorb and remove any cubes we landed on before sending anything else to client
+         absorb();
+         removeDead();
          sendWorld(state.workSocket);
 
          state.CallbackAction = ActionReceived;
