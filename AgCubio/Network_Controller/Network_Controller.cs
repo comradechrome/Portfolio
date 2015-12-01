@@ -184,7 +184,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                throw e;
+                Console.WriteLine(e);
             }
 
         }
