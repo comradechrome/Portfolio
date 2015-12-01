@@ -88,7 +88,6 @@ namespace Server
          // String Builder to hold all cubes needing an update.
          StringBuilder jsonCubes = new StringBuilder();
          HashSet<Cube> modifiedCubes = new HashSet<Cube>();
-         HashSet<Cube> tempSet = new HashSet<Cube>();
          // stop the heartbeat
          heartbeat.Stop();
          // grow new food if needed and append to modifiedCubes set
@@ -208,7 +207,7 @@ namespace Server
          int growthFactor = 5;
          Cube foodCube = null;
 
-         int randomFoodID = rand.Next(1, randomFactor * mainWorldParams.maxFood);
+         int randomFoodID = rand.Next(0, randomFactor * mainWorldParams.maxFood);
 
          lock (mainWorld)
          {
