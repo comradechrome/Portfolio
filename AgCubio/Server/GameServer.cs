@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -86,38 +87,65 @@ namespace Server
       {
          // String Builder to hold all cubes needing an update.
          StringBuilder jsonCubes = new StringBuilder();
-         HashSet<int> modifiedCubes = new HashSet<int>();
+         HashSet<Cube> modifiedCubes = new HashSet<Cube>();
+         HashSet<Cube> tempSet = new HashSet<Cube>();
          // stop the heartbeat
          heartbeat.Stop();
-         // grow new food if needed - append new fod to the json string builder
-         jsonCubes.Append(growFood());
+         // grow new food if needed and append to modifiedCubes set
+         modifiedCubes.UnionWith(growFood());
          // shrink players
          attrition();
          // randomly increate the mass of food cubes
-         randomFoodGrowth();
+         modifiedCubes.Add(randomFoodGrowth());
          // process cube movements
          processMoves();
          // process cube splits
          // TODO: processSplits();
          // virus mechanics - append any created or destroyed virus cubes to the json string builder
-         // TODO: jsonCubes.Append(virusUpdates());
-         // players eating food and players eating players - append any 0 mass cubes to the json string builder 
+         // TODO: modifieCubes.UnionWith(spawnVirus());
+         // players eating food and players eating players, players hitting  
          // and remove them from the world (players and food)
-         // TODO: jsonCubes.Append(absorb());
-         // add all player cubes to the json string builder
-         jsonCubes.Append(addPlayers());
+         absorb();
+         // add all player cubes to the modifiedCubes set
+         modifiedCubes.UnionWith(addPlayers());
+         // remove all zero mass cubes
+         modifiedCubes.UnionWith(removeDead());
          // send update to all players of all added and eaten food along will all players
-         if (jsonCubes.Length > 0)
+         foreach (var cube in modifiedCubes)
+         {
+            jsonCubes.Append(JsonConvert.SerializeObject(cube) + "\n");
+         }
             sendUpdates(jsonCubes);
          //start the heartbeat back up
          heartbeat.Start();
 
       }
 
-      private static string growFood()
+      private static HashSet<Cube> removeDead()
       {
+         HashSet<Cube> deadCubes = new HashSet<Cube>();
+
+         lock (mainWorld)
+         {
+            // find all cubes with zero mass
+            foreach (var cube in mainWorld.worldCubes)
+            {
+               if (cube.Value.Mass < 1.0)
+                  deadCubes.Add(cube.Value);
+            }
+            // remove cubes from world
+            foreach (var cube in deadCubes)
+            {
+               mainWorld.removeCube(cube);
+            }
+         }
+         return deadCubes;
+      }
+
+      private static HashSet<Cube> growFood()
+      {
+         HashSet<Cube> newCubes = new HashSet<Cube>();
          int foodCount = 0;
-         StringBuilder jsonCubes = new StringBuilder();
 
          lock (mainWorld)
          {
@@ -131,9 +159,9 @@ namespace Server
             }
          }
          if (foodCount < mainWorldParams.maxFood)
-            jsonCubes.Append(GenerateFoodCube());
+            newCubes.Add(GenerateFoodCube());
 
-         return jsonCubes.ToString();
+         return newCubes;
       }
 
       /// <summary>
@@ -150,18 +178,19 @@ namespace Server
          {
             lock (mainWorld)
             {
-               foreach (var cube in mainWorld.playerCubes)
+               foreach (var player in mainWorld.playerCubes)
                {
+                  Cube cube = mainWorld.worldCubes[player.Value];
                   // decrease mass if cube is above minimum mass - 2%/sec if attrition rate is 200
-                  if (cube.Value.Mass > acceleratedMass)
+                  if (cube.Mass > acceleratedMass)
                   {
-                     cube.Value.Mass -= cube.Value.Mass * mainWorldParams.attritionRate /
+                     cube.Mass -= cube.Mass * mainWorldParams.attritionRate /
                                         (10000 * mainWorldParams.heartbeatsPerSecond);
                   }
-                  else if (cube.Value.Mass > minMass)
+                  else if (cube.Mass > minMass)
                   {
                      // decrease mass by 1%/sec if attrition rate is 200
-                     cube.Value.Mass -= cube.Value.Mass * mainWorldParams.attritionRate /
+                     cube.Mass -= cube.Mass * mainWorldParams.attritionRate /
                                         (20000 * mainWorldParams.heartbeatsPerSecond);
                   }
                }
@@ -170,30 +199,30 @@ namespace Server
       }
 
       /// <summary>
-      /// 
+      /// Randomly genrates a number. If a food cube exists with that number we grow the food
+      /// If growth was successful, we return the food ID, otherwise we return 0
       /// </summary>
-      private static string randomFoodGrowth()
+      private static Cube randomFoodGrowth()
       {
          int randomFactor = 100; // TODO: add this to parameter file
          int growthFactor = 5;
-         StringBuilder jsonCubes = new StringBuilder("");
+         Cube foodCube = null;
 
          int randomFoodID = rand.Next(1, randomFactor * mainWorldParams.maxFood);
+
          lock (mainWorld)
          {
-            if (mainWorld.worldCubes.ContainsKey(randomFoodID))
+            if (mainWorld.worldCubes.ContainsKey(randomFoodID) && mainWorld.worldCubes[randomFoodID].food)
             {
                mainWorld.worldCubes[randomFoodID].Mass = mainWorld.worldCubes[randomFoodID].Mass*growthFactor;
-               jsonCubes.Append(JsonConvert.SerializeObject(mainWorld.worldCubes[randomFoodID]));
-            }
+               foodCube = mainWorld.worldCubes[randomFoodID];
+            }  
          }
-         return jsonCubes.ToString();
+         return foodCube;
       }
 
-      private static string processMoves()
+      private static void processMoves()
       {
-         StringBuilder jsonCubes = new StringBuilder();
-
          lock (mainWorld)
          {
             if (mousePoints.Count > 0)
@@ -206,9 +235,10 @@ namespace Server
                   int y = coordinates.Value.Item2;
 
                   // get players cube current position and mass
-                  double cubeX = mainWorld.playerCubes[playerName].loc_x;
-                  double cubeY = mainWorld.playerCubes[playerName].loc_y;
-                  double mass = mainWorld.playerCubes[playerName].Mass;
+                  Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
+                  double cubeX = cube.loc_x;
+                  double cubeY = cube.loc_y;
+                  double mass = cube.Mass;
 
                   // calculate the distance from our mouse to the cube
                   double distX = x - cubeX;
@@ -219,16 +249,12 @@ namespace Server
 
                   if (distance > 1.0)
                   {
-                     mainWorld.playerCubes[playerName].loc_x += distX * smoothingFactor(mass);
-                     mainWorld.playerCubes[playerName].loc_y += distY * smoothingFactor(mass);
+                     cube.loc_x += distX * smoothingFactor(mass);
+                     cube.loc_y += distY * smoothingFactor(mass);
                   }
-                  jsonCubes.Append(JsonConvert.SerializeObject(mainWorld.playerCubes[playerName]) + "\n");
-
                }
             }
          }
-
-         return jsonCubes.ToString();
       }
 
       /// <summary>
@@ -276,36 +302,130 @@ namespace Server
          return jsonCubes.ToString();
       }
       /// <summary>
+      /// Detect cube collisions and take appropriate action. Cubes that need to be updated are added to the 
+      /// cubes HashSet and are returned to the caller
+      /// </summary>
+      /// <returns></returns>
+      private static void absorb()
+      {
+         HashSet<Cube> cubeUpdates = new HashSet<Cube>();
+         HashSet<Cube> infectedCubes = new HashSet<Cube>();
+
+
+         if (mainWorld.playerCubes.Count > 0)
+         {
+            lock (mainWorld)
+            {
+               foreach (var playerID in mainWorld.playerCubes)
+               {
+                  Cube playerCube = mainWorld.worldCubes[playerID.Value];
+                  // only run loop if player is not dead
+                  if (playerCube.Mass > 0)
+                  {
+                     // get the x,y coordinates of the upper left and lower right of the player cube
+                     Tuple<int,int,int,int> playerCorners = playerCube.corners;
+
+                     int playerCubeX1 = playerCorners.Item1;
+                     int playerCubeY1 = playerCorners.Item2;
+                     int playerCubeX2 = playerCorners.Item3;
+                     int playerCubeY2 = playerCorners.Item4;
+
+                     foreach (var cube in mainWorld.worldCubes)
+                     {
+                        // make sure we're not comparing playerCube to itself
+                        if (cube.Value.uid != playerCube.uid) 
+                        {
+                           // get the x,y coordinates of the upper left and lower right of the checked cube
+                           Tuple<int, int, int, int> cubeCorners = cube.Value.corners;
+
+                           int cubeX1 = cubeCorners.Item1;
+                           int cubeY1 = cubeCorners.Item2;
+                           int cubeX2 = cubeCorners.Item3;
+                           int cubeY2 = cubeCorners.Item4;
+
+                           // this algorithm checks to see if player cube [(x1,y1),(x2,y2)] overlaps current cube [(x1,y1),(x2,y2)]
+                           // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
+
+                           if (!(playerCubeY2 < cubeY1 || playerCubeY1 > cubeY2 ||
+                                 playerCubeX2 < cubeX1 || playerCubeX1 > cubeX2))
+                              // cubes overlap; figure out cube type and take appropriate action
+                           {
+                              // check if encountered cube is food
+                              if (cube.Value.food && cube.Value.Name == "")
+                              {
+                                 playerCube.Mass += cube.Value.Mass;
+                                 cube.Value.Mass = 0;
+                                 cubeUpdates.Add(cube.Value);
+                              }
+                              // check if encountered cube is a virus and larger than the player cube
+                              else if (cube.Value.food && cube.Value.Mass >= playerCube.Mass)
+                              {
+                                 // remove virus and add player to infected HashSet
+                                 cube.Value.Mass = 0;
+                                 infectedCubes.Add(playerCube);
+                              }
+                              // check if cube is a virus and smaller than the player cube
+                              else if (cube.Value.food)
+                              {
+                                 //TODO:  move cube so it doesn't overlap virus
+
+                              }
+                              // cube mass is greater than player so we remove player cube
+                              else if (cube.Value.Mass > playerCube.Mass)
+                              {
+                                 //TODO: once we have figured out splitting, we need to add logic here to figure out if this is last of the players cubes
+                                 cube.Value.Mass += playerCube.Mass;
+                                 playerCube.Mass = 0;
+                              }
+                              else
+                              // cube is smaller (or equal) than the player cube so we will remove the cube
+                              {
+                                 // TODO: just as the case above, we need method to determine if this is the last of a players cubes
+                                 playerCube.Mass += cube.Value.Mass;
+                                 cube.Value.Mass = 0;
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+
+               // TODO: process infected cubes
+               // processInfected(infectedCubes);
+            }
+         }
+      }
+
+      /// <summary>
       /// 
       /// </summary>
       /// <returns></returns>
-      private static string absorb()
+      private static HashSet<Cube> virusCollision()
       {
-         StringBuilder jsonCubes = new StringBuilder();
-
-         return jsonCubes.ToString();
+         throw new NotImplementedException();
       }
+
       /// <summary>
-      /// Generate a json string for all player cubes
+      /// Generate a HashSet of all player cubes
       /// </summary>
       /// <returns></returns>
-      private static string addPlayers()
+      private static HashSet<Cube> addPlayers()
       {
-         StringBuilder jsonCubes = new StringBuilder();
+         HashSet<Cube> playerCubes = new HashSet<Cube>();
 
          if (mainWorld.playerCubes.Count > 0)
          {
             lock (mainWorld)
             {
                //append all player cubes to the string builder
-               foreach (var cube in mainWorld.playerCubes)
+               foreach (var playerID in mainWorld.playerCubes)
                {
-                  jsonCubes.Append(JsonConvert.SerializeObject(cube.Value) + "\n");
+                  playerCubes.Add(mainWorld.worldCubes[playerID.Value]);
                }
             }
          }
 
-         return jsonCubes.ToString();
+         return playerCubes;
       }
 
       /// <summary>
@@ -414,12 +534,16 @@ namespace Server
          lock (mainWorld)
          {
             mainWorld.addCube(playerCube);
-            mainWorld.playerCubes[playerName] = playerCube;
+            mainWorld.playerCubes[playerName] = playerCube.uid;
          }
          return JsonConvert.SerializeObject(playerCube) + "\n";
       }
 
-      private static string GenerateFoodCube()
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
+      private static Cube GenerateFoodCube()
       {
          Tuple<double, double> coordinates = availablePosition(mainWorldParams.foodValue);
          Cube foodCube = new Cube(coordinates.Item1, coordinates.Item2, randomColor(),
@@ -428,7 +552,7 @@ namespace Server
          {
             mainWorld.addCube(foodCube);
          }
-         return JsonConvert.SerializeObject(foodCube) + "\n";
+         return foodCube;
       }
 
       private static int randomColor()
@@ -474,10 +598,13 @@ namespace Server
                   {
                      int cubeRadius = (int) Math.Ceiling(cube.Value.Width/2.0); // round up
                      // get diagonal corners of current cube
-                     int x3 = (int) cube.Value.loc_x - cubeRadius;
-                     int y3 = (int) cube.Value.loc_y - cubeRadius;
-                     int x4 = (int) cube.Value.loc_x + cubeRadius;
-                     int y4 = (int) cube.Value.loc_y + cubeRadius;
+                     // get the x,y coordinates of the upper left and lower right of the player cube
+                     Tuple<int, int, int, int> corners = cube.Value.corners;
+
+                     int x3 = corners.Item1;
+                     int y3 = corners.Item2;
+                     int x4 = corners.Item3;
+                     int y4 = corners.Item4;
 
                      // this algorithm checks to see if new cube [(x1,y1),(x2,y2)] overlaps current cube [(x3,y3),(x4,y4)]
                      // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
@@ -547,13 +674,15 @@ namespace Server
 
          if (actionString.StartsWith("(move"))
          {
+            // 'Groups[1]' is the x coordinate, 'Groups[2]' is the y coordinate
             Regex pattern = new Regex(@"\(move,\s*(\-?\d+),\s*(\-?\d+).*");
             Match match = pattern.Match(actionString);
+            // get the width of player cube
+            double width = mainWorld.worldCubes[mainWorld.playerCubes[playerName]].Width;
             // save x,y values but ensure that they fall within valide ranges
-            x = widthRange(int.Parse(match.Groups[1].Value), mainWorld.playerCubes[playerName].Width);
-            y = heightRange(int.Parse(match.Groups[2].Value), mainWorld.playerCubes[playerName].Width);
+            x = widthRange(int.Parse(match.Groups[1].Value), width);
+            y = heightRange(int.Parse(match.Groups[2].Value), width);
             
-
             // add to our mousePoints dictionary. should we Lock this ??
             lock (mainWorld)
             {
@@ -563,10 +692,15 @@ namespace Server
          }
          else if (actionString.StartsWith("(split"))
          {
+            // TODO: repeat code, can combine this with 'move'
+            // 'Groups[1]' is the x coordinate, 'Groups[2]' is the y coordinate
             Regex pattern = new Regex(@"\(split,\s*(\-?\d+),\s*(\-?\d+).*");
             Match match = pattern.Match(actionString);
-            x = widthRange(int.Parse(match.Groups[1].Value), mainWorld.playerCubes[playerName].Width);
-            y = heightRange(int.Parse(match.Groups[2].Value), mainWorld.playerCubes[playerName].Width);
+            // get the width of player cube
+            double width = mainWorld.worldCubes[mainWorld.playerCubes[playerName]].Width;
+            // save x,y values but ensure that they fall within valide ranges
+            x = widthRange(int.Parse(match.Groups[1].Value), width);
+            y = heightRange(int.Parse(match.Groups[2].Value), width);
 
             // add to our mousePoints dictionary. should we Lock this ??
             lock (mainWorld)

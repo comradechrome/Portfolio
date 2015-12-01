@@ -78,15 +78,38 @@ namespace AgCubio
       }
 
       /// <summary>
+      /// returns the x,y coordinates of the top left and bottom right of the cube (in that order)
+      /// x1,y1 are the top left and x2,y2 are the bottom right
+      /// </summary>
+      public Tuple<int, int, int, int> corners
+      {
+         get
+         {
+            int x1 = (int)(loc_x - Math.Ceiling(Width / 2.0)); // round down to the smallest integer
+            int y1 = (int)(loc_y - Math.Ceiling(Width / 2.0)); // round down to the smallest integer
+            int x2 = (int)(loc_x + Math.Ceiling(Width / 2.0)); // round up to the largest integer
+            int y2 = (int)(loc_y + Math.Ceiling(Width / 2.0)); // round up to the largest integer
+
+            return Tuple.Create(x1, y1, x2, y2);
+}
+      }
+
+
+
+      /// <summary>
       /// Overloaded equals method
       /// </summary>
       /// <param name="obj"></param>
       /// <returns></returns>
       public override bool Equals(object obj)
       {
+         
+         if (obj == null)
+            return false;
+
          Cube cube = obj as Cube;
 
-         if (obj == null)
+         if ((object) cube == null)
             return false;
 
          if (this.uid == cube.uid)
@@ -138,6 +161,8 @@ namespace AgCubio
       {
          return Math.Pow(mass, 0.65);
       }
+
+
 
       /// <summary>
       /// Default contructor of the cube object
@@ -193,9 +218,9 @@ namespace AgCubio
       /// </summary>
       public Dictionary<int, Cube> ourCubes { get; }
       /// <summary>
-      /// Dictionary of payer cubes used by the server
+      /// Dictionary of payer cubes used by the server. Key: PlayerName, Value: Player ID
       /// </summary>
-      public Dictionary<string,Cube> playerCubes { get; }
+      public Dictionary<string,int> playerCubes { get; }
 
 
 
@@ -210,7 +235,7 @@ namespace AgCubio
          this.worldWidth = width;
          worldCubes = new Dictionary<int, Cube>();
          ourCubes = new Dictionary<int, Cube>();
-         playerCubes = new Dictionary<string, Cube>();
+         playerCubes = new Dictionary<string, int>();
       }
 
       /// <summary>
@@ -267,6 +292,8 @@ namespace AgCubio
             worldCubes.Remove(cube.uid);
          if (ourCubes.ContainsKey(cube.uid))
             ourCubes.Remove(cube.uid);
+         if (playerCubes.ContainsKey(cube.Name))
+            playerCubes.Remove(cube.Name);
       }
 
       /// <summary>
