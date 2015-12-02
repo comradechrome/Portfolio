@@ -36,9 +36,10 @@ namespace AgCubio
         /// Callback method
         /// </summary>
         public Action<StateObject> CallbackAction;
-        
-
-
+      /// <summary>
+      /// State Object Identifier
+      /// </summary>
+       public String ID = "";
     }
 
     /// <summary>
@@ -83,10 +84,11 @@ namespace AgCubio
                 // Connect to the remote endpoint.
                 ClientStateObject.workSocket.BeginConnect(remoteEP, Connected_to_Server, ClientStateObject);
                 //Receive((IAsyncResult)MainStateObject);
+
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                //Console.WriteLine(e.ToString());
             }
             return ClientStateObject.workSocket;
         }
@@ -106,7 +108,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+               // Console.WriteLine(e.ToString());
             }
             // run callback defined in view - send Player name to server
             state.CallbackAction(state);
@@ -143,7 +145,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                //Console.WriteLine(e.ToString());
             }
 
         }
@@ -162,7 +164,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+              //  Console.WriteLine(e.ToString());
             }
         }
 
@@ -183,7 +185,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                throw e;
+             //   Console.WriteLine(e);
             }
 
         }
@@ -208,7 +210,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+             //   Console.WriteLine(e.ToString());
             }
         }
 
@@ -258,7 +260,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+             //   Console.WriteLine(e.ToString());
             }
 
         }
