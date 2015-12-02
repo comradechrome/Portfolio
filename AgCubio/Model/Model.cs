@@ -69,6 +69,11 @@ namespace AgCubio
       public int team_id { get; set; }
 
       /// <summary>
+      /// On splits, the momentum will be > 0 and cause the cube to move faster. Default value is 0
+      /// </summary>
+      private int momentum { get; set; } = 0;
+
+      /// <summary>
       /// Width is  mass ^ .65 which gets us close to the supplied client
       /// Width is a read only property
       /// </summary>
@@ -162,6 +167,22 @@ namespace AgCubio
          return Math.Pow(mass, 0.65);
       }
 
+      /// <summary>
+      /// Gets the momentum of a cube
+      /// </summary>
+      /// <returns></returns>
+      public int getMomentum()
+      {
+         return this.momentum;
+      }
+      /// <summary>
+      /// Sets the momentum of a cube
+      /// </summary>
+      /// <param name="momentum"></param>
+      public void setMomentum(int momentum)
+      {
+         this.momentum = momentum;
+      }
 
 
       /// <summary>

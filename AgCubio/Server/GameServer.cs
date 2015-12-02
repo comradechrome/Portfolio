@@ -311,8 +311,8 @@ namespace Server
 
                      if (distance > 1.0)
                      {
-                        cube.loc_x += distX*smoothingFactor(mass);
-                        cube.loc_y += distY*smoothingFactor(mass);
+                        cube.loc_x += distX*smoothingFactor(mass) + cube.getMomentum();
+                        cube.loc_y += distY*smoothingFactor(mass) + cube.getMomentum();
                      }
                   }
                }
