@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DONE.txt" />
+    <Content Include="Libraries\world_parameters.xml" />
     <Content Include="README.txt" />
   </ItemGroup>
   <ItemGroup>

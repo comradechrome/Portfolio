@@ -126,20 +126,18 @@ namespace Server
       private static HashSet<Cube> spawnVirus()
       {
          HashSet<Cube> cubes = new HashSet<Cube>();
-         double virusProbability = 5; // 5% chance per second of virus generation TODO: this should be in parameters file
-         int virusMass = 800; //TODO: this should be in parameters file
          Cube cube = null;
          lock (mainWorld)
          {
-            if (rand.Next(10000) < virusProbability*100/mainWorldParams.heartbeatsPerSecond)
+            if (rand.Next(10000) < mainWorldParams.virusProbability *100/mainWorldParams.heartbeatsPerSecond)
          {
             
-               int newRadius = (int) Math.Ceiling(Cube.getWidth(virusMass)/2.0); // round up
+               int newRadius = (int) Math.Ceiling(Cube.getWidth(mainWorldParams.virusMass)/2.0); // round up
                Tuple<bool, int, int> results = tryPosition(newRadius, false);
                if (results.Item1)
                {
                   int green = Color.LawnGreen.ToArgb();
-                  cube = new Cube(results.Item2, results.Item3, green, uid++, 0, true, virusName(7), virusMass);
+                  cube = new Cube(results.Item2, results.Item3, green, uid++, 0, true, virusName(7), mainWorldParams.virusMass);
                   mainWorld.addCube(cube);
                   mainWorld.virusList.Add(cube.uid);
                   cubes.Add(cube);
@@ -225,14 +223,14 @@ namespace Server
       }
 
       /// <summary>
-      /// At each heartbeat of the game every player cube above the minMass value will lose mass
+      /// At each heartbeat of the game every player cube above the minMass value will lose mass.
+      /// Minumum mass is 2 times the minSplitMass
       /// below the acceleratedMass value a player will lose 1% per second with an attritionRate of 200
       /// Above the acceleratedMass value a player will lose 2% per second with an attritionRate of 200
       /// </summary>
       private static void attrition()
       {
-         int minMass = 200;
-         int acceleratedMass = 800;
+         int minMass = 2 * mainWorldParams.minSplitMass;
 
          if (mainWorld.playerCubes.Count > 0)
          {
@@ -242,7 +240,7 @@ namespace Server
                {
                   Cube cube = mainWorld.worldCubes[player.Value];
                   // decrease mass if cube is above minimum mass - 2%/sec if attrition rate is 200
-                  if (cube.Mass > acceleratedMass)
+                  if (cube.Mass > mainWorldParams.acceleratedAttrition)
                   {
                      cube.Mass -= cube.Mass * mainWorldParams.attritionRate /
                                         (10000 * mainWorldParams.heartbeatsPerSecond);
@@ -264,17 +262,15 @@ namespace Server
       /// </summary>
       private static Cube randomFoodGrowth()
       {
-         int randomFactor = 100; // TODO: add this to parameter file
-         int growthFactor = 5;
          Cube foodCube = null;
 
-         int randomFoodID = rand.Next(0, randomFactor * mainWorldParams.maxFood);
+         int randomFoodID = rand.Next(0, mainWorldParams.foodRandomFactor * mainWorldParams.maxFood);
 
          lock (mainWorld)
          {
             if (mainWorld.worldCubes.ContainsKey(randomFoodID) && mainWorld.worldCubes[randomFoodID].food)
             {
-               mainWorld.worldCubes[randomFoodID].Mass = mainWorld.worldCubes[randomFoodID].Mass*growthFactor;
+               mainWorld.worldCubes[randomFoodID].Mass = mainWorld.worldCubes[randomFoodID].Mass* mainWorldParams.foodGrowthFactor;
                foodCube = mainWorld.worldCubes[randomFoodID];
             }  
          }
@@ -332,8 +328,11 @@ namespace Server
       /// <returns></returns>
       private static double smoothingFactor(double mass)
       {
-         double scaleConst = .00125;
-         double smoothingIncrement = 1500;
+         // this adjusts the amount of speed factor
+         double scaleConst = mainWorldParams.scaleConst;
+         // this adjusts how much the factor affects speed as mass increases
+         double smoothingIncrement = (double)mainWorldParams.smoothingIncrement;
+
          double minFactor = 3 * scaleConst + mainWorldParams.lowSpeed * scaleConst;
          double maxFactor = 3 * scaleConst + mainWorldParams.topSpeed * scaleConst;
 
@@ -377,7 +376,6 @@ namespace Server
       {
          HashSet<Cube> cubeUpdates = new HashSet<Cube>();
          HashSet<Cube> infectedCubes = new HashSet<Cube>();
-         double allowedOverlap = .25; // TODO: add this to paramerter file. The allowed cube overlap before a cube is 'eaten'
 
 
          if (mainWorld.playerCubes.Count > 0)
@@ -409,7 +407,7 @@ namespace Server
                         {
                            // get the x,y coordinates of the upper left and lower right of the checked cube
                            Tuple<int, int, int, int> cubeCorners = cube.Value.corners;
-                           double overlap = cube.Value.Width * allowedOverlap;
+                           double overlap = cube.Value.Width * mainWorldParams.allowedOverlap;
 
                            int cubeX1 = cubeCorners.Item1 + (int)overlap;
                            int cubeY1 = cubeCorners.Item2 + (int)overlap;
@@ -596,23 +594,6 @@ namespace Server
          state.CallbackAction = ActionReceived;
 
          Network.i_want_more_data(state);
-         
-
-         //    // create cubes in world
-         //    lock (mainWorld)
-         //    {
-         //        mainWorld.processCube(line);
-         //    }
-
-         //    hasCubes = true;
-
-
-         //}
-         //isConnected = true;
-
-         //// request more cube data from server
-
-         //worldSocket = state.workSocket;
 
       }
 
@@ -743,7 +724,7 @@ namespace Server
       /// <returns></returns>
       public static int widthRange(int xValue,double width)
       {
-         int radius = (int)(width / 4); // if we set this to 'width / 2' cube is too slo when it gets near the edges
+         int radius = (int)(width / 4); // if we set this to 'width / 2' cube is too slow when it gets near the edges
          if (xValue < radius) { return radius; }
          if (xValue > mainWorldParams.width - radius) { return mainWorldParams.width - radius; }
          return xValue;
@@ -757,7 +738,7 @@ namespace Server
       /// <returns></returns>
       public static int heightRange(int yValue,double width)
       {
-         int radius = (int)(width / 4); // if we set this to 'width / 2' cube is too slo when it gets near the edges
+         int radius = (int)(width / 4); // if we set this to 'width / 2' cube is too slow when it gets near the edges
          if (yValue < radius) { return radius; }
          if (yValue > mainWorldParams.height - radius) { return mainWorldParams.height - radius; }
          return yValue;

@@ -447,6 +447,32 @@ namespace AgCubio
       /// 
       /// </summary>
       public int heartbeatsPerSecond { get; } = 25;
+      /// <summary>
+      /// The mass of a virus
+      /// </summary>
+      public int virusMass { get; } = 800;
+      /// <summary>
+      /// percent per second chance that a virus will be generated
+      /// </summary>
+      public int virusProbability { get; } = 5;
+
+      public int acceleratedAttrition { get; } = 800;
+      public int foodRandomFactor { get; } = 100;
+      public int foodGrowthFactor { get; } = 5;
+      /// <summary>
+      /// the percentage of cube overlap allowed before a cube can be 'eaten'
+      /// </summary>
+      public double allowedOverlap { get; } = .25;
+
+      /// <summary>
+      /// this adjusts the amount of speed factor
+      /// </summary>
+      public double scaleConst { get; } = .00125;
+
+      /// <summary>
+      /// this adjusts how much the factor affects speed as mass increases
+      /// </summary>
+      public int smoothingIncrement { get; } = 1500;
 
       /// <summary>
       /// Default World Parameters construtor
