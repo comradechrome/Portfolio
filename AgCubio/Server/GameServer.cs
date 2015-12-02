@@ -69,7 +69,7 @@ namespace Server
       {
     
          // Create a timer based on the heartbeatsPerSecond parameter
-         heartbeat = new Timer(1000.0/mainWorldParams.heartbeatsPerSecond);
+            heartbeat = new Timer(1000.0 / mainWorldParams.heartbeatsPerSecond);
          // Hook up the Elapsed event for the timer. 
          heartbeat.Elapsed += OnHeartbeat;
          heartbeat.AutoReset = true;
@@ -97,6 +97,7 @@ namespace Server
          // process cube movements
          processMoves();
          // process cube splits
+            modifiedCubes.UnionWith(processSplits());
          // TODO: processSplits();
          // virus mechanics - append any created or destroyed virus cubes to the json string builder
          modifiedCubes.UnionWith(spawnVirus());
@@ -161,7 +162,7 @@ namespace Server
       {
          var chars = "~@#$%^&*+-:;<>?}{[]|";
          // Name format is 'length' random characters + VIRUS + 'length' random characters (in reverse)
-         var stringChars = new char[length*2+5];
+            var stringChars = new char[length * 2 + 5];
          var random = new Random();
 
          for (int i = 0; i < length; i++)
@@ -171,10 +172,10 @@ namespace Server
          }
 
          stringChars[length] = 'V';
-         stringChars[length+1] = 'I';
-         stringChars[length+2] = 'R';
-         stringChars[length+3] = 'U';
-         stringChars[length+4] = 'S';
+            stringChars[length + 1] = 'I';
+            stringChars[length + 2] = 'R';
+            stringChars[length + 3] = 'U';
+            stringChars[length + 4] = 'S';
 
 
          var name = new String(stringChars);
@@ -307,19 +308,19 @@ namespace Server
                      // move our cube and any 'team' cubes if any
                      foreach (Cube cube in teamCubes)
                      {
-                        double cubeX = cube.loc_x;
-                        double cubeY = cube.loc_y;
-                        double mass = cube.Mass;
+                     double cubeX = cube.loc_x;
+                     double cubeY = cube.loc_y;
+                     double mass = cube.Mass;
 
-                        // calculate the distance from our mouse to the cube
-                        double distX = x - cubeX;
-                        double distY = y - cubeY;
+                     // calculate the distance from our mouse to the cube
+                     double distX = x - cubeX;
+                     double distY = y - cubeY;
 
-                        // make sure distace is greater than 1
-                        double distance = Math.Sqrt(distX * distX + distY * distY);
+                     // make sure distace is greater than 1
+                            double distance = Math.Sqrt(distX * distX + distY * distY);
 
-                        if (distance > 1.0)
-                        {
+                     if (distance > 1.0)
+                     {
                            cube.loc_x += distX * smoothingFactor(mass) + cube.getMomentum();
                            cube.loc_y += distY * smoothingFactor(mass) + cube.getMomentum();
                         }
@@ -365,9 +366,35 @@ namespace Server
       /// TODO: remove player and disconnect socket when last cube has been eaten (maybe handle in absorb mehtod)
       /// TODO: gather statisics for PS9 - Play Time, Max mass, mass at death, etc
       /// </summary>
-      private static void processSplits()
+        private static HashSet<Cube> processSplits()
       {
+            HashSet<Cube> updatedCubes = new HashSet<Cube>();
+            if (splitPoints.Count > 0)
+            {
+                lock (mainWorld)
+                {
+                    foreach (string name in splitPoints.Keys)
+                    {
+                        Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
+                        double newWidth = Math.Sqrt(originalCube.Mass / 2);
+                        Cube newCube = new Cube(originalCube.loc_x + newWidth, originalCube.loc_y + newWidth,
+                                                    originalCube.argb_color, ++uid, originalCube.uid, false, name, originalCube.Mass / 2);
+                        originalCube.Mass /= 2;
+                        originalCube.loc_x -= newWidth;
+                        originalCube.loc_y -= newWidth;
+                        //lock (mainWorld)
+                        //{
+                        //    mainWorld.addCube(newCube);
+                        //    mainWorld.playerCubes[name] = newCube.uid;
+                        //}
+                        updatedCubes.Add(newCube);
+                        updatedCubes.Add(originalCube);
+                    }
+                    splitPoints = new Dictionary<string, Tuple<int, int>>();
+                }
+            }
          
+            return updatedCubes;
       }
 
       /// <summary>
@@ -407,7 +434,7 @@ namespace Server
                   if (playerCube.Mass > 0)
                   {
                      // get the x,y coordinates of the upper left and lower right of the player/virus cube
-                     Tuple<int,int,int,int> playerCorners = playerCube.corners;
+                            Tuple<int, int, int, int> playerCorners = playerCube.corners;
 
                      int playerCubeX1 = playerCorners.Item1;
                      int playerCubeY1 = playerCorners.Item2;
@@ -615,7 +642,7 @@ namespace Server
       {
          double width = Cube.getWidth(mainWorldParams.playerStartMass);
          int radius = (int)Math.Ceiling(width / 2.0); // round up
-         Cube playerCube = new Cube(rand.Next(radius,mainWorldParams.height - radius), rand.Next(radius, mainWorldParams.width - radius),
+            Cube playerCube = new Cube(rand.Next(radius, mainWorldParams.height - radius), rand.Next(radius, mainWorldParams.width - radius),
                                      randomColor(), uid++, 0, false, playerName, mainWorldParams.playerStartMass);
          lock (mainWorld)
          {
@@ -653,19 +680,19 @@ namespace Server
       /// </summary>
       /// <param name="width"></param>
       /// <returns></returns>
-      public static Tuple<double,double> availablePosition(double mass)
+        public static Tuple<double, double> availablePosition(double mass)
       {
          double width = Cube.getWidth(mass);
          int x = 0;
          int y = 0;
          bool available = false;
-         int newRadius = (int)Math.Ceiling(width/2.0); // round up
+            int newRadius = (int)Math.Ceiling(width / 2.0); // round up
          
 
 
          while (!available)
          {
-            Tuple<bool, int, int> results = tryPosition(newRadius,true);
+                Tuple<bool, int, int> results = tryPosition(newRadius, true);
             available = results.Item1;
             x = results.Item2;
             y = results.Item3;
@@ -681,7 +708,7 @@ namespace Server
       /// <param name="radius"></param>
       /// <param name="foodFlag"></param>
       /// <returns></returns>
-      public static Tuple<bool,int,int> tryPosition(int radius, bool foodFlag)
+        public static Tuple<bool, int, int> tryPosition(int radius, bool foodFlag)
       {
          // generate random coordiantes that fall withing the world. Then generate the cube diagonal points.
          int x = rand.Next(radius, mainWorldParams.height - radius);
@@ -736,7 +763,7 @@ namespace Server
       /// <param name="xValue"></param>
       /// <param name="width"></param>
       /// <returns></returns>
-      public static int widthRange(int xValue,double width)
+        public static int widthRange(int xValue, double width)
       {
          int radius = (int)(width / 4); // if we set this to 'width / 2' cube is too slow when it gets near the edges
          if (xValue < radius) { return radius; }
@@ -750,7 +777,7 @@ namespace Server
       /// <param name="yValue"></param>
       /// <param name="width"></param>
       /// <returns></returns>
-      public static int heightRange(int yValue,double width)
+        public static int heightRange(int yValue, double width)
       {
          int radius = (int)(width / 4); // if we set this to 'width / 2' cube is too slow when it gets near the edges
          if (yValue < radius) { return radius; }
@@ -804,8 +831,8 @@ namespace Server
             {
                splitPoints[playerName] = Tuple.Create(x, y);
                //splitPoints.Add(playerName, Tuple.Create(x, y));
+                    Console.WriteLine(playerName + splitPoints[playerName].ToString());
             }
-
          }
 
         // Console.WriteLine(actionString + "\nX: " + x + " Y: " + y);

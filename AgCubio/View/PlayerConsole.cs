@@ -301,9 +301,7 @@ namespace AgCubio
                 textBox_food.Text = "food: " + food.ToString();
                 textBox_fps.Text = "fps: " + CalcFrameRate();
                 refreshTextBoxes();
-
             }
-
         }
 
         /// <summary>
@@ -506,7 +504,7 @@ namespace AgCubio
         //{
         //   this.Invoke(new Action(() =>
         //   {
-        //      MessageBox.Show("AgCubio version 0.1\nCreated by team ellefsakishev");
+        //      MessageBox.Show("AgCubio version 0.1\nCreated by + ellefsakishev");
         //   }));
         //}
     }
