@@ -287,28 +287,42 @@ namespace Server
                {
                   // player name and mouse coordinates
                   string playerName = coordinates.Key;
+                  int playerID = mainWorld.playerCubes[playerName];
                   int x = coordinates.Value.Item1;
                   int y = coordinates.Value.Item2;
+
 
                   // get players cube current position and mass - 1st check if player exists
                   if (mainWorld.playerCubes.ContainsKey(playerName))
                   {
-                     Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
-                     double cubeX = cube.loc_x;
-                     double cubeY = cube.loc_y;
-                     double mass = cube.Mass;
-
-                     // calculate the distance from our mouse to the cube
-                     double distX = x - cubeX;
-                     double distY = y - cubeY;
-
-                     // make sure distace is greater than 1
-                     double distance = Math.Sqrt(distX*distX + distY*distY);
-
-                     if (distance > 1.0)
+                     HashSet<Cube> teamCubes = new HashSet<Cube>();
+                     // Add the player main cube to our hashSet
+                     teamCubes.Add(mainWorld.worldCubes[playerID]);
+                     // itterate through the world and find any cubes with a matching team id
+                     foreach (var cube in mainWorld.worldCubes)
                      {
-                        cube.loc_x += distX*smoothingFactor(mass) + cube.getMomentum();
-                        cube.loc_y += distY*smoothingFactor(mass) + cube.getMomentum();
+                        if (cube.Value.team_id == playerID)
+                           teamCubes.Add(cube.Value);
+                     }
+                     // move our cube and any 'team' cubes if any
+                     foreach (Cube cube in teamCubes)
+                     {
+                        double cubeX = cube.loc_x;
+                        double cubeY = cube.loc_y;
+                        double mass = cube.Mass;
+
+                        // calculate the distance from our mouse to the cube
+                        double distX = x - cubeX;
+                        double distY = y - cubeY;
+
+                        // make sure distace is greater than 1
+                        double distance = Math.Sqrt(distX * distX + distY * distY);
+
+                        if (distance > 1.0)
+                        {
+                           cube.loc_x += distX * smoothingFactor(mass) + cube.getMomentum();
+                           cube.loc_y += distY * smoothingFactor(mass) + cube.getMomentum();
+                        }
                      }
                   }
                }
