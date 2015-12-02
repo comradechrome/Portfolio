@@ -88,7 +88,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                //Console.WriteLine(e.ToString());
             }
             return ClientStateObject.workSocket;
         }
@@ -108,7 +108,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+               // Console.WriteLine(e.ToString());
             }
             // run callback defined in view - send Player name to server
             state.CallbackAction(state);
@@ -145,7 +145,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                //Console.WriteLine(e.ToString());
             }
 
         }
@@ -164,7 +164,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+              //  Console.WriteLine(e.ToString());
             }
         }
 
@@ -185,7 +185,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+             //   Console.WriteLine(e);
             }
 
         }
@@ -210,7 +210,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+             //   Console.WriteLine(e.ToString());
             }
         }
 
@@ -260,7 +260,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+             //   Console.WriteLine(e.ToString());
             }
 
         }
