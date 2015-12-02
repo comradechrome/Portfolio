@@ -69,6 +69,11 @@ namespace AgCubio
       public int team_id { get; set; }
 
       /// <summary>
+      /// On splits, the momentum will be > 0 and cause the cube to move faster. Default value is 0
+      /// </summary>
+      private int momentum { get; set; } = 0;
+
+      /// <summary>
       /// Width is  mass ^ .65 which gets us close to the supplied client
       /// Width is a read only property
       /// </summary>
@@ -162,6 +167,22 @@ namespace AgCubio
          return Math.Sqrt(mass);
       }
 
+      /// <summary>
+      /// Gets the momentum of a cube
+      /// </summary>
+      /// <returns></returns>
+      public int getMomentum()
+      {
+         return this.momentum;
+      }
+      /// <summary>
+      /// Sets the momentum of a cube
+      /// </summary>
+      /// <param name="momentum"></param>
+      public void setMomentum(int momentum)
+      {
+         this.momentum = momentum;
+      }
 
 
       /// <summary>
@@ -436,6 +457,32 @@ namespace AgCubio
       /// 
       /// </summary>
       public int heartbeatsPerSecond { get; } = 25;
+      /// <summary>
+      /// The mass of a virus
+      /// </summary>
+      public int virusMass { get; } = 800;
+      /// <summary>
+      /// percent per second chance that a virus will be generated
+      /// </summary>
+      public int virusProbability { get; } = 5;
+
+      public int acceleratedAttrition { get; } = 800;
+      public int foodRandomFactor { get; } = 100;
+      public int foodGrowthFactor { get; } = 5;
+      /// <summary>
+      /// the percentage of cube overlap allowed before a cube can be 'eaten'
+      /// </summary>
+      public double allowedOverlap { get; } = .25;
+
+      /// <summary>
+      /// this adjusts the amount of speed factor
+      /// </summary>
+      public double scaleConst { get; } = .00125;
+
+      /// <summary>
+      /// this adjusts how much the factor affects speed as mass increases
+      /// </summary>
+      public int smoothingIncrement { get; } = 1500;
 
       /// <summary>
       /// Default World Parameters construtor
