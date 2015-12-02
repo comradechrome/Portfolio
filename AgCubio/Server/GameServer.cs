@@ -384,11 +384,11 @@ namespace Server
                         originalCube.Mass /= 2;
                         originalCube.loc_x -= newWidth;
                         originalCube.loc_y -= newWidth;
-                        //lock (mainWorld)
-                        //{
-                        //    mainWorld.addCube(newCube);
-                        //    mainWorld.playerCubes[name] = newCube.uid;
-                        //}
+                        lock (mainWorld)
+                        {
+                            mainWorld.addCube(newCube);
+                            mainWorld.playerCubes[name] = newCube.uid;
+                        }
                         updatedCubes.Add(newCube);
                         updatedCubes.Add(originalCube);
                     }
