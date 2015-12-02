@@ -99,7 +99,7 @@ namespace Server
          // process cube splits
          // TODO: processSplits();
          // virus mechanics - append any created or destroyed virus cubes to the json string builder
-         //modifiedCubes.Add(spawnVirus());
+         modifiedCubes.UnionWith(spawnVirus());
          // players eating food and players eating players, players hitting  
          // and remove them from the world (players and food)
          absorb();
@@ -117,21 +117,75 @@ namespace Server
          heartbeat.Start();
 
       }
-
-      private static Cube spawnVirus()
+      /// <summary>
+      /// Every heartbeat we'll 'roll the dice' - if we are lucky we'll attempt to create a virus
+      /// Chances of creation are determined by the virusProbably parameter
+      /// If we find available spot, we create virus (the more empty spaces the higher the probability)
+      /// </summary>
+      /// <returns></returns>
+      private static HashSet<Cube> spawnVirus()
       {
-         //create green color
-         //random guess > certain number we try and generate cube
-         //if we find available spot, we create virus (the more empty spaces the higher probability
-         Color green = Color.LawnGreen;
-         return null;
+         HashSet<Cube> cubes = new HashSet<Cube>();
+         double virusProbability = 5; // 5% chance per second of virus generation TODO: this should be in parameters file
+         int virusMass = 800; //TODO: this should be in parameters file
+         Cube cube = null;
+         lock (mainWorld)
+         {
+            if (rand.Next(10000) < virusProbability*100/mainWorldParams.heartbeatsPerSecond)
+         {
+            
+               int newRadius = (int) Math.Ceiling(Cube.getWidth(virusMass)/2.0); // round up
+               Tuple<bool, int, int> results = tryPosition(newRadius, false);
+               if (results.Item1)
+               {
+                  int green = Color.LawnGreen.ToArgb();
+                  cube = new Cube(results.Item2, results.Item3, green, uid++, 0, true, virusName(7), virusMass);
+                  mainWorld.addCube(cube);
+                  mainWorld.virusList.Add(cube.uid);
+                  cubes.Add(cube);
+               }
+            }
+            foreach (var virusID in mainWorld.virusList)
+            {
+               mainWorld.worldCubes[virusID].Name = virusName(7);
+               cubes.Add(mainWorld.worldCubes[virusID]);
+            }
 
+         }
+         return cubes;
+      }
+
+      /// <summary>
+      /// Generates a random virus name 'length' special characters long
+      /// </summary>
+      /// <returns></returns>
+      private static string virusName(int length)
+      {
+         var chars = "~@#$%^&*+-:;<>?}{[]|";
+         // Name format is 'length' random characters + VIRUS + 'length' random characters (in reverse)
+         var stringChars = new char[length*2+5];
+         var random = new Random();
+
+         for (int i = 0; i < length; i++)
+         {
+            stringChars[i] = chars[random.Next(chars.Length)];
+            stringChars[stringChars.Length - i - 1] = stringChars[i];
+         }
+
+         stringChars[length] = 'V';
+         stringChars[length+1] = 'I';
+         stringChars[length+2] = 'R';
+         stringChars[length+3] = 'U';
+         stringChars[length+4] = 'S';
+
+
+         var name = new String(stringChars);
+         return name;
       }
 
       private static HashSet<Cube> removeDead()
       {
          HashSet<Cube> deadCubes = new HashSet<Cube>();
-
          lock (mainWorld)
          {
             // find all cubes with zero mass
@@ -314,7 +368,8 @@ namespace Server
          return jsonCubes.ToString();
       }
       /// <summary>
-      /// Detect cube collisions and take appropriate action. Cubes that need to be updated are added to the 
+      /// Itterates through all Player and virus cubes.
+      /// Detects cube collisions and takes appropriate action. Cubes that need to be updated are added to the 
       /// cubes HashSet and are returned to the caller
       /// </summary>
       /// <returns></returns>
@@ -329,13 +384,17 @@ namespace Server
          {
             lock (mainWorld)
             {
-               foreach (var playerID in mainWorld.playerCubes)
+               // create a list of all Player and virus ID's so we can itterate through them
+               HashSet<int> playersViruses = new HashSet<int>(mainWorld.playerCubes.Values);
+               playersViruses.UnionWith(mainWorld.virusList);
+
+               foreach (var cubeID in playersViruses)
                {
-                  Cube playerCube = mainWorld.worldCubes[playerID.Value];
-                  // only run loop if player is not dead
+                  Cube playerCube = mainWorld.worldCubes[cubeID];
+                  // only run loop if player/virus is not dead
                   if (playerCube.Mass > 0)
                   {
-                     // get the x,y coordinates of the upper left and lower right of the player cube
+                     // get the x,y coordinates of the upper left and lower right of the player/virus cube
                      Tuple<int,int,int,int> playerCorners = playerCube.corners;
 
                      int playerCubeX1 = playerCorners.Item1;
@@ -378,15 +437,15 @@ namespace Server
                                  cube.Value.Mass = 0;
                                  infectedCubes.Add(playerCube);
                               }
-                              // cube mass is greater than player so we remove player cube
-                              else if (cube.Value.Mass > playerCube.Mass)
+                              // cube mass is greater than player so we remove player cube (don't check if we're a virus)
+                              else if (cube.Value.Mass > playerCube.Mass && !playerCube.food)
                               {
                                  cube.Value.Mass += playerCube.Mass;
                                  killPlayer(playerCube);
                                  playerCube.Mass = 0;
                               }
-                              else
-                              // cube is smaller (or equal) than the player cube so we will remove the cube
+                              else if (!playerCube.food)
+                              // cube is smaller (or equal) than the player cube so we will remove the cube (and we're not a virus)
                               {
                                  playerCube.Mass += cube.Value.Mass;
                                  killPlayer(cube.Value);
@@ -404,7 +463,11 @@ namespace Server
 
       private static void processInfected(HashSet<Cube> infectedCubes)
       {
-         // TODO: process infected cubes
+         foreach (var cube in infectedCubes)
+         {
+            Console.WriteLine(cube.Name + " was infected!!");
+         }
+         
       }
 
       private static void killPlayer(Cube cube)
@@ -412,6 +475,12 @@ namespace Server
          // TODO: once we have figured out splitting, we need to add logic here to figure out if this is last of the players cubes - close socket connection
          // TODO: just as the case above, we need method to determine if this is the last of a players cubes - close socket connection
 
+         if (cube.team_id == 0)
+         {
+           // Network.Send(clientStates[cube.Name].workSocket,"");
+          //  Network.Stop(clientStates[cube.Name].workSocket);
+         }
+         
       }
 
       /// <summary>
@@ -596,12 +665,12 @@ namespace Server
          int y = 0;
          bool available = false;
          int newRadius = (int)Math.Ceiling(width/2.0); // round up
-         Tuple<bool, int, int> results;
+         
 
 
          while (!available)
          {
-            results = tryPosition(newRadius);
+            Tuple<bool, int, int> results = tryPosition(newRadius,true);
             available = results.Item1;
             x = results.Item2;
             y = results.Item3;
@@ -610,7 +679,14 @@ namespace Server
          return Tuple.Create((double)x, (double)y);
       }
 
-      public static Tuple<bool,int,int> tryPosition(int radius)
+      /// <summary>
+      /// generates a random x,y coordinate. With a supplied radius, checks if there is an overlap.
+      /// foodFlag determines if we cehck for overlapping food or not. True: check food, False: only check players
+      /// </summary>
+      /// <param name="radius"></param>
+      /// <param name="foodFlag"></param>
+      /// <returns></returns>
+      public static Tuple<bool,int,int> tryPosition(int radius, bool foodFlag)
       {
          // generate random coordiantes that fall withing the world. Then generate the cube diagonal points.
          int x = rand.Next(radius, mainWorldParams.height - radius);
@@ -624,13 +700,19 @@ namespace Server
 
          if (mainWorld.worldCubes.Count > 0)
          {
+
             // we have cubes so we'll need to check for overlaps
             lock (mainWorld)
             {
-
-
                foreach (var cube in mainWorld.worldCubes)
                {
+                  // don't check food cubes
+                  if (!foodFlag)
+                  {
+                     if (cube.Value.food)
+                        break;
+                  }
+
                   Tuple<int, int, int, int> corners = cube.Value.corners;
 
                   int x3 = corners.Item1;

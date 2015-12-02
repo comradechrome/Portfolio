@@ -47,7 +47,7 @@ namespace AgCubio
       public int uid { get; }
 
       /// <summary>
-      /// true = Food
+      /// true = Food (or if it has a name, it's a virus)
       /// false = Player
       /// </summary>
       public bool food { get; }
@@ -55,7 +55,7 @@ namespace AgCubio
       /// <summary>
       /// The name on the cube - if food, the name will be an empty string
       /// </summary>
-      public String Name { get; }
+      public String Name { get; set; }
 
 
       /// <summary>
@@ -222,6 +222,8 @@ namespace AgCubio
       /// </summary>
       public Dictionary<string,int> playerCubes { get; }
 
+      public HashSet<int> virusList { get; set; } 
+
 
 
       /// <summary>
@@ -236,6 +238,7 @@ namespace AgCubio
          worldCubes = new Dictionary<int, Cube>();
          ourCubes = new Dictionary<int, Cube>();
          playerCubes = new Dictionary<string, int>();
+         virusList = new HashSet<int>();
       }
 
       /// <summary>
@@ -270,6 +273,7 @@ namespace AgCubio
             worldCubes[cube.uid].Mass = cube.Mass;
             worldCubes[cube.uid].loc_x = cube.loc_x;
             worldCubes[cube.uid].loc_y = cube.loc_y;
+            worldCubes[cube.uid].Name = cube.Name;
          }
          // check if ourCubes contains cube, if so modify it
          if (ourCubes.ContainsKey(cube.uid))
@@ -294,6 +298,8 @@ namespace AgCubio
             ourCubes.Remove(cube.uid);
          if (playerCubes.ContainsKey(cube.Name))
             playerCubes.Remove(cube.Name);
+         if (virusList.Contains(cube.uid))
+            virusList.Remove(cube.uid);
       }
 
       /// <summary>
