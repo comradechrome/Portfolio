@@ -130,10 +130,10 @@ namespace Server
             Cube cube = null;
             lock (mainWorld)
             {
-            if (rand.Next(10000) < mainWorldParams.virusProbability *100/mainWorldParams.heartbeatsPerSecond)
+                if (rand.Next(10000) < mainWorldParams.virusProbability * 100 / mainWorldParams.heartbeatsPerSecond)
                 {
 
-               int newRadius = (int) Math.Ceiling(Cube.getWidth(mainWorldParams.virusMass)/2.0); // round up
+                    int newRadius = (int)Math.Ceiling(Cube.getWidth(mainWorldParams.virusMass) / 2.0); // round up
                     Tuple<bool, int, int> results = tryPosition(newRadius, false);
                     if (results.Item1)
                     {
@@ -271,7 +271,7 @@ namespace Server
             {
                 if (mainWorld.worldCubes.ContainsKey(randomFoodID) && mainWorld.worldCubes[randomFoodID].food)
                 {
-               mainWorld.worldCubes[randomFoodID].Mass = mainWorld.worldCubes[randomFoodID].Mass* mainWorldParams.foodGrowthFactor;
+                    mainWorld.worldCubes[randomFoodID].Mass = mainWorld.worldCubes[randomFoodID].Mass * mainWorldParams.foodGrowthFactor;
                     foodCube = mainWorld.worldCubes[randomFoodID];
                 }
             }
@@ -286,30 +286,15 @@ namespace Server
                 {
                     foreach (var coordinates in mousePoints)
                     {
+                        // player name and mouse coordinates
                         string playerName = coordinates.Key;
-
-
-
-                  // get players cube current position and mass - 1st check if player exists
-                  if (mainWorld.playerCubes.ContainsKey(playerName))
-                  {
-                     // player name and mouse coordinates
-                     int playerID = mainWorld.playerCubes[playerName];
                         int x = coordinates.Value.Item1;
                         int y = coordinates.Value.Item2;
 
-                     HashSet<Cube> teamCubes = new HashSet<Cube>();
-                     // Add the player main cube to our hashSet
-                     teamCubes.Add(mainWorld.worldCubes[playerID]);
-                     // itterate through the world and find any cubes with a matching team id
-                     foreach (var cube in mainWorld.worldCubes)
-                     {
-                        if (cube.Value.team_id == playerID)
-                           teamCubes.Add(cube.Value);
-                     }
-                     // move our cube and any 'team' cubes if any
-                     foreach (Cube cube in teamCubes)
+                        // get players cube current position and mass - 1st check if player exists
+                        if (mainWorld.playerCubes.ContainsKey(playerName))
                         {
+                            Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
                             double cubeX = cube.loc_x;
                             double cubeY = cube.loc_y;
                             double mass = cube.Mass;
@@ -323,9 +308,8 @@ namespace Server
 
                             if (distance > 1.0)
                             {
-                        cube.loc_x += distX*smoothingFactor(mass) + cube.getMomentum();
-                        cube.loc_y += distY*smoothingFactor(mass) + cube.getMomentum();
-                            }
+                                cube.loc_x += distX * smoothingFactor(mass) + cube.getMomentum();
+                                cube.loc_y += distY * smoothingFactor(mass) + cube.getMomentum();
                             }
                         }
                     }
@@ -380,10 +364,11 @@ namespace Server
                         Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
                         double newWidth = Math.Sqrt(originalCube.Mass / 2);
                         Cube newCube = new Cube(originalCube.loc_x + newWidth, originalCube.loc_y + newWidth,
-                                                    originalCube.argb_color, ++uid, originalCube.uid, false, name, originalCube.Mass / 2);
+                                                    originalCube.argb_color, uid++, originalCube.uid, false, name, originalCube.Mass / 2);
                         originalCube.Mass /= 2;
                         originalCube.loc_x -= newWidth;
                         originalCube.loc_y -= newWidth;
+                        originalCube.team_id = originalCube.uid;
                         lock (mainWorld)
                         {
                             mainWorld.addCube(newCube);
@@ -705,7 +690,7 @@ namespace Server
 
         /// <summary>
         /// generates a random x,y coordinate. With a supplied radius, checks if there is an overlap.
-      /// foodFlag determines if we cehck for overlapping food or not. True: check food, False: only check players
+        /// foodFlag determines if we check for overlapping food or not. True: check food, False: only check players
         /// </summary>
         /// <param name="radius"></param>
         /// <param name="foodFlag"></param>
