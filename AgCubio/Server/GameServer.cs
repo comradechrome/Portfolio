@@ -130,10 +130,10 @@ namespace Server
          Cube cube = null;
          lock (mainWorld)
          {
-                if (rand.Next(10000) < mainWorldParams.virusProbability * 100 / mainWorldParams.heartbeatsPerSecond)
+            if (rand.Next(10000) < mainWorldParams.virusProbability *100/mainWorldParams.heartbeatsPerSecond)
          {
             
-                    int newRadius = (int)Math.Ceiling(Cube.getWidth(mainWorldParams.virusMass) / 2.0); // round up
+               int newRadius = (int) Math.Ceiling(Cube.getWidth(mainWorldParams.virusMass)/2.0); // round up
                Tuple<bool, int, int> results = tryPosition(newRadius, false);
                if (results.Item1)
                {
@@ -271,7 +271,7 @@ namespace Server
          {
             if (mainWorld.worldCubes.ContainsKey(randomFoodID) && mainWorld.worldCubes[randomFoodID].food)
             {
-                    mainWorld.worldCubes[randomFoodID].Mass = mainWorld.worldCubes[randomFoodID].Mass * mainWorldParams.foodGrowthFactor;
+               mainWorld.worldCubes[randomFoodID].Mass = mainWorld.worldCubes[randomFoodID].Mass* mainWorldParams.foodGrowthFactor;
                foodCube = mainWorld.worldCubes[randomFoodID];
             }  
          }
@@ -286,16 +286,16 @@ namespace Server
             {
                foreach (var coordinates in mousePoints)
                {
-                  // player name and mouse coordinates
                   string playerName = coordinates.Key;
-                  int playerID = mainWorld.playerCubes[playerName];
-                  int x = coordinates.Value.Item1;
-                  int y = coordinates.Value.Item2;
-
 
                   // get players cube current position and mass - 1st check if player exists
                   if (mainWorld.playerCubes.ContainsKey(playerName))
                   {
+                     // player name and mouse coordinates
+                     int playerID = mainWorld.playerCubes[playerName];
+                     int x = coordinates.Value.Item1;
+                     int y = coordinates.Value.Item2;
+
                      HashSet<Cube> teamCubes = new HashSet<Cube>();
                      // Add the player main cube to our hashSet
                      teamCubes.Add(mainWorld.worldCubes[playerID]);
@@ -378,16 +378,15 @@ namespace Server
                         Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
                         double newWidth = Math.Sqrt(originalCube.Mass / 2);
                         Cube newCube = new Cube(originalCube.loc_x + newWidth, originalCube.loc_y + newWidth,
-                                                    originalCube.argb_color, uid++, originalCube.uid, false, name, originalCube.Mass / 2);
+                                                    originalCube.argb_color, ++uid, originalCube.uid, false, name, originalCube.Mass / 2);
                         originalCube.Mass /= 2;
                         originalCube.loc_x -= newWidth;
                         originalCube.loc_y -= newWidth;
-                        originalCube.team_id = originalCube.uid;
-                        lock (mainWorld)
-                        {
-                            mainWorld.addCube(newCube);
-                            mainWorld.playerCubes[name] = newCube.uid;
-                        }
+                        //lock (mainWorld)
+                        //{
+                        //    mainWorld.addCube(newCube);
+                        //    mainWorld.playerCubes[name] = newCube.uid;
+                        //}
                         updatedCubes.Add(newCube);
                         updatedCubes.Add(originalCube);
                     }
@@ -636,7 +635,7 @@ namespace Server
          state.CallbackAction = ActionReceived;
 
          Network.i_want_more_data(state);
-         
+
       }
 
       private static string GeneratePlayerCube(string playerName)
@@ -704,7 +703,7 @@ namespace Server
 
       /// <summary>
       /// generates a random x,y coordinate. With a supplied radius, checks if there is an overlap.
-        /// foodFlag determines if we check for overlapping food or not. True: check food, False: only check players
+      /// foodFlag determines if we cehck for overlapping food or not. True: check food, False: only check players
       /// </summary>
       /// <param name="radius"></param>
       /// <param name="foodFlag"></param>
