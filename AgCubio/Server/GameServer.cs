@@ -292,7 +292,6 @@ namespace Server
                   int x = coordinates.Value.Item1;
                   int y = coordinates.Value.Item2;
 
-
                   // get players cube current position and mass - 1st check if player exists
                   if (mainWorld.playerCubes.ContainsKey(playerName))
                   {
@@ -813,7 +812,6 @@ namespace Server
             {
                mousePoints[playerName] = Tuple.Create(x, y);
             }
-            
          }
          else if (actionString.StartsWith("(split"))
          {
