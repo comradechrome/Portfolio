@@ -159,7 +159,7 @@ namespace AgCubio
       /// <returns></returns>
       public static double getWidth(double mass)
       {
-         return Math.Pow(mass, 0.65);
+         return Math.Sqrt(mass);
       }
 
 
@@ -366,8 +366,18 @@ namespace AgCubio
          return Tuple.Create(x, y, Math.Max(width, height));
       }
 
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="splitPoints"></param>
+        //public void splitPlayer(Dictionary<string, Tuple<int, int>> splitPoints)
+        //{
+        //    foreach(string name in splitPoints.Keys)
+        //    {
 
-   }
+        //    }
+        //}
+    }
 
    /// <summary>
    /// 
