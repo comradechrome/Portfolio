@@ -326,12 +326,12 @@ namespace Server
                         cube.loc_x += distX*smoothingFactor(mass) + cube.getMomentum();
                         cube.loc_y += distY*smoothingFactor(mass) + cube.getMomentum();
                             }
+                            }
                         }
                     }
                 }
             }
         }
-      }
 
         /// <summary>
         /// f(mass) = factor
