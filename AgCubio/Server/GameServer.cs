@@ -289,6 +289,7 @@ namespace Server
                   string playerName = coordinates.Key;
 
 
+
                   // get players cube current position and mass - 1st check if player exists
                   if (mainWorld.playerCubes.ContainsKey(playerName))
                   {
