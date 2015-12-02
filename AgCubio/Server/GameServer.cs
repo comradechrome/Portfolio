@@ -99,7 +99,7 @@ namespace Server
          // process cube splits
          // TODO: processSplits();
          // virus mechanics - append any created or destroyed virus cubes to the json string builder
-         // TODO: modifieCubes.UnionWith(spawnVirus());
+         //modifiedCubes.Add(spawnVirus());
          // players eating food and players eating players, players hitting  
          // and remove them from the world (players and food)
          absorb();
@@ -115,6 +115,16 @@ namespace Server
             sendUpdates(jsonCubes);
          //start the heartbeat back up
          heartbeat.Start();
+
+      }
+
+      private static Cube spawnVirus()
+      {
+         //create green color
+         //random guess > certain number we try and generate cube
+         //if we find available spot, we create virus (the more empty spaces the higher probability
+         Color green = Color.LawnGreen;
+         return null;
 
       }
 
@@ -312,6 +322,7 @@ namespace Server
       {
          HashSet<Cube> cubeUpdates = new HashSet<Cube>();
          HashSet<Cube> infectedCubes = new HashSet<Cube>();
+         double allowedOverlap = .25; // TODO: add this to paramerter file. The allowed cube overlap before a cube is 'eaten'
 
 
          if (mainWorld.playerCubes.Count > 0)
@@ -339,11 +350,12 @@ namespace Server
                         {
                            // get the x,y coordinates of the upper left and lower right of the checked cube
                            Tuple<int, int, int, int> cubeCorners = cube.Value.corners;
+                           double overlap = cube.Value.Width * allowedOverlap;
 
-                           int cubeX1 = cubeCorners.Item1;
-                           int cubeY1 = cubeCorners.Item2;
-                           int cubeX2 = cubeCorners.Item3;
-                           int cubeY2 = cubeCorners.Item4;
+                           int cubeX1 = cubeCorners.Item1 + (int)overlap;
+                           int cubeY1 = cubeCorners.Item2 + (int)overlap;
+                           int cubeX2 = cubeCorners.Item3 - (int)overlap;
+                           int cubeY2 = cubeCorners.Item4 - (int)overlap;
 
                            // this algorithm checks to see if player cube [(x1,y1),(x2,y2)] overlaps current cube [(x1,y1),(x2,y2)]
                            // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
@@ -359,31 +371,25 @@ namespace Server
                                  cube.Value.Mass = 0;
                                  cubeUpdates.Add(cube.Value);
                               }
-                              // check if encountered cube is a virus and larger than the player cube
-                              else if (cube.Value.food && cube.Value.Mass >= playerCube.Mass)
+                              // check if encountered cube is a virus
+                              else if (cube.Value.food)
                               {
                                  // remove virus and add player to infected HashSet
                                  cube.Value.Mass = 0;
                                  infectedCubes.Add(playerCube);
                               }
-                              // check if cube is a virus and smaller than the player cube
-                              else if (cube.Value.food)
-                              {
-                                 //TODO:  move cube so it doesn't overlap virus
-
-                              }
                               // cube mass is greater than player so we remove player cube
                               else if (cube.Value.Mass > playerCube.Mass)
                               {
-                                 //TODO: once we have figured out splitting, we need to add logic here to figure out if this is last of the players cubes - close socket connection
                                  cube.Value.Mass += playerCube.Mass;
+                                 killPlayer(playerCube);
                                  playerCube.Mass = 0;
                               }
                               else
                               // cube is smaller (or equal) than the player cube so we will remove the cube
                               {
-                                 // TODO: just as the case above, we need method to determine if this is the last of a players cubes - close socket connection
                                  playerCube.Mass += cube.Value.Mass;
+                                 killPlayer(cube.Value);
                                  cube.Value.Mass = 0;
                               }
                            }
@@ -391,11 +397,21 @@ namespace Server
                      }
                   }
                }
-
-               // TODO: process infected cubes
-               // processInfected(infectedCubes);
+               processInfected(infectedCubes);
             }
          }
+      }
+
+      private static void processInfected(HashSet<Cube> infectedCubes)
+      {
+         // TODO: process infected cubes
+      }
+
+      private static void killPlayer(Cube cube)
+      {
+         // TODO: once we have figured out splitting, we need to add logic here to figure out if this is last of the players cubes - close socket connection
+         // TODO: just as the case above, we need method to determine if this is the last of a players cubes - close socket connection
+
       }
 
       /// <summary>
@@ -580,63 +596,61 @@ namespace Server
          int y = 0;
          bool available = false;
          int newRadius = (int)Math.Ceiling(width/2.0); // round up
-
+         Tuple<bool, int, int> results;
 
 
          while (!available)
          {
-            // generate random coordiantes that fall withing the world. Then generate the cube diagonal points.
-            x = rand.Next(newRadius, mainWorldParams.height - newRadius);
-            y = rand.Next(newRadius, mainWorldParams.width - newRadius);
-            int x1 = x - newRadius;
-            int y1 = y - newRadius;
-            int x2 = x + newRadius;
-            int y2 = y + newRadius;
-
-            if (mainWorld.worldCubes.Count > 0)
-            {
-               // we have cubes so we'll need to check for overlaps
-               lock (mainWorld)
-               {
-
-
-                  foreach (var cube in mainWorld.worldCubes)
-                  {
-                     int cubeRadius = (int) Math.Ceiling(cube.Value.Width/2.0); // round up
-                     // get diagonal corners of current cube
-                     // get the x,y coordinates of the upper left and lower right of the player cube
-                     Tuple<int, int, int, int> corners = cube.Value.corners;
-
-                     int x3 = corners.Item1;
-                     int y3 = corners.Item2;
-                     int x4 = corners.Item3;
-                     int y4 = corners.Item4;
-
-                     // this algorithm checks to see if new cube [(x1,y1),(x2,y2)] overlaps current cube [(x3,y3),(x4,y4)]
-                     // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
-
-                     if (!(y2 < y3 || y1 > y4 || x2 < x3 || x1 > x4))
-                        // cubes overlap; break, generate a new cube, check again
-                     {
-                        available = false;
-                        break;
-                     }
-                     else
-                     // cubes do not overlap, set flag to true and check another cube
-                     {
-                        available = true;
-                     }
-                  }
-               }
-            }
-            else
-            {
-               // no cubes yet, so we'll set flag to true
-               available = true;
-            }
+            results = tryPosition(newRadius);
+            available = results.Item1;
+            x = results.Item2;
+            y = results.Item3;
          }
          
          return Tuple.Create((double)x, (double)y);
+      }
+
+      public static Tuple<bool,int,int> tryPosition(int radius)
+      {
+         // generate random coordiantes that fall withing the world. Then generate the cube diagonal points.
+         int x = rand.Next(radius, mainWorldParams.height - radius);
+         int y = rand.Next(radius, mainWorldParams.width - radius);
+         bool available = true;
+
+         int x1 = x - radius;
+         int y1 = y - radius;
+         int x2 = x + radius;
+         int y2 = y + radius;
+
+         if (mainWorld.worldCubes.Count > 0)
+         {
+            // we have cubes so we'll need to check for overlaps
+            lock (mainWorld)
+            {
+
+
+               foreach (var cube in mainWorld.worldCubes)
+               {
+                  Tuple<int, int, int, int> corners = cube.Value.corners;
+
+                  int x3 = corners.Item1;
+                  int y3 = corners.Item2;
+                  int x4 = corners.Item3;
+                  int y4 = corners.Item4;
+
+                  // this algorithm checks to see if new cube [(x1,y1),(x2,y2)] overlaps current cube [(x3,y3),(x4,y4)]
+                  // more specifically, it's checking 4 conditions where the cubes cannot overlap - if any are true, the cubes do not overlap
+
+                  if (!(y2 < y3 || y1 > y4 || x2 < x3 || x1 > x4))
+                  // cubes overlap, set flag to false and break out of loop
+                  {
+                     available = false;
+                     break;
+                  }
+               }
+            }
+         }
+         return Tuple.Create(available, x, y);
       }
 
       /// <summary>
