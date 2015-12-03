@@ -138,7 +138,7 @@ namespace Server
                if (results.Item1)
                {
                   int green = Color.LawnGreen.ToArgb();
-                  cube = new Cube(results.Item2, results.Item3, green, uid++, 0, true, virusName(7), mainWorldParams.virusMass);
+                  cube = new Cube(results.Item2, results.Item3, green, uid++, 0, true, virusName(3), mainWorldParams.virusMass);
                   mainWorld.addCube(cube);
                   mainWorld.virusList.Add(cube.uid);
                   cubes.Add(cube);
@@ -498,10 +498,14 @@ namespace Server
                // create a list of all Player and virus ID's so we can itterate through them
                HashSet<int> playersViruses = new HashSet<int>(mainWorld.playerCubes.Values);
                playersViruses.UnionWith(mainWorld.virusList);
+                    foreach (HashSet<Cube> team in mainWorld.teams.Values)
+                        foreach (Cube cube in team)
+                            playersViruses.Add(cube.uid);
 
                foreach (var cubeID in playersViruses)
                {
                   Cube playerCube = mainWorld.worldCubes[cubeID];
+
                   // only run loop if player/virus is not dead
                   if (playerCube.Mass > 0)
                   {
@@ -550,14 +554,14 @@ namespace Server
                               }
                               else if (cube.team_id != 0)
                               {
-                                 //if (playerCubeY2 < cubeY1)
-                                 //    playerCube.loc_y = cubeY1 - playerCube.Width/2;
-                                 //if (playerCubeY1 > cubeY2)
-                                 //    playerCube.loc_y = cubeY2 + playerCube.Width/2;
-                                 //if (playerCubeX2 > cubeX1)
-                                 //    playerCube.loc_x = cubeX1 - playerCube.Width/2;
-                                 //if (playerCubeY2 < cubeY1)
-                                 //    playerCube.loc_x = cubeX2 + playerCube.Width/2;
+                                            if (playerCubeY2 < cubeY1)
+                                                playerCube.loc_y = cubeY1 - playerCube.Width / 2;
+                                            if (playerCubeY1 > cubeY2)
+                                                playerCube.loc_y = cubeY2 + playerCube.Width / 2;
+                                            if (playerCubeX2 > cubeX1)
+                                                playerCube.loc_x = cubeX1 - playerCube.Width / 2;
+                                            if (playerCubeY2 < cubeY1)
+                                                playerCube.loc_x = cubeX2 + playerCube.Width / 2;
                               }
                               // cube mass is greater than player so we remove player cube (don't check if we're a virus)
                               else if (cube.Mass > playerCube.Mass && !playerCube.food)
