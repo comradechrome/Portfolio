@@ -483,6 +483,7 @@ namespace AgCubio
       /// this adjusts how much the factor affects speed as mass increases
       /// </summary>
       public int smoothingIncrement { get; } = 1500;
+      public int splitDistance { get; } = 20;
 
       /// <summary>
       /// Default World Parameters construtor
@@ -586,6 +587,42 @@ namespace AgCubio
                         case "heartbeats_per_second":
                            reader.Read();
                            this.heartbeatsPerSecond = reader.ReadContentAsInt();
+                           break;
+                        case "virus_mass":
+                           reader.Read();
+                           this.virusMass = reader.ReadContentAsInt();
+                           break;
+                        case "virus_probability":
+                           reader.Read();
+                           this.virusProbability = reader.ReadContentAsInt();
+                           break;
+                        case "accelerated_attrition":
+                           reader.Read();
+                           this.acceleratedAttrition = reader.ReadContentAsInt();
+                           break;
+                        case "food_random_factor":
+                           reader.Read();
+                           this.foodRandomFactor = reader.ReadContentAsInt();
+                           break;
+                        case "food_growth_factor":
+                           reader.Read();
+                           this.foodGrowthFactor = reader.ReadContentAsInt();
+                           break;
+                        case "allowed_overlap":
+                           reader.Read();
+                           this.allowedOverlap = reader.ReadContentAsInt();
+                           break;
+                        case "scale_constant":
+                           reader.Read();
+                           this.scaleConst = reader.ReadContentAsInt();
+                           break;
+                        case "smoothing_increment":
+                           reader.Read();
+                           this.smoothingIncrement = reader.ReadContentAsInt();
+                           break;
+                        case "split_distance":
+                           reader.Read();
+                           this.splitDistance = reader.ReadContentAsInt();
                            break;
                         default:
                            reader.Read();
