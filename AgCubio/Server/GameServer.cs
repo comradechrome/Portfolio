@@ -366,7 +366,6 @@ namespace Server
          if (factor < minFactor) { return minFactor; }
          if (factor > maxFactor) { return maxFactor; }
          return factor;
-
       }
 
       /// <summary>
@@ -385,20 +384,19 @@ namespace Server
                foreach (string name in splitPoints.Keys)
                {
                   Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
-                  double newWidth = Math.Sqrt(originalCube.Mass / 2);
-                  Cube newCube = new Cube(originalCube.loc_x + newWidth, originalCube.loc_y + newWidth,
-                                              originalCube.argb_color, uid++, originalCube.uid, false, name, originalCube.Mass / 2);
-                  originalCube.Mass /= 2;
-                  originalCube.loc_x -= newWidth;
-                  originalCube.loc_y -= newWidth;
-                  originalCube.team_id = originalCube.uid;
-                  lock (mainWorld)
+                        if (originalCube.team_id == 0)
                   {
-                     mainWorld.addCube(newCube);
-                     //mainWorld.playerCubes[name] = newCube.uid;
+                            int teamID = originalCube.uid;
+                            mainWorld.teams.Add(teamID, new HashSet<Cube>());
+                            splitHelper(teamID, name, originalCube, updatedCubes);
+                        } else
+                        {
+                            foreach(Cube cube in mainWorld.teams[originalCube.team_id].ToArray())
+                            {
+                                if (cube.Mass>mainWorldParams.minSplitMass)
+                                    splitHelper(originalCube.team_id, name, cube, updatedCubes);
                   }
-                  updatedCubes.Add(newCube);
-                  updatedCubes.Add(originalCube);
+                        }
                }
                splitPoints = new Dictionary<string, Tuple<int, int>>();
             }
@@ -406,6 +404,27 @@ namespace Server
 
          return updatedCubes;
       }
+
+        private static void splitHelper(int teamID, string name, Cube splitCube, HashSet<Cube> updatedCubes)
+        {
+
+            double newWidth = Math.Sqrt(splitCube.Mass / 2);
+            Cube newCube = new Cube(splitCube.loc_x + newWidth, splitCube.loc_y + newWidth,
+                                        splitCube.argb_color, uid++, teamID, false, name, splitCube.Mass / 2);
+            splitCube.Mass /= 2;
+            splitCube.loc_x -= newWidth;
+            splitCube.loc_y -= newWidth;
+            splitCube.team_id = teamID;
+            lock (mainWorld)
+            {
+                //mainWorld.playerCubes[name] = newCube.uid;
+                mainWorld.addCube(newCube);
+                mainWorld.teams[teamID].Add(newCube);
+                mainWorld.teams[teamID].Add(splitCube);
+            }
+            updatedCubes.Add(newCube);
+            updatedCubes.Add(splitCube);
+        }
 
       /// <summary>
       /// 

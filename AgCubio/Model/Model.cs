@@ -114,7 +114,7 @@ namespace AgCubio
 
          Cube cube = obj as Cube;
 
-         if ((object) cube == null)
+            if ((object)cube == null)
             return false;
 
          if (this.uid == cube.uid)
@@ -238,10 +238,13 @@ namespace AgCubio
       /// As cube splits, it will be indexed by Cube_id, but all team_id's should be our original UID
       /// </summary>
       public Dictionary<int, Cube> ourCubes { get; }
+
+        public Dictionary<int, HashSet<Cube>> teams { get; }
+
       /// <summary>
       /// Dictionary of payer cubes used by the server. Key: PlayerName, Value: Player ID
       /// </summary>
-      public Dictionary<string,int> playerCubes { get; }
+        public Dictionary<string, int> playerCubes { get; }
 
       public HashSet<int> virusList { get; set; } 
 
@@ -260,6 +263,7 @@ namespace AgCubio
          ourCubes = new Dictionary<int, Cube>();
          playerCubes = new Dictionary<string, int>();
          virusList = new HashSet<int>();
+            teams = new Dictionary<int, HashSet<Cube>>();
       }
 
       /// <summary>
@@ -275,8 +279,7 @@ namespace AgCubio
             ourCubes.Add(cube.uid, cube);
          }
          // add our split cubes to ourCubes dictionary
-         else if (cube.team_id == ourID)
-            ourCubes.Add(cube.uid, cube);
+
 
          worldCubes.Add(cube.uid, cube);
       }
