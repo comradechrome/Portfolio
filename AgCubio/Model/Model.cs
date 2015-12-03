@@ -239,10 +239,13 @@ namespace AgCubio
       /// </summary>
       public Dictionary<int, Cube> ourCubes { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Dictionary<int, HashSet<Cube>> teams { get; }
 
       /// <summary>
-      /// Dictionary of payer cubes used by the server. Key: PlayerName, Value: Player ID
+        /// Dictionary of player cubes used by the server. Key: PlayerName, Value: Player ID
       /// </summary>
         public Dictionary<string, int> playerCubes { get; }
 

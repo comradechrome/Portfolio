@@ -300,10 +300,9 @@ namespace Server
                   {
                      int playerID = mainWorld.playerCubes[playerName];
 
-                     
                      // Add the player main cube to our hashSet
                      teamCubes.Add(mainWorld.worldCubes[playerID]);
-                     // itterate through the world and find any cubes with a matching team id
+                            // iterate through the world and find any cubes with a matching team id
                      foreach (Cube cube in mainWorld.worldCubes.Values)
                      {
                        // Console.WriteLine("team ID: " + cube.Value.team_id + " PlayerID: " + playerID);
@@ -332,11 +331,17 @@ namespace Server
                            cube.loc_x += distX * smoothingFactor(mass) + cube.getMomentum();
                            cube.loc_y += distY * smoothingFactor(mass) + cube.getMomentum();
                         }
+
+                                if (cube.team_id != 0)
+                                    foreach(Cube friend in mainWorld.teams[cube.team_id])
+                                    {
+
                      }
                   }
                }
             }
          }
+            }
          return teamCubes;
       }
 
@@ -391,7 +396,7 @@ namespace Server
                             splitHelper(teamID, name, originalCube, updatedCubes, splitPoints[name]);
                         } else
                         {
-                            foreach(Cube cube in mainWorld.teams[originalCube.team_id].ToArray())
+                            foreach (Cube cube in mainWorld.teams[originalCube.team_id].ToArray())
                             {
                                 if (cube.Mass>mainWorldParams.minSplitMass)
                                     splitHelper(originalCube.team_id, name, cube, updatedCubes, splitPoints[name]);
@@ -482,14 +487,14 @@ namespace Server
                      int playerCubeX2 = playerCorners.Item3;
                      int playerCubeY2 = playerCorners.Item4;
 
-                     foreach (var cube in mainWorld.worldCubes)
+                            foreach (Cube cube in mainWorld.worldCubes.Values)
                      {
                         // make sure we're not comparing playerCube to itself
-                        if (cube.Value.uid != playerCube.uid)
+                                if (cube.uid != playerCube.uid)
                         {
                            // get the x,y coordinates of the upper left and lower right of the checked cube
-                           Tuple<int, int, int, int> cubeCorners = cube.Value.corners;
-                           double overlap = cube.Value.Width * mainWorldParams.allowedOverlap;
+                                    Tuple<int, int, int, int> cubeCorners = cube.corners;
+                                    double overlap = cube.Width * mainWorldParams.allowedOverlap;
 
                            int cubeX1 = cubeCorners.Item1 + (int)overlap;
                            int cubeY1 = cubeCorners.Item2 + (int)overlap;
@@ -504,33 +509,43 @@ namespace Server
                            // cubes overlap; figure out cube type and take appropriate action
                            {
                               // check if encountered cube is food
-                              if (cube.Value.food && cube.Value.Name == "")
+                                        if (cube.food && cube.Name == "")
                               {
-                                 playerCube.Mass += cube.Value.Mass;
-                                 cube.Value.Mass = 0;
-                                 cubeUpdates.Add(cube.Value);
+                                            playerCube.Mass += cube.Mass;
+                                            cube.Mass = 0;
+                                            cubeUpdates.Add(cube);
                               }
                               // check if encountered cube is a virus
-                              else if (cube.Value.food)
+                                        else if (cube.food)
                               {
                                  // remove virus and add player to infected HashSet
-                                 cube.Value.Mass = 0;
+                                            cube.Mass = 0;
                                  infectedCubes.Add(playerCube);
                               }
-                             // else if()
+                                        else if (cube.team_id != 0)
+                                        {
+                                            //if (playerCubeY2 < cubeY1)
+                                            //    playerCube.loc_y = cubeY1 - playerCube.Width/2;
+                                            //if (playerCubeY1 > cubeY2)
+                                            //    playerCube.loc_y = cubeY2 + playerCube.Width/2;
+                                            //if (playerCubeX2 > cubeX1)
+                                            //    playerCube.loc_x = cubeX1 - playerCube.Width/2;
+                                            //if (playerCubeY2 < cubeY1)
+                                            //    playerCube.loc_x = cubeX2 + playerCube.Width/2;
+                                        }
                               // cube mass is greater than player so we remove player cube (don't check if we're a virus)
-                              else if (cube.Value.Mass > playerCube.Mass && !playerCube.food)
+                                        else if (cube.Mass > playerCube.Mass && !playerCube.food)
                               {
-                                 cube.Value.Mass += playerCube.Mass;
+                                            cube.Mass += playerCube.Mass;
                                  killPlayer(playerCube);
                                  playerCube.Mass = 0;
                               }
                               else if (!playerCube.food)
                               // cube is smaller (or equal) than the player cube so we will remove the cube (and we're not a virus)
                               {
-                                 playerCube.Mass += cube.Value.Mass;
-                                 killPlayer(cube.Value);
-                                 cube.Value.Mass = 0;
+                                            playerCube.Mass += cube.Mass;
+                                            killPlayer(cube);
+                                            cube.Mass = 0;
                               }
                            }
                         }
