@@ -513,7 +513,7 @@ namespace Server
                                         }
                                         else if (cube.team_id != 0)
                                         {
-                                            if (playerCubeY2 < cubeY1)
+                                            //if (playerCubeY2 < cubeY1)
                                             //    playerCube.loc_y = cubeY1 - playerCube.Width/2;
                                             //if (playerCubeY1 > cubeY2)
                                             //    playerCube.loc_y = cubeY2 + playerCube.Width/2;
