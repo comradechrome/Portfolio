@@ -383,9 +383,9 @@ namespace Server
             {
                foreach (string name in splitPoints.Keys)
                {
-                        Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
+                  Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
                         if (originalCube.team_id == 0)
-                        {
+                  {
                             int teamID = originalCube.uid;
                             mainWorld.teams.Add(teamID, new HashSet<Cube>());
                             splitHelper(teamID, name, originalCube, updatedCubes);
@@ -395,7 +395,7 @@ namespace Server
                             {
                                 if (cube.Mass>mainWorldParams.minSplitMass)
                                     splitHelper(originalCube.team_id, name, cube, updatedCubes);
-                            }
+                  }
                         }
                }
                splitPoints = new Dictionary<string, Tuple<int, int>>();
@@ -505,6 +505,7 @@ namespace Server
                                  cube.Value.Mass = 0;
                                  infectedCubes.Add(playerCube);
                               }
+                             // else if()
                               // cube mass is greater than player so we remove player cube (don't check if we're a virus)
                               else if (cube.Value.Mass > playerCube.Mass && !playerCube.food)
                               {
