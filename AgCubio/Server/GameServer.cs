@@ -388,13 +388,13 @@ namespace Server
                   {
                             int teamID = originalCube.uid;
                             mainWorld.teams.Add(teamID, new HashSet<Cube>());
-                            splitHelper(teamID, name, originalCube, updatedCubes);
+                            splitHelper(teamID, name, originalCube, updatedCubes, splitPoints[name]);
                         } else
                         {
                             foreach(Cube cube in mainWorld.teams[originalCube.team_id].ToArray())
                             {
                                 if (cube.Mass>mainWorldParams.minSplitMass)
-                                    splitHelper(originalCube.team_id, name, cube, updatedCubes);
+                                    splitHelper(originalCube.team_id, name, cube, updatedCubes, splitPoints[name]);
                   }
                         }
                }
@@ -405,15 +405,25 @@ namespace Server
          return updatedCubes;
       }
 
-        private static void splitHelper(int teamID, string name, Cube splitCube, HashSet<Cube> updatedCubes)
+        private static void splitHelper(int teamID, string name, Cube splitCube, HashSet<Cube> updatedCubes, Tuple<int,int> pointer)
         {
+         // calculate the distance from our mouse to the cube
+         double distX = pointer.Item1 - splitCube.loc_x;
+         double distY = pointer.Item2 - splitCube.loc_y;
 
-            double newWidth = Math.Sqrt(splitCube.Mass / 2);
-            Cube newCube = new Cube(splitCube.loc_x + newWidth, splitCube.loc_y + newWidth,
-                                        splitCube.argb_color, uid++, teamID, false, name, splitCube.Mass / 2);
-            splitCube.Mass /= 2;
-            splitCube.loc_x -= newWidth;
-            splitCube.loc_y -= newWidth;
+         // make sure distace is greater than 1
+         double distance = Math.Sqrt(distX * distX + distY * distY);
+
+         double unitX = distX / distance;
+         double unitY = distY / distance;
+
+         double newX = splitCube.loc_x + unitX * splitCube.Width * mainWorldParams.splitDistance;
+         double newY = splitCube.loc_y + unitX * splitCube.Width * mainWorldParams.splitDistance;
+
+         double newWidth = Math.Sqrt(splitCube.Mass / 2);
+         Cube newCube = new Cube(newX, newY, splitCube.argb_color, uid++, teamID, false, name, splitCube.Mass / 2);
+
+         splitCube.Mass /= 2;
             splitCube.team_id = teamID;
             lock (mainWorld)
             {
