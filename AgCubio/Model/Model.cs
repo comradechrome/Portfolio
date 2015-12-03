@@ -239,7 +239,7 @@ namespace AgCubio
         /// </summary>
         public Dictionary<int, Cube> ourCubes { get; }
 
-        public Dictionary<int, Cube> subCubes { get; }
+        public Dictionary<int, HashSet<Cube>> teams { get; }
 
         /// <summary>
         /// Dictionary of payer cubes used by the server. Key: PlayerName, Value: Player ID
@@ -263,6 +263,7 @@ namespace AgCubio
             ourCubes = new Dictionary<int, Cube>();
             playerCubes = new Dictionary<string, int>();
             virusList = new HashSet<int>();
+            teams = new Dictionary<int, HashSet<Cube>>();
         }
 
         /// <summary>
