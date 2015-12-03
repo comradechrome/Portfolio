@@ -418,12 +418,14 @@ namespace Server
          double unitY = distY / distance;
 
          double newX = splitCube.loc_x + unitX * splitCube.Width * mainWorldParams.splitDistance;
-         double newY = splitCube.loc_y + unitX * splitCube.Width * mainWorldParams.splitDistance;
+         double newY = splitCube.loc_y + unitY * splitCube.Width * mainWorldParams.splitDistance;
 
          double newWidth = Math.Sqrt(splitCube.Mass / 2);
          Cube newCube = new Cube(newX, newY, splitCube.argb_color, uid++, teamID, false, name, splitCube.Mass / 2);
+         newCube.setMomentum(mainWorldParams.splitMomentum);
 
          splitCube.Mass /= 2;
+         splitCube.setMomentum(mainWorldParams.splitMomentum);
             splitCube.team_id = teamID;
             lock (mainWorld)
             {
