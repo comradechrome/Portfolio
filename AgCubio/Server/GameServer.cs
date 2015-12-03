@@ -28,6 +28,7 @@ namespace Server
                                 = new Dictionary<string, Tuple<int, int>>();
         private static Dictionary<string, Tuple<int, int>> splitPoints
                                 = new Dictionary<string, Tuple<int, int>>();
+        private static Dictionary<int, HashSet<Cube>> teams;
         private static WorldParams mainWorldParams;
         private static Timer heartbeat;
 
@@ -98,7 +99,7 @@ namespace Server
             processMoves();
             // process cube splits
             modifiedCubes.UnionWith(processSplits());
-            // TODO: processSplits();
+
             // virus mechanics - append any created or destroyed virus cubes to the json string builder
             modifiedCubes.UnionWith(spawnVirus());
             // players eating food and players eating players, players hitting  
@@ -117,6 +118,85 @@ namespace Server
             //start the heartbeat back up
             heartbeat.Start();
 
+        }
+
+        private static void processMoves()
+        {
+            lock (mainWorld)
+            {
+                if (mousePoints.Count > 0)
+                {
+                    foreach (var coordinates in mousePoints)
+                    {
+                        // player name and mouse coordinates
+                        string playerName = coordinates.Key;
+                        int x = coordinates.Value.Item1;
+                        int y = coordinates.Value.Item2;
+
+                        // get players cube current position and mass - 1st check if player exists
+                        if (mainWorld.playerCubes.ContainsKey(playerName))
+                        {
+                            Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
+                            double cubeX = cube.loc_x;
+                            double cubeY = cube.loc_y;
+                            double mass = cube.Mass;
+
+                            // calculate the distance from our mouse to the cube
+                            double distX = x - cubeX;
+                            double distY = y - cubeY;
+
+                            // make sure distace is greater than 1
+                            double distance = Math.Sqrt(distX * distX + distY * distY);
+
+                            if (distance > 1.0)
+                            {
+                                cube.loc_x += distX * smoothingFactor(mass) + cube.getMomentum();
+                                cube.loc_y += distY * smoothingFactor(mass) + cube.getMomentum();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// TODO: Split cubes when space bar has been hit. create team_id
+        /// TODO: handle cube ID when main cube is eaten and there are additional cubes
+        /// TODO: remove player and disconnect socket when last cube has been eaten (maybe handle in absorb mehtod)
+        /// TODO: gather statisics for PS9 - Play Time, Max mass, mass at death, etc
+        /// </summary>
+        private static HashSet<Cube> processSplits()
+        {
+            HashSet<Cube> updatedCubes = new HashSet<Cube>();
+            if (splitPoints.Count > 0)
+            {
+                lock (mainWorld)
+                {
+                    foreach (string name in splitPoints.Keys)
+                    {
+                        Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
+
+
+                        double newWidth = Math.Sqrt(originalCube.Mass / 2);
+                        Cube newCube = new Cube(originalCube.loc_x + newWidth, originalCube.loc_y + newWidth,
+                                                    originalCube.argb_color, uid++, originalCube.uid, false, name, originalCube.Mass / 2);
+                        originalCube.Mass /= 2;
+                        originalCube.loc_x -= newWidth;
+                        originalCube.loc_y -= newWidth;
+                        originalCube.team_id = originalCube.uid;
+                        lock (mainWorld)
+                        {
+                            mainWorld.addCube(newCube);
+                            mainWorld.playerCubes[name] = newCube.uid;
+                        }
+                        updatedCubes.Add(newCube);
+                        updatedCubes.Add(originalCube);
+                    }
+                    splitPoints = new Dictionary<string, Tuple<int, int>>();
+                }
+            }
+
+            return updatedCubes;
         }
         /// <summary>
         /// Every heartbeat we'll 'roll the dice' - if we are lucky we'll attempt to create a virus
@@ -278,44 +358,7 @@ namespace Server
             return foodCube;
         }
 
-        private static void processMoves()
-        {
-            lock (mainWorld)
-            {
-                if (mousePoints.Count > 0)
-                {
-                    foreach (var coordinates in mousePoints)
-                    {
-                        // player name and mouse coordinates
-                        string playerName = coordinates.Key;
-                        int x = coordinates.Value.Item1;
-                        int y = coordinates.Value.Item2;
-
-                        // get players cube current position and mass - 1st check if player exists
-                        if (mainWorld.playerCubes.ContainsKey(playerName))
-                        {
-                            Cube cube = mainWorld.worldCubes[mainWorld.playerCubes[playerName]];
-                            double cubeX = cube.loc_x;
-                            double cubeY = cube.loc_y;
-                            double mass = cube.Mass;
-
-                            // calculate the distance from our mouse to the cube
-                            double distX = x - cubeX;
-                            double distY = y - cubeY;
-
-                            // make sure distace is greater than 1
-                            double distance = Math.Sqrt(distX * distX + distY * distY);
-
-                            if (distance > 1.0)
-                            {
-                                cube.loc_x += distX * smoothingFactor(mass) + cube.getMomentum();
-                                cube.loc_y += distY * smoothingFactor(mass) + cube.getMomentum();
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        
 
         /// <summary>
         /// f(mass) = factor
@@ -346,43 +389,7 @@ namespace Server
 
         }
 
-        /// <summary>
-        /// TODO: Split cubes when space bar has been hit. create team_id
-        /// TODO: handle cube ID when main cube is eaten and there are additional cubes
-        /// TODO: remove player and disconnect socket when last cube has been eaten (maybe handle in absorb mehtod)
-        /// TODO: gather statisics for PS9 - Play Time, Max mass, mass at death, etc
-        /// </summary>
-        private static HashSet<Cube> processSplits()
-        {
-            HashSet<Cube> updatedCubes = new HashSet<Cube>();
-            if (splitPoints.Count > 0)
-            {
-                lock (mainWorld)
-                {
-                    foreach (string name in splitPoints.Keys)
-                    {
-                        Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
-                        double newWidth = Math.Sqrt(originalCube.Mass / 2);
-                        Cube newCube = new Cube(originalCube.loc_x + newWidth, originalCube.loc_y + newWidth,
-                                                    originalCube.argb_color, uid++, originalCube.uid, false, name, originalCube.Mass / 2);
-                        originalCube.Mass /= 2;
-                        originalCube.loc_x -= newWidth;
-                        originalCube.loc_y -= newWidth;
-                        originalCube.team_id = originalCube.uid;
-                        lock (mainWorld)
-                        {
-                            mainWorld.addCube(newCube);
-                            mainWorld.playerCubes[name] = newCube.uid;
-                        }
-                        updatedCubes.Add(newCube);
-                        updatedCubes.Add(originalCube);
-                    }
-                    splitPoints = new Dictionary<string, Tuple<int, int>>();
-                }
-            }
-
-            return updatedCubes;
-        }
+        
 
         /// <summary>
         /// 
