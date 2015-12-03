@@ -63,6 +63,10 @@
       <Project>{416c9ea1-52f8-4a07-8354-cc00a6b83256}</Project>
       <Name>Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Server\Server.csproj">
+      <Project>{8a3d9761-9b74-4952-99ba-5c3c8a0d2ed4}</Project>
+      <Name>Server</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

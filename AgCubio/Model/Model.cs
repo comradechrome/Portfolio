@@ -61,7 +61,7 @@ namespace AgCubio
       /// <summary>
       /// mass of the cube - if set attempts a value less than 1, we'll default to 1
       /// </summary>
-      public Double Mass { get; set; }
+      public double Mass { get; set; }
 
       /// <summary>
       /// If cube has been split, this will be the origial cube ID on all split cube instances
@@ -69,15 +69,15 @@ namespace AgCubio
       public int team_id { get; set; }
 
       /// <summary>
-      /// On splits, the momentum will be > 0 and cause the cube to move faster. Default value is 0
+      /// On splits, the momentum will be > 1 and cause the cube to move faster. Default value is 1 (should not ever be zero)
       /// </summary>
-      private int momentum { get; set; } = 0;
+      private double momentum { get; set; } = 1;
 
       /// <summary>
       /// Width is  mass ^ .65 which gets us close to the supplied client
       /// Width is a read only property
       /// </summary>
-      public Double Width
+      public double Width
       {
          get { return getWidth(Mass); }
       }
@@ -114,7 +114,7 @@ namespace AgCubio
 
          Cube cube = obj as Cube;
 
-         if ((object) cube == null)
+            if ((object)cube == null)
             return false;
 
          if (this.uid == cube.uid)
@@ -171,7 +171,7 @@ namespace AgCubio
       /// Gets the momentum of a cube
       /// </summary>
       /// <returns></returns>
-      public int getMomentum()
+      public double getMomentum()
       {
          return this.momentum;
       }
@@ -179,7 +179,7 @@ namespace AgCubio
       /// Sets the momentum of a cube
       /// </summary>
       /// <param name="momentum"></param>
-      public void setMomentum(int momentum)
+      public void setMomentum(double momentum)
       {
          this.momentum = momentum;
       }
@@ -238,10 +238,16 @@ namespace AgCubio
       /// As cube splits, it will be indexed by Cube_id, but all team_id's should be our original UID
       /// </summary>
       public Dictionary<int, Cube> ourCubes { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Dictionary<int, HashSet<Cube>> teams { get; }
+
       /// <summary>
-      /// Dictionary of payer cubes used by the server. Key: PlayerName, Value: Player ID
+        /// Dictionary of player cubes used by the server. Key: PlayerName, Value: Player ID
       /// </summary>
-      public Dictionary<string,int> playerCubes { get; }
+        public Dictionary<string, int> playerCubes { get; }
 
       public HashSet<int> virusList { get; set; } 
 
@@ -260,6 +266,7 @@ namespace AgCubio
          ourCubes = new Dictionary<int, Cube>();
          playerCubes = new Dictionary<string, int>();
          virusList = new HashSet<int>();
+            teams = new Dictionary<int, HashSet<Cube>>();
       }
 
       /// <summary>
@@ -275,8 +282,7 @@ namespace AgCubio
             ourCubes.Add(cube.uid, cube);
          }
          // add our split cubes to ourCubes dictionary
-         else if (cube.team_id == ourID)
-            ourCubes.Add(cube.uid, cube);
+
 
          worldCubes.Add(cube.uid, cube);
       }
@@ -464,7 +470,7 @@ namespace AgCubio
       /// <summary>
       /// percent per second chance that a virus will be generated
       /// </summary>
-      public int virusProbability { get; } = 5;
+      public int virusProbability { get; } = 10;
 
       public int acceleratedAttrition { get; } = 800;
       public int foodRandomFactor { get; } = 100;
@@ -483,6 +489,9 @@ namespace AgCubio
       /// this adjusts how much the factor affects speed as mass increases
       /// </summary>
       public int smoothingIncrement { get; } = 1500;
+      public double splitDistance { get; } = 3;
+      public int splitDecayRate { get; } = 10;
+      public int splitMomentum { get; } = 50;
 
       /// <summary>
       /// Default World Parameters construtor
@@ -587,10 +596,53 @@ namespace AgCubio
                            reader.Read();
                            this.heartbeatsPerSecond = reader.ReadContentAsInt();
                            break;
+                        case "virus_mass":
+                           reader.Read();
+                           this.virusMass = reader.ReadContentAsInt();
+                           break;
+                        case "virus_probability":
+                           reader.Read();
+                           this.virusProbability = reader.ReadContentAsInt();
+                           break;
+                        case "accelerated_attrition":
+                           reader.Read();
+                           this.acceleratedAttrition = reader.ReadContentAsInt();
+                           break;
+                        case "food_random_factor":
+                           reader.Read();
+                           this.foodRandomFactor = reader.ReadContentAsInt();
+                           break;
+                        case "food_growth_factor":
+                           reader.Read();
+                           this.foodGrowthFactor = reader.ReadContentAsInt();
+                           break;
+                        case "allowed_overlap":
+                           reader.Read();
+                           this.allowedOverlap = reader.ReadContentAsInt();
+                           break;
+                        case "scale_constant":
+                           reader.Read();
+                           this.scaleConst = reader.ReadContentAsInt();
+                           break;
+                        case "smoothing_increment":
+                           reader.Read();
+                           this.smoothingIncrement = reader.ReadContentAsInt();
+                           break;
+                        case "split_distance":
+                           reader.Read();
+                           this.splitDistance = reader.ReadContentAsInt();
+                           break;
+                        case "split_decay_rate":
+                           reader.Read();
+                           this.splitDecayRate = reader.ReadContentAsInt();
+                           break;
+                        case "split_momentum":
+                           reader.Read();
+                           this.splitMomentum = reader.ReadContentAsInt();
+                           break;
                         default:
                            reader.Read();
                            break;
-
                      }
                   }
                }

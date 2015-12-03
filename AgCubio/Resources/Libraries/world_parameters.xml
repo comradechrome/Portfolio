@@ -21,4 +21,5 @@
   <allowed_overlap>.25</allowed_overlap>
   <scale_constant>.00125</scale_constant>
   <smoothing_increment>1500</smoothing_increment>
+  <split_distance>20</split_distance>
 </parameters>
