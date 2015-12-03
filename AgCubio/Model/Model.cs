@@ -489,9 +489,9 @@ namespace AgCubio
       /// this adjusts how much the factor affects speed as mass increases
       /// </summary>
       public int smoothingIncrement { get; } = 1500;
-      public double splitDistance { get; } = 1.5;
+      public double splitDistance { get; } = 3;
       public int splitDecayRate { get; } = 10;
-      public int splitMomentum { get; } = 10;
+      public int splitMomentum { get; } = 50;
 
       /// <summary>
       /// Default World Parameters construtor
