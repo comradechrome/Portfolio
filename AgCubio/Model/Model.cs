@@ -61,7 +61,7 @@ namespace AgCubio
       /// <summary>
       /// mass of the cube - if set attempts a value less than 1, we'll default to 1
       /// </summary>
-      public Double Mass { get; set; }
+      public double Mass { get; set; }
 
       /// <summary>
       /// If cube has been split, this will be the origial cube ID on all split cube instances
@@ -71,13 +71,13 @@ namespace AgCubio
       /// <summary>
       /// On splits, the momentum will be > 0 and cause the cube to move faster. Default value is 0
       /// </summary>
-      private int momentum { get; set; } = 0;
+      private double momentum { get; set; } = 0;
 
       /// <summary>
       /// Width is  mass ^ .65 which gets us close to the supplied client
       /// Width is a read only property
       /// </summary>
-      public Double Width
+      public double Width
       {
          get { return getWidth(Mass); }
       }
@@ -171,7 +171,7 @@ namespace AgCubio
       /// Gets the momentum of a cube
       /// </summary>
       /// <returns></returns>
-      public int getMomentum()
+      public double getMomentum()
       {
          return this.momentum;
       }
@@ -179,7 +179,7 @@ namespace AgCubio
       /// Sets the momentum of a cube
       /// </summary>
       /// <param name="momentum"></param>
-      public void setMomentum(int momentum)
+      public void setMomentum(double momentum)
       {
          this.momentum = momentum;
       }
