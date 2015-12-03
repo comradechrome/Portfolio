@@ -9,7 +9,7 @@ namespace AgCubio
       [TestMethod]
       public void createCube()
       {
-         Cube cube = new Cube(1, 1, , 123, 124, false, "cube1", 400);
+         Cube cube = new Cube(1, 1, -124342, 123, 124, false, "cube1", 400);
          
          Assert.AreEqual(1, cube.loc_x);
          Assert.AreEqual(1, cube.loc_y);
