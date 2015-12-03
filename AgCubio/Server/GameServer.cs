@@ -456,7 +456,7 @@ namespace Server
          newCube.setMomentum(mainWorldParams.splitMomentum);
 
          splitCube.Mass /= 2;
-         splitCube.setMomentum(mainWorldParams.splitMomentum);
+         //splitCube.setMomentum(mainWorldParams.splitMomentum);
          splitCube.team_id = teamID;
          lock (mainWorld)
          {
