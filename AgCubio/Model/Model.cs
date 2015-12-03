@@ -484,6 +484,8 @@ namespace AgCubio
       /// </summary>
       public int smoothingIncrement { get; } = 1500;
       public int splitDistance { get; } = 20;
+      public int splitDecayRate { get; } = 10;
+      public int splitMomentum { get; } = 10;
 
       /// <summary>
       /// Default World Parameters construtor
@@ -623,6 +625,14 @@ namespace AgCubio
                         case "split_distance":
                            reader.Read();
                            this.splitDistance = reader.ReadContentAsInt();
+                           break;
+                        case "split_decay_rate":
+                           reader.Read();
+                           this.splitDecayRate = reader.ReadContentAsInt();
+                           break;
+                        case "split_momentum":
+                           reader.Read();
+                           this.splitMomentum = reader.ReadContentAsInt();
                            break;
                         default:
                            reader.Read();
