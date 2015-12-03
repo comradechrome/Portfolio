@@ -273,7 +273,7 @@ namespace Server
                      {
                         momentum -= momentum * mainWorldParams.splitDecayRate / (100 * mainWorldParams.heartbeatsPerSecond);
                         cube.setMomentum(momentum);
-                     }
+                     }    
                   }
 
                }
@@ -497,9 +497,9 @@ namespace Server
                // create a list of all Player and virus ID's so we can itterate through them
                HashSet<int> playersViruses = new HashSet<int>(mainWorld.playerCubes.Values);
                playersViruses.UnionWith(mainWorld.virusList);
-               foreach (HashSet<Cube> team in mainWorld.teams.Values)
-                  foreach (Cube cube in team)
-                     playersViruses.Add(cube.uid);
+                    foreach (HashSet<Cube> team in mainWorld.teams.Values)
+                        foreach (Cube cube in team)
+                            playersViruses.Add(cube.uid);
 
                foreach (var cubeID in playersViruses)
                {
@@ -553,14 +553,14 @@ namespace Server
                               }
                               else if (cube.team_id != 0)
                               {
-                                 if (playerCubeY2 < cubeY1)
-                                    playerCube.loc_y = cubeY1 - playerCube.Width / 2;
-                                 if (playerCubeY1 > cubeY2)
-                                    playerCube.loc_y = cubeY2 + playerCube.Width / 2;
-                                 if (playerCubeX2 > cubeX1)
-                                    playerCube.loc_x = cubeX1 - playerCube.Width / 2;
-                                 if (playerCubeY2 < cubeY1)
-                                    playerCube.loc_x = cubeX2 + playerCube.Width / 2;
+                                            if (playerCubeY2 > cubeY1)
+                                                playerCube.loc_y += 1;
+                                            if (playerCubeY1 < cubeY2)
+                                                playerCube.loc_y -= 1;
+                                            if (playerCubeX2 > cubeX1)
+                                                playerCube.loc_x += 1;
+                                            if (playerCubeX1 < cubeX2)
+                                                playerCube.loc_x -= 1;
                               }
                               // cube mass is greater than player so we remove player cube (don't check if we're a virus)
                               else if (cube.Mass > playerCube.Mass && !playerCube.food)
@@ -637,7 +637,7 @@ namespace Server
                   if (mainWorld.teams.ContainsKey(playerID))
                   {
                      foreach (Cube cube in mainWorld.teams[playerID])
-                     {
+               {
                         playerCubes.Add(cube);
                      }
                   }
