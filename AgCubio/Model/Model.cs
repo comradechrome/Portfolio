@@ -69,9 +69,9 @@ namespace AgCubio
       public int team_id { get; set; }
 
       /// <summary>
-      /// On splits, the momentum will be > 0 and cause the cube to move faster. Default value is 0
+      /// On splits, the momentum will be > 1 and cause the cube to move faster. Default value is 1 (should not ever be zero)
       /// </summary>
-      private double momentum { get; set; } = 0;
+      private double momentum { get; set; } = 1;
 
       /// <summary>
       /// Width is  mass ^ .65 which gets us close to the supplied client
@@ -470,7 +470,7 @@ namespace AgCubio
       /// <summary>
       /// percent per second chance that a virus will be generated
       /// </summary>
-      public int virusProbability { get; } = 5;
+      public int virusProbability { get; } = 10;
 
       public int acceleratedAttrition { get; } = 800;
       public int foodRandomFactor { get; } = 100;

@@ -98,7 +98,6 @@ namespace Server
          modifiedCubes.UnionWith(processMoves());
          // process cube splits
          modifiedCubes.UnionWith(processSplits());
-         // TODO: processSplits();
          // virus mechanics - append any created or destroyed virus cubes to the json string builder
          modifiedCubes.UnionWith(spawnVirus());
          // players eating food and players eating players, players hitting  
@@ -162,7 +161,7 @@ namespace Server
       {
          var chars = "~@#$%^&*+-:;<>?}{[]|";
          // Name format is 'length' random characters + VIRUS + 'length' random characters (in reverse)
-         var stringChars = new char[length * 2 + 5];
+         var stringChars = new char[length * 2 + 1];
          var random = new Random();
 
          for (int i = 0; i < length; i++)
@@ -172,10 +171,10 @@ namespace Server
          }
 
          stringChars[length] = 'V';
-         stringChars[length + 1] = 'I';
-         stringChars[length + 2] = 'R';
-         stringChars[length + 3] = 'U';
-         stringChars[length + 4] = 'S';
+         //stringChars[length + 1] = 'I';
+         //stringChars[length + 2] = 'R';
+         //stringChars[length + 3] = 'U';
+         //stringChars[length + 4] = 'S';
 
 
          var name = new String(stringChars);
@@ -266,15 +265,15 @@ namespace Server
                         cube.Mass -= cube.Mass * mainWorldParams.attritionRate /
                                            (20000 * mainWorldParams.heartbeatsPerSecond);
                      }
-                     // decay the cubes momentum if less than one, otherwise set it to zero
+                     // decay the cubes momentum if greater than two, otherwise set it to one
                      double momentum = cube.getMomentum();
-                     if (momentum < 1)
-                        cube.setMomentum(0);
+                     if (momentum < 2)
+                        cube.setMomentum(1);
                      else
                      {
                         momentum -= momentum * mainWorldParams.splitDecayRate / (100 * mainWorldParams.heartbeatsPerSecond);
                         cube.setMomentum(momentum);
-                     }    
+                     }
                   }
 
                }
@@ -390,7 +389,7 @@ namespace Server
          double minFactor = 3 * scaleConst + mainWorldParams.lowSpeed * scaleConst;
          double maxFactor = 3 * scaleConst + mainWorldParams.topSpeed * scaleConst;
 
-         double factor = (3 * mainWorldParams.splitMomentum) * scaleConst + mainWorldParams.topSpeed +
+         double factor = 3 * mainWorldParams.splitMomentum * scaleConst + mainWorldParams.topSpeed +
                               ((mainWorldParams.minSplitMass - mass) / smoothingIncrement) * scaleConst;
 
          if (factor < minFactor) { return minFactor; }
@@ -498,9 +497,9 @@ namespace Server
                // create a list of all Player and virus ID's so we can itterate through them
                HashSet<int> playersViruses = new HashSet<int>(mainWorld.playerCubes.Values);
                playersViruses.UnionWith(mainWorld.virusList);
-                    foreach (HashSet<Cube> team in mainWorld.teams.Values)
-                        foreach (Cube cube in team)
-                            playersViruses.Add(cube.uid);
+               foreach (HashSet<Cube> team in mainWorld.teams.Values)
+                  foreach (Cube cube in team)
+                     playersViruses.Add(cube.uid);
 
                foreach (var cubeID in playersViruses)
                {
@@ -554,14 +553,14 @@ namespace Server
                               }
                               else if (cube.team_id != 0)
                               {
-                                            if (playerCubeY2 < cubeY1)
-                                                playerCube.loc_y = cubeY1 - playerCube.Width / 2;
-                                            if (playerCubeY1 > cubeY2)
-                                                playerCube.loc_y = cubeY2 + playerCube.Width / 2;
-                                            if (playerCubeX2 > cubeX1)
-                                                playerCube.loc_x = cubeX1 - playerCube.Width / 2;
-                                            if (playerCubeY2 < cubeY1)
-                                                playerCube.loc_x = cubeX2 + playerCube.Width / 2;
+                                 if (playerCubeY2 < cubeY1)
+                                    playerCube.loc_y = cubeY1 - playerCube.Width / 2;
+                                 if (playerCubeY1 > cubeY2)
+                                    playerCube.loc_y = cubeY2 + playerCube.Width / 2;
+                                 if (playerCubeX2 > cubeX1)
+                                    playerCube.loc_x = cubeX1 - playerCube.Width / 2;
+                                 if (playerCubeY2 < cubeY1)
+                                    playerCube.loc_x = cubeX2 + playerCube.Width / 2;
                               }
                               // cube mass is greater than player so we remove player cube (don't check if we're a virus)
                               else if (cube.Mass > playerCube.Mass && !playerCube.food)
@@ -630,10 +629,22 @@ namespace Server
          {
             lock (mainWorld)
             {
+
                //append all player cubes to the string builder
-               foreach (var playerID in mainWorld.playerCubes)
+               foreach (int playerID in mainWorld.playerCubes.Values)
                {
-                  playerCubes.Add(mainWorld.worldCubes[playerID.Value]);
+                  playerCubes.Add(mainWorld.worldCubes[playerID]);
+                  if (mainWorld.teams.ContainsKey(playerID))
+                  {
+                     foreach (Cube cube in mainWorld.teams[playerID])
+                     {
+                        playerCubes.Add(cube);
+                     }
+                  }
+                  playerCubes.Add(mainWorld.worldCubes[playerID]);
+
+
+
                }
             }
          }

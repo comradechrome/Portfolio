@@ -55,7 +55,7 @@ namespace AgCubio
         private static long elapsedSecs;
 
         private double biggestMass = 0;
-        Font myFont = new Font("Arial", 10);
+        Font myFont = new Font("Arial", 8);
 
 
         /// <summary>
