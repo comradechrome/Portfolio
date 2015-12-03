@@ -391,7 +391,7 @@ namespace Server
                   originalCube.Mass /= 2;
                   originalCube.loc_x -= newWidth;
                   originalCube.loc_y -= newWidth;
-                 // originalCube.team_id = originalCube.uid;
+                  originalCube.team_id = originalCube.uid;
                   lock (mainWorld)
                   {
                      mainWorld.addCube(newCube);
@@ -486,6 +486,7 @@ namespace Server
                                  cube.Value.Mass = 0;
                                  infectedCubes.Add(playerCube);
                               }
+                             // else if()
                               // cube mass is greater than player so we remove player cube (don't check if we're a virus)
                               else if (cube.Value.Mass > playerCube.Mass && !playerCube.food)
                               {
