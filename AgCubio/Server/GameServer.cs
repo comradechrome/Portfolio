@@ -460,8 +460,8 @@ namespace Server
             Cube newCube = new Cube(newX, newY, splitCube.argb_color, uid++, teamID, false, name, splitCube.Mass / 2);
             newCube.momentum = mainWorldParams.splitMomentum;
 
-            newCube.mergeDecay = 10;
-            splitCube.mergeDecay = 10;
+            newCube.mergeDecay += 10;
+            splitCube.mergeDecay += 10;
 
             splitCube.Mass /= 2;
             //splitCube.setMomentum(mainWorldParams.splitMomentum);
@@ -633,8 +633,9 @@ namespace Server
         /// <param name="infectedCubes"></param>
         private static void processInfected(HashSet<Cube> infectedCubes)
         {
-            foreach (var cube in infectedCubes)
+            foreach (Cube cube in infectedCubes)
             {
+
                 Console.WriteLine(cube.Name + " was infected!!");
             }
         }

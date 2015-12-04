@@ -68,7 +68,7 @@ namespace AgCubio
         /// 
         /// </summary>
         [JsonIgnore]
-        public double mergeDecay { get; set; }
+        public double mergeDecay { get; set; } =  0;
         /// <summary>
         /// Width is  mass ^ .65 which gets us close to the supplied client
         /// Width is a read only property
