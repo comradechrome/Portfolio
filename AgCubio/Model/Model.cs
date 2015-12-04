@@ -70,7 +70,7 @@ namespace AgCubio
         [JsonIgnore]
         public double mergeDecay { get; set; } =  0;
         /// <summary>
-        /// Width is  mass ^ .65 which gets us close to the supplied client
+        /// Width is  mass ^ 2 which gets us close to the supplied client
         /// Width is a read only property
         /// </summary>
         [JsonIgnore]
@@ -615,11 +615,11 @@ namespace AgCubio
                                     break;
                                 case "allowed_overlap":
                                     reader.Read();
-                                    this.allowedOverlap = reader.ReadContentAsInt();
+                                    this.allowedOverlap = reader.ReadContentAsDouble();
                                     break;
                                 case "scale_constant":
                                     reader.Read();
-                                    this.scaleConst = reader.ReadContentAsInt();
+                                    this.scaleConst = reader.ReadContentAsDouble();
                                     break;
                                 case "smoothing_increment":
                                     reader.Read();

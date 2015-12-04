@@ -18,8 +18,8 @@
   <accelerated_attrition>800</accelerated_attrition>
   <food_random_factor>100</food_random_factor>
   <food_growth_factor>5</food_growth_factor>
-  <allowed_overlap>.25</allowed_overlap>
-  <scale_constant>.00125</scale_constant>
+  <allowed_overlap>0.25</allowed_overlap>
+  <scale_constant>0.00125</scale_constant>
   <smoothing_increment>1500</smoothing_increment>
   <split_distance>20</split_distance>
   <split_decay>10</split_decay>

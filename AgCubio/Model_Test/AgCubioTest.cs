@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace AgCubio
 {
@@ -19,7 +20,7 @@ namespace AgCubio
          Assert.IsFalse(cube.food);
          Assert.AreEqual("cube1", cube.Name);
          Assert.AreEqual(400, cube.Mass);
-         Assert.AreEqual(49, (int)cube.Width);
+         Assert.AreEqual(20, (int)cube.Width);
 
       }
 
@@ -76,14 +77,30 @@ namespace AgCubio
          World world = new World(100, 200);
          Cube cube1 = new Cube(1, 1, -124342, 123, 0, false, "cube1", 400);
          Cube cube2 = new Cube(1, 1, -124342, 125, 123, false, "cube2", 400);
+
+         world.playerCubes[cube1.Name] = cube1.uid;
+         world.virusList.Add(cube1.uid);
+
+         HashSet<Cube> cubes = new HashSet<Cube>();
+         cubes.Add(cube1);
+         cubes.Add(cube2);
+
+
          world.addCube(cube1);
          world.addCube(cube2);
+         
+         world.teams[cube1.uid] = cubes;
          world.removeCube(cube2);
+         world.removeCube(cube1);
+         
 
-         Assert.AreEqual(1, world.ourCubes.Count);
+
+         Assert.AreEqual(0, world.ourCubes.Count);
+
+      
 
 
-      }
+   }
 
       [TestMethod]
       public void processCube()
@@ -113,11 +130,80 @@ namespace AgCubio
 
          Tuple<Double,Double,Double> cubeAvg = world.getOurCubesAverage();
          
-         Assert.AreEqual(10,(int)cubeAvg.Item1);
-         Assert.AreEqual(10, (int)cubeAvg.Item2);
-         Assert.AreEqual(19, (int)cubeAvg.Item3);
+         Assert.AreEqual(12, (int)cubeAvg.Item1);
+         Assert.AreEqual(12, (int)cubeAvg.Item2);
+         Assert.AreEqual(15, (int)cubeAvg.Item3);
 
 
+      }
+
+      [TestMethod]
+      public void momentum()
+      {
+         World world = new World(100, 200);
+         Cube cube1 = new Cube(10, 10, -124342, 123, 0, false, "cube1", 34);
+         cube1.momentum = 5;
+
+         Assert.AreEqual(5, cube1.momentum);
+      }
+
+      [TestMethod]
+      public void mergeDecay()
+      {
+         World world = new World(100, 200);
+         Cube cube1 = new Cube(10, 10, -124342, 123, 0, false, "cube1", 34);
+         cube1.mergeDecay = 5;
+
+         Assert.AreEqual(5, cube1.mergeDecay);
+      }
+
+      [TestMethod]
+      public void edges()
+      {
+         Cube cube1 = new Cube(100, 100, -124342, 123, 0, false, "cube1", 100);
+
+         Tuple<int, int, int, int> edges = cube1.edges;
+
+         Assert.AreEqual(95, edges.Item1);
+         Assert.AreEqual(95, edges.Item2);
+         Assert.AreEqual(105, edges.Item3);
+         Assert.AreEqual(105, edges.Item4);
+
+      }
+
+      [TestMethod]
+      public void equalsOverloads()
+      {
+         Cube cube1 = new Cube(100, 100, -124342, 123, 0, false, "cube1", 100);
+         Cube cube2 = new Cube(100, 100, -124342, 123, 0, false, "cube1", 100);
+         Cube cube3 = new Cube(100, 100, -124342, 124, 0, false, "cube3", 100);
+         Cube cube4 = null;
+         Cube cube5 = null;
+
+
+
+         Assert.AreEqual(cube1,cube2);
+         Assert.AreNotEqual(cube1, cube3);
+         Assert.AreEqual(cube4, cube5);
+         Assert.AreNotEqual(cube3, cube5);
+
+         Assert.IsTrue(cube1 == cube2);
+         Assert.IsTrue(cube1 != cube3);
+         Assert.IsFalse(cube1.Equals(cube4));
+
+         //Assert.IsTrue(cube4.Equals(cube5));
+
+         Assert.AreEqual(123, cube1.GetHashCode());
+
+
+      }
+
+      [TestMethod]
+      public void worldParams()
+      {
+         WorldParams worldParams = new WorldParams(@"..\..\..\Resources\Libraries\world_parameters.xml");
+
+         Assert.AreEqual(1000, worldParams.width);
       }
 
    }
