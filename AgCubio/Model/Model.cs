@@ -458,9 +458,17 @@ namespace AgCubio
         /// percent per second chance that a virus will be generated
         /// </summary>
         public int virusProbability { get; } = 10;
-
+        /// <summary>
+        /// 
+        /// </summary>
         public int acceleratedAttrition { get; } = 800;
+        /// <summary>
+        /// 
+        /// </summary>
         public int foodRandomFactor { get; } = 100;
+        /// <summary>
+        /// 
+        /// </summary>
         public int foodGrowthFactor { get; } = 5;
         /// <summary>
         /// the percentage of cube overlap allowed before a cube can be 'eaten'
