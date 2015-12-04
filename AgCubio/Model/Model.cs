@@ -68,7 +68,7 @@ namespace AgCubio
         /// 
         /// </summary>
         [JsonIgnore]
-        public double mergeDecay { get; set; }
+        public double mergeDecay { get; set; } =  0;
         /// <summary>
         /// Width is  mass ^ 2 which gets us close to the supplied client
         /// Width is a read only property
@@ -475,10 +475,12 @@ namespace AgCubio
         /// <summary>
         /// this adjusts how much the factor affects speed as mass increases
         /// </summary>
-        public int smoothingIncrement { get; } = 1500;
+        public int smoothingIncrement { get; } = 200;
         public double splitDistance { get; } = 3;
         public int splitDecayRate { get; } = 10;
         public int splitMomentum { get; } = 50;
+        public int splitDecay { get; } = 10;
+        public int infectedDecay { get; } = 100;
 
         /// <summary>
         /// Default World Parameters construtor
@@ -626,6 +628,14 @@ namespace AgCubio
                                 case "split_momentum":
                                     reader.Read();
                                     this.splitMomentum = reader.ReadContentAsInt();
+                                    break;
+                                case "split_decay":
+                                    reader.Read();
+                                    this.splitDecay = reader.ReadContentAsInt();
+                                    break;
+                                case "infected_decay":
+                                    reader.Read();
+                                    this.infectedDecay = reader.ReadContentAsInt();
                                     break;
                                 default:
                                     reader.Read();

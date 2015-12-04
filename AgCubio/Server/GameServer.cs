@@ -28,6 +28,8 @@ namespace Server
                                 = new Dictionary<string, Tuple<int, int>>();
         private static Dictionary<string, Tuple<int, int>> splitPoints
                                 = new Dictionary<string, Tuple<int, int>>();
+        private static Dictionary<string, Tuple<int, int>> decayPoints
+                                = new Dictionary<string, Tuple<int, int>>();
         private static WorldParams mainWorldParams;
         private static Timer heartbeat;
 
@@ -100,7 +102,7 @@ namespace Server
             // process cube movements
             modifiedCubes.UnionWith(processMoves());
             // process cube splits
-            modifiedCubes.UnionWith(processSplits());
+            modifiedCubes.UnionWith(processSplits(ref splitPoints, mainWorldParams.splitDecay));
             // virus mechanics - append any created or destroyed virus cubes to the json string builder
             modifiedCubes.UnionWith(spawnVirus());
             // players eating food and players eating players, players hitting  
@@ -409,39 +411,39 @@ namespace Server
         /// TODO: remove player and disconnect socket when last cube has been eaten (maybe handle in absorb mehtod)
         /// TODO: gather statisics for PS9 - Play Time, Max mass, mass at death, etc
         /// </summary>
-        private static HashSet<Cube> processSplits()
+        private static HashSet<Cube> processSplits(ref Dictionary<string, Tuple<int, int>> points, int decayRate)
         {
             HashSet<Cube> updatedCubes = new HashSet<Cube>();
-            if (splitPoints.Count > 0)
+            if (points.Count > 0)
             {
                 lock (mainWorld)
                 {
-                    foreach (string name in splitPoints.Keys)
+                    foreach (string name in points.Keys)
                     {
                         Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
                         if (originalCube.team_id == 0)
                         {
                             int teamID = originalCube.uid;
                             mainWorld.teams.Add(teamID, new HashSet<Cube>());
-                            splitHelper(teamID, name, originalCube, updatedCubes, splitPoints[name]);
+                            splitHelper(teamID, name, originalCube, updatedCubes, points[name], decayRate);
                         }
                         else
                         {
                             foreach (Cube cube in mainWorld.teams[originalCube.team_id].ToArray())
                             {
                                 if (cube.Mass > mainWorldParams.minSplitMass)
-                                    splitHelper(originalCube.team_id, name, cube, updatedCubes, splitPoints[name]);
+                                    splitHelper(originalCube.team_id, name, cube, updatedCubes, points[name], decayRate);
                             }
                         }
                     }
-                    splitPoints = new Dictionary<string, Tuple<int, int>>();
+                    points = new Dictionary<string, Tuple<int, int>>();
                 }
             }
 
             return updatedCubes;
         }
 
-        private static void splitHelper(int teamID, string name, Cube splitCube, HashSet<Cube> updatedCubes, Tuple<int, int> pointer)
+        private static void splitHelper(int teamID, string name, Cube splitCube, HashSet<Cube> updatedCubes, Tuple<int, int> pointer, int decayRate)
         {
             // calculate the distance from our mouse to the cube
             double distX = pointer.Item1 - splitCube.loc_x;
@@ -460,8 +462,8 @@ namespace Server
             Cube newCube = new Cube(newX, newY, splitCube.argb_color, uid++, teamID, false, name, splitCube.Mass / 2);
             newCube.momentum = mainWorldParams.splitMomentum;
 
-            newCube.mergeDecay = 10;
-            splitCube.mergeDecay = 10;
+            newCube.mergeDecay += decayRate;
+            splitCube.mergeDecay += decayRate;
 
             splitCube.Mass /= 2;
             //splitCube.setMomentum(mainWorldParams.splitMomentum);
@@ -557,6 +559,7 @@ namespace Server
                                         else if (cube.food)
                                         {
                                             // remove virus and add player to infected HashSet
+                                            decayPoints.Add(playerCube.Name, mousePoints[playerCube.Name]);
                                             cube.Mass = 0;
                                             infectedCubes.Add(playerCube);
                                         }
@@ -604,7 +607,7 @@ namespace Server
                             }
                         }
                     }
-                    processInfected(infectedCubes);
+                    if (infectedCubes.Count>0) processInfected(infectedCubes);
                 }
             }
         }
@@ -633,8 +636,9 @@ namespace Server
         /// <param name="infectedCubes"></param>
         private static void processInfected(HashSet<Cube> infectedCubes)
         {
-            foreach (var cube in infectedCubes)
+            foreach (Cube cube in infectedCubes)
             {
+                processSplits(ref decayPoints, mainWorldParams.infectedDecay);
                 Console.WriteLine(cube.Name + " was infected!!");
             }
         }
