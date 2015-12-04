@@ -88,7 +88,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                //Console.WriteLine(e.ToString());
+                Console.WriteLine(e.ToString());
             }
             return ClientStateObject.workSocket;
         }
@@ -108,7 +108,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-               // Console.WriteLine(e.ToString());
+                Console.WriteLine(e.ToString());
             }
             // run callback defined in view - send Player name to server
             state.CallbackAction(state);
@@ -145,7 +145,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                //Console.WriteLine(e.ToString());
+                Console.WriteLine(e.ToString());
             }
 
         }
@@ -164,7 +164,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-              //  Console.WriteLine(e.ToString());
+                Console.WriteLine(e.ToString());
             }
         }
 
@@ -185,7 +185,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-             //   Console.WriteLine(e);
+                Console.WriteLine(e);
             }
 
         }
@@ -210,7 +210,7 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-             //   Console.WriteLine(e.ToString());
+                Console.WriteLine(e.ToString());
             }
         }
 
@@ -254,17 +254,12 @@ namespace AgCubio
                 Console.WriteLine("Waiting for a connection...");
                 listener.BeginAccept(new AsyncCallback(Accept_a_New_Client), serverStateObject);
 
-                // Wait until a connection is made before continuing.
-                //callback();
-
             }
             catch (Exception e)
             {
-             //   Console.WriteLine(e.ToString());
+                Console.WriteLine(e.ToString());
             }
-
         }
-
 
         private static void Accept_a_New_Client(IAsyncResult ar)
         {
@@ -281,44 +276,5 @@ namespace AgCubio
 
             listenerState.workSocket.BeginAccept(new AsyncCallback(Accept_a_New_Client), listenerState);
         }
-
-
-
-
-
-        //public static void ReadCallback(IAsyncResult ar)
-        //{
-        //    String content = String.Empty;
-
-        //    // Retrieve the state object and the handler socket
-        //    // from the asynchronous state object.
-        //    StateObject state = (StateObject)ar.AsyncState;
-        //    Socket handler = state.workSocket;
-
-        //    // Read data from the client socket. 
-        //    int bytesRead = handler.EndReceive(ar);
-
-        //    if (bytesRead > 0)
-        //    {
-        //        // There  might be more data, so store the data received so far.
-        //        state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
-
-        //        // Check for end-of-file tag. If it is not there, read more data.
-        //        content = state.sb.ToString();
-        //        if (content.IndexOf("<EOF>") > -1)
-        //        {
-        //            // All the data has been read from the client. Display it on the console.
-        //            Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", content.Length, content);
-        //            // Echo the data back to the client.
-        //            Send(handler, content);
-        //        }
-        //        else
-        //        {
-        //            // Not all data received. Get more.
-        //            handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-        //            new AsyncCallback(ReadCallback), state);
-        //        }
-        //    }
-        //}
     }
 }
