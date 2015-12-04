@@ -73,6 +73,7 @@ namespace AgCubio
       /// Width is  mass ^ .65 which gets us close to the supplied client
       /// Width is a read only property
       /// </summary>
+      [JsonIgnore]
       public double Width
       {
          get { return getWidth(Mass); }
@@ -81,6 +82,7 @@ namespace AgCubio
       /// returns the x,y coordinates of the top left and bottom right of the cube (in that order)
       /// x1,y1 are the top left and x2,y2 are the bottom right
       /// </summary>
+      [JsonIgnore]
       public Tuple<int, int, int, int> edges
       {
          get
@@ -126,7 +128,7 @@ namespace AgCubio
       /// <returns></returns>
       public static bool operator ==(Cube c1, Cube c2)
       {
-         if (c1 == null && c2 == null)
+         if (ReferenceEquals(c1, null) && ReferenceEquals(c2, null))
             return true;
          else
             return Equals(c1.uid, c2.uid);
@@ -226,7 +228,9 @@ namespace AgCubio
         /// Dictionary of player cubes used by the server. Key: PlayerName, Value: Player ID
       /// </summary>
         public Dictionary<string, int> playerCubes { get; }
-
+      /// <summary>
+      /// 
+      /// </summary>
       public HashSet<int> virusList { get; set; } 
 
 
@@ -302,7 +306,7 @@ namespace AgCubio
             worldCubes.Remove(cube.uid);
          if (ourCubes.ContainsKey(cube.uid))
             ourCubes.Remove(cube.uid);
-         if (playerCubes.ContainsKey(cube.Name) /*&& cube.team_id != 0*/)
+         if (playerCubes.ContainsKey(cube.Name) && cube.team_id == 0)
             playerCubes.Remove(cube.Name);
          if (virusList.Contains(cube.uid))
             virusList.Remove(cube.uid);

@@ -110,10 +110,12 @@ namespace Server
          // send update to all players of all added and eaten food along will all players
          foreach (var cube in modifiedCubes)
          {
+            if (cube == null) continue;
             jsonCubes.Append(JsonConvert.SerializeObject(cube) + "\n");
          }
          sendUpdates(jsonCubes);
          //start the heartbeat back up
+         Console.WriteLine("heartbeat");
          heartbeat.Start();
 
       }
@@ -559,24 +561,24 @@ namespace Server
                                  if (playerCubeY2 > cubeY1)
                                  {
                                     playerCube.loc_y += 1;
-                                    //merge(playerCube, cube);
+                                    merge(playerCube, cube);
                                  }
                                  if (playerCubeY1 < cubeY2)
                                  {
                                     playerCube.loc_y -= 1;
-                                    //merge(playerCube, cube);
+                                    merge(playerCube, cube);
                                  }
 
                                  if (playerCubeX2 > cubeX1)
                                  {
                                     playerCube.loc_x += 1;
-                                    //merge(playerCube, cube);
+                                    merge(playerCube, cube);
                                  }
 
                                  if (playerCubeX1 < cubeX2)
                                  {
                                     playerCube.loc_x -= 1;
-                                    //merge(playerCube, cube);
+                                    merge(playerCube, cube);
                                  }
                               }
                               // cube mass is greater than player so we remove player cube (don't check if we're a virus)
@@ -914,7 +916,6 @@ namespace Server
 
       private static void ActionReceived(StateObject state)
       {
-
          // save our state string buffer to a new String
          string actionString = state.sb.ToString();
          string playerName = state.ID;
