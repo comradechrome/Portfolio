@@ -59,6 +59,8 @@ namespace Server
             GenerateFoodCube();
          }
 
+
+
          Network.Server_Awaiting_Client(NameReceived);
 
          SetTimer();
@@ -86,10 +88,11 @@ namespace Server
          // String Builder to hold all cubes needing an update.
          StringBuilder jsonCubes = new StringBuilder();
          HashSet<Cube> modifiedCubes = new HashSet<Cube>();
+
          // stop the heartbeat
          heartbeat.Stop();
          // grow new food if needed and append to modifiedCubes set
-         modifiedCubes.Add(createFood());
+         modifiedCubes.UnionWith(createFood());
          // shrink players
          attrition();
          // randomly increate the mass of food cubes
@@ -128,7 +131,7 @@ namespace Server
       private static HashSet<Cube> spawnVirus()
       {
          HashSet<Cube> cubes = new HashSet<Cube>();
-         Cube cube = null;
+         Cube cube;
          lock (mainWorld)
          {
             if (rand.Next(10000) < mainWorldParams.virusProbability * 100 / mainWorldParams.heartbeatsPerSecond)
@@ -147,7 +150,7 @@ namespace Server
             }
             foreach (var virusID in mainWorld.virusList)
             {
-               mainWorld.worldCubes[virusID].Name = virusName(7);
+               mainWorld.worldCubes[virusID].Name = virusName(3);
                cubes.Add(mainWorld.worldCubes[virusID]);
             }
 
@@ -203,8 +206,9 @@ namespace Server
          return deadCubes;
       }
 
-      private static Cube createFood()
+      private static HashSet<Cube> createFood()
       {
+         HashSet<Cube> cubes = new HashSet<Cube>();
          int foodCount = 0;
 
          lock (mainWorld)
@@ -219,9 +223,9 @@ namespace Server
             }
          }
          if (foodCount < mainWorldParams.maxFood)
-            return GenerateFoodCube();
-         else
-            return null;
+            cubes.Add(GenerateFoodCube());
+
+            return cubes;
       }
 
       /// <summary>
@@ -923,43 +927,46 @@ namespace Server
          state.sb.Clear();
          int x = 0;
          int y = 0;
-
-         if (actionString.StartsWith("(move"))
+         if (mainWorld.playerCubes.ContainsKey(playerName))
          {
-            // 'Groups[1]' is the x coordinate, 'Groups[2]' is the y coordinate
-            Regex pattern = new Regex(@"\(move,\s*(\-?\d+),\s*(\-?\d+).*");
-            Match match = pattern.Match(actionString);
-            // get the width of player cube
-            double width = mainWorld.worldCubes[mainWorld.playerCubes[playerName]].Width;
-            // save x,y values but ensure that they fall within valide ranges
-            x = widthRange(int.Parse(match.Groups[1].Value), width);
-            y = heightRange(int.Parse(match.Groups[2].Value), width);
-
-            // add to our mousePoints dictionary. should we Lock this ??
-            lock (mainWorld)
+            if (actionString.StartsWith("(move"))
             {
-               mousePoints[playerName] = Tuple.Create(x, y);
+               // 'Groups[1]' is the x coordinate, 'Groups[2]' is the y coordinate
+               Regex pattern = new Regex(@"\(move,\s*(\-?\d+),\s*(\-?\d+).*");
+               Match match = pattern.Match(actionString);
+               // get the width of player cube
+
+               double width = mainWorld.worldCubes[mainWorld.playerCubes[playerName]].Width;
+               // save x,y values but ensure that they fall within valide ranges
+               x = widthRange(int.Parse(match.Groups[1].Value), width);
+               y = heightRange(int.Parse(match.Groups[2].Value), width);
+
+               // add to our mousePoints dictionary. should we Lock this ??
+               lock (mainWorld)
+               {
+                  mousePoints[playerName] = Tuple.Create(x, y);
+               }
+
             }
-
-         }
-         else if (actionString.StartsWith("(split"))
-         {
-            // TODO: repeat code, can combine this with 'move'
-            // 'Groups[1]' is the x coordinate, 'Groups[2]' is the y coordinate
-            Regex pattern = new Regex(@"\(split,\s*(\-?\d+),\s*(\-?\d+).*");
-            Match match = pattern.Match(actionString);
-            // get the width of player cube
-            double width = mainWorld.worldCubes[mainWorld.playerCubes[playerName]].Width;
-            // save x,y values but ensure that they fall within valide ranges
-            x = widthRange(int.Parse(match.Groups[1].Value), width);
-            y = heightRange(int.Parse(match.Groups[2].Value), width);
-
-            // add to our mousePoints dictionary. should we Lock this ??
-            lock (mainWorld)
+            else if (actionString.StartsWith("(split"))
             {
-               splitPoints[playerName] = Tuple.Create(x, y);
-               //splitPoints.Add(playerName, Tuple.Create(x, y));
-               Console.WriteLine(playerName + splitPoints[playerName].ToString());
+               // TODO: repeat code, can combine this with 'move'
+               // 'Groups[1]' is the x coordinate, 'Groups[2]' is the y coordinate
+               Regex pattern = new Regex(@"\(split,\s*(\-?\d+),\s*(\-?\d+).*");
+               Match match = pattern.Match(actionString);
+               // get the width of player cube
+               double width = mainWorld.worldCubes[mainWorld.playerCubes[playerName]].Width;
+               // save x,y values but ensure that they fall within valide ranges
+               x = widthRange(int.Parse(match.Groups[1].Value), width);
+               y = heightRange(int.Parse(match.Groups[2].Value), width);
+
+               // add to our mousePoints dictionary. should we Lock this ??
+               lock (mainWorld)
+               {
+                  splitPoints[playerName] = Tuple.Create(x, y);
+                  //splitPoints.Add(playerName, Tuple.Create(x, y));
+                  Console.WriteLine(playerName + splitPoints[playerName].ToString());
+               }
             }
          }
 
