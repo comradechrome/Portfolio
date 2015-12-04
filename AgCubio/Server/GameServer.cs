@@ -187,10 +187,10 @@ namespace Server
          lock (mainWorld)
          {
             // find all cubes with zero mass
-            foreach (var cube in mainWorld.worldCubes)
+            foreach (Cube cube in mainWorld.worldCubes.Values)
             {
-               if (cube.Value.Mass < 1.0)
-                  deadCubes.Add(cube.Value);
+               if (cube.Mass < 1.0)
+                  deadCubes.Add(cube);
             }
             // remove cubes from world
             foreach (var cube in deadCubes)
@@ -252,19 +252,19 @@ namespace Server
                   }
 
                   foreach (Cube cube in teamCubes)
-               {
-                  // decrease mass if cube is above minimum mass - 2%/sec if attrition rate is 200
-                  if (cube.Mass > mainWorldParams.acceleratedAttrition)
                   {
-                     cube.Mass -= cube.Mass * mainWorldParams.attritionRate /
-                                        (10000 * mainWorldParams.heartbeatsPerSecond);
-                  }
-                  else if (cube.Mass > minMass)
-                  {
-                     // decrease mass by 1%/sec if attrition rate is 200
-                     cube.Mass -= cube.Mass * mainWorldParams.attritionRate /
-                                        (20000 * mainWorldParams.heartbeatsPerSecond);
-                  }
+                     // decrease mass if cube is above minimum mass - 2%/sec if attrition rate is 200
+                     if (cube.Mass > mainWorldParams.acceleratedAttrition)
+                     {
+                        cube.Mass -= cube.Mass * mainWorldParams.attritionRate /
+                                           (10000 * mainWorldParams.heartbeatsPerSecond);
+                     }
+                     else if (cube.Mass > minMass)
+                     {
+                        // decrease mass by 1%/sec if attrition rate is 200
+                        cube.Mass -= cube.Mass * mainWorldParams.attritionRate /
+                                           (20000 * mainWorldParams.heartbeatsPerSecond);
+                     }
                      // decay the cubes momentum if greater than two, otherwise set it to one
                      double momentum = cube.momentum;
                      if (momentum < 2)
@@ -272,13 +272,13 @@ namespace Server
                      else
                      {
                         momentum -= momentum * mainWorldParams.splitDecayRate / (100 * mainWorldParams.heartbeatsPerSecond);
-                                cube.momentum = (momentum);
-                     }    
-               }
+                        cube.momentum = (momentum);
+                     }
+                  }
 
+               }
             }
          }
-      }
       }
 
       /// <summary>
@@ -326,15 +326,15 @@ namespace Server
 
                      // Add the player main cube to our hashSet
                      teamCubes.Add(mainWorld.worldCubes[playerID]);
-                            // iterate through the world and find any cubes with a matching team id
+                     // iterate through the world and find any cubes with a matching team id
                      foreach (Cube cube in mainWorld.worldCubes.Values)
                      {
-                       // Console.WriteLine("team ID: " + cube.Value.team_id + " PlayerID: " + playerID);
+                        // Console.WriteLine("team ID: " + cube.Value.team_id + " PlayerID: " + playerID);
                         if (cube.team_id == playerID)
-                        { 
+                        {
                            teamCubes.Add(cube);
                         }
-                           
+
                      }
                      // move our cube and any 'team' cubes if any
                      foreach (Cube cube in teamCubes)
@@ -356,16 +356,16 @@ namespace Server
                            cube.loc_y += distY * smoothingFactor(mass);
                         }
 
-                                if (cube.team_id != 0)
+                        if (cube.team_id != 0)
                            foreach (Cube friend in mainWorld.teams[cube.team_id])
-                                    {
+                           {
 
+                           }
                      }
                   }
                }
             }
          }
-            }
          return teamCubes;
       }
 
@@ -413,20 +413,20 @@ namespace Server
                foreach (string name in splitPoints.Keys)
                {
                   Cube originalCube = mainWorld.worldCubes[mainWorld.playerCubes[name]];
-                        if (originalCube.team_id == 0)
+                  if (originalCube.team_id == 0)
                   {
-                            int teamID = originalCube.uid;
-                            mainWorld.teams.Add(teamID, new HashSet<Cube>());
-                            splitHelper(teamID, name, originalCube, updatedCubes, splitPoints[name]);
+                     int teamID = originalCube.uid;
+                     mainWorld.teams.Add(teamID, new HashSet<Cube>());
+                     splitHelper(teamID, name, originalCube, updatedCubes, splitPoints[name]);
                   }
                   else
-                        {
-                            foreach (Cube cube in mainWorld.teams[originalCube.team_id].ToArray())
-                            {
+                  {
+                     foreach (Cube cube in mainWorld.teams[originalCube.team_id].ToArray())
+                     {
                         if (cube.Mass > mainWorldParams.minSplitMass)
-                                    splitHelper(originalCube.team_id, name, cube, updatedCubes, splitPoints[name]);
+                           splitHelper(originalCube.team_id, name, cube, updatedCubes, splitPoints[name]);
+                     }
                   }
-                        }
                }
                splitPoints = new Dictionary<string, Tuple<int, int>>();
             }
@@ -436,7 +436,7 @@ namespace Server
       }
 
       private static void splitHelper(int teamID, string name, Cube splitCube, HashSet<Cube> updatedCubes, Tuple<int, int> pointer)
-        {
+      {
          // calculate the distance from our mouse to the cube
          double distX = pointer.Item1 - splitCube.loc_x;
          double distY = pointer.Item2 - splitCube.loc_y;
@@ -450,26 +450,26 @@ namespace Server
          double newX = splitCube.loc_x + unitX * splitCube.Width * mainWorldParams.splitDistance;
          double newY = splitCube.loc_y + unitY * splitCube.Width * mainWorldParams.splitDistance;
 
-            double newWidth = Math.Sqrt(splitCube.Mass / 2);
+         double newWidth = Math.Sqrt(splitCube.Mass / 2);
          Cube newCube = new Cube(newX, newY, splitCube.argb_color, uid++, teamID, false, name, splitCube.Mass / 2);
-            newCube.momentum = mainWorldParams.splitMomentum;
+         newCube.momentum = mainWorldParams.splitMomentum;
 
-            newCube.mergeDecay = 10;
-            splitCube.mergeDecay = 10;
+         newCube.mergeDecay = 10;
+         splitCube.mergeDecay = 10;
 
-            splitCube.Mass /= 2;
+         splitCube.Mass /= 2;
          //splitCube.setMomentum(mainWorldParams.splitMomentum);
-            splitCube.team_id = teamID;
-            lock (mainWorld)
-            {
-                //mainWorld.playerCubes[name] = newCube.uid;
-                mainWorld.addCube(newCube);
-                mainWorld.teams[teamID].Add(newCube);
-                mainWorld.teams[teamID].Add(splitCube);
-            }
-            updatedCubes.Add(newCube);
-            updatedCubes.Add(splitCube);
-        }
+         splitCube.team_id = teamID;
+         lock (mainWorld)
+         {
+            //mainWorld.playerCubes[name] = newCube.uid;
+            mainWorld.addCube(newCube);
+            mainWorld.teams[teamID].Add(newCube);
+            mainWorld.teams[teamID].Add(splitCube);
+         }
+         updatedCubes.Add(newCube);
+         updatedCubes.Add(splitCube);
+      }
 
       /// <summary>
       /// 
@@ -500,9 +500,9 @@ namespace Server
                // create a list of all Player and virus ID's so we can itterate through them
                HashSet<int> playersViruses = new HashSet<int>(mainWorld.playerCubes.Values);
                playersViruses.UnionWith(mainWorld.virusList);
-                    foreach (HashSet<Cube> team in mainWorld.teams.Values)
-                        foreach (Cube cube in team)
-                            playersViruses.Add(cube.uid);
+               foreach (HashSet<Cube> team in mainWorld.teams.Values)
+                  foreach (Cube cube in team)
+                     playersViruses.Add(cube.uid);
 
                foreach (var cubeID in playersViruses)
                {
@@ -512,21 +512,21 @@ namespace Server
                   if (playerCube.Mass > 0)
                   {
                      // get the x,y coordinates of the upper left and lower right of the player/virus cube
-                     Tuple<int, int, int, int> playerCorners = playerCube.corners;
+                     Tuple<int, int, int, int> playerCorners = playerCube.edges;
 
                      int playerCubeX1 = playerCorners.Item1;
                      int playerCubeY1 = playerCorners.Item2;
                      int playerCubeX2 = playerCorners.Item3;
                      int playerCubeY2 = playerCorners.Item4;
 
-                            foreach (Cube cube in mainWorld.worldCubes.Values)
+                     foreach (Cube cube in mainWorld.worldCubes.Values)
                      {
                         // make sure we're not comparing playerCube to itself
-                                if (cube.uid != playerCube.uid)
+                        if (cube.uid != playerCube.uid)
                         {
                            // get the x,y coordinates of the upper left and lower right of the checked cube
-                                    Tuple<int, int, int, int> cubeCorners = cube.corners;
-                                    double overlap = cube.Width * mainWorldParams.allowedOverlap;
+                           Tuple<int, int, int, int> cubeCorners = cube.edges;
+                           double overlap = cube.Width * mainWorldParams.allowedOverlap;
 
                            int cubeX1 = cubeCorners.Item1 + (int)overlap;
                            int cubeY1 = cubeCorners.Item2 + (int)overlap;
@@ -541,57 +541,57 @@ namespace Server
                            // cubes overlap; figure out cube type and take appropriate action
                            {
                               // check if encountered cube is food
-                                        if (cube.food && cube.Name == "")
+                              if (cube.food && cube.Name == "")
                               {
-                                            playerCube.Mass += cube.Mass;
-                                            cube.Mass = 0;
-                                            cubeUpdates.Add(cube);
+                                 playerCube.Mass += cube.Mass;
+                                 cube.Mass = 0;
+                                 cubeUpdates.Add(cube);
                               }
                               // check if encountered cube is a virus
-                                        else if (cube.food)
+                              else if (cube.food)
                               {
                                  // remove virus and add player to infected HashSet
-                                            cube.Mass = 0;
+                                 cube.Mass = 0;
                                  infectedCubes.Add(playerCube);
                               }
-                                        else if (cube.team_id != 0)
-                                        {
-                                            if (playerCubeY2 > cubeY1)
-                                            {
-                                                playerCube.loc_y += 1;
-                                                merge(playerCube, cube);
-                                            }
-                                            if (playerCubeY1 < cubeY2)
-                                            {
-                                                playerCube.loc_y -= 1;
-                                                merge(playerCube, cube);
-                                            }
-                                                
-                                            if (playerCubeX2 > cubeX1)
-                                            {
-                                                playerCube.loc_x += 1;
-                                                merge(playerCube, cube);
-                                            }
-                                                
-                                            if (playerCubeX1 < cubeX2)
-                                            {
-                                                playerCube.loc_x -= 1;
-                                                merge(playerCube, cube);
-                                            }   
-                                        }
-                              // cube mass is greater than player so we remove player cube (don't check if we're a virus)
-                                        else if (cube.Mass > playerCube.Mass && !playerCube.food)
+                              else if (cube.team_id != 0)
                               {
-                                            cube.Mass += playerCube.Mass;
+                                 if (playerCubeY2 > cubeY1)
+                                 {
+                                    playerCube.loc_y += 1;
+                                    merge(playerCube, cube);
+                                 }
+                                 if (playerCubeY1 < cubeY2)
+                                 {
+                                    playerCube.loc_y -= 1;
+                                    merge(playerCube, cube);
+                                 }
+
+                                 if (playerCubeX2 > cubeX1)
+                                 {
+                                    playerCube.loc_x += 1;
+                                    merge(playerCube, cube);
+                                 }
+
+                                 if (playerCubeX1 < cubeX2)
+                                 {
+                                    playerCube.loc_x -= 1;
+                                    merge(playerCube, cube);
+                                 }
+                              }
+                              // cube mass is greater than player so we remove player cube (don't check if we're a virus)
+                              else if (cube.Mass > playerCube.Mass && !playerCube.food)
+                              {
+                                 cube.Mass += playerCube.Mass;
                                  killPlayer(playerCube);
                                  playerCube.Mass = 0;
                               }
                               else if (!playerCube.food)
                               // cube is smaller (or equal) than the player cube so we will remove the cube (and we're not a virus)
                               {
-                                            playerCube.Mass += cube.Mass;
-                                            killPlayer(cube);
-                                            cube.Mass = 0;
+                                 playerCube.Mass += cube.Mass;
+                                 killPlayer(cube);
+                                 cube.Mass = 0;
                               }
                            }
                         }
@@ -603,24 +603,24 @@ namespace Server
          }
       }
 
-        private static void merge(Cube cube1, Cube cube2)
-        {
-            if (cube1.mergeDecay > 0)
-                cube1.mergeDecay--;
+      private static void merge(Cube cube1, Cube cube2)
+      {
+         if (cube1.mergeDecay > 0)
+            cube1.mergeDecay--;
+         else
+         {
+            if (cube1.uid == cube1.team_id)
+            {
+               cube1.Mass += cube2.Mass;
+               cube2.Mass = 0;
+            }
             else
             {
-                if (cube1.uid == cube1.team_id)
-                {
-                    cube1.Mass += cube2.Mass;
-                    cube2.Mass = 0;
-                }
-                else
-                {
-                    cube2.Mass += cube1.Mass;
-                    cube1.Mass = 0;
-                }
+               cube2.Mass += cube1.Mass;
+               cube1.Mass = 0;
             }
-        }
+         }
+      }
 
       private static void processInfected(HashSet<Cube> infectedCubes)
       {
@@ -636,7 +636,7 @@ namespace Server
          // TODO: once we have figured out splitting, we need to add logic here to figure out if this is last of the players cubes - close socket connection
          // TODO: just as the case above, we need method to determine if this is the last of a players cubes - close socket connection
 
-         if (cube.team_id == 0)
+         if (cube.team_id == 0 || cube.team_id == cube.uid)
          {
             // Network.Send(clientStates[cube.Name].workSocket,"");
             //  Network.Stop(clientStates[cube.Name].workSocket);
@@ -673,7 +673,7 @@ namespace Server
                   if (mainWorld.teams.ContainsKey(playerID))
                   {
                      foreach (Cube cube in mainWorld.teams[playerID])
-               {
+                     {
                         playerCubes.Add(cube);
                      }
                   }
@@ -869,7 +869,7 @@ namespace Server
                         break;
                   }
 
-                  Tuple<int, int, int, int> corners = cube.Value.corners;
+                  Tuple<int, int, int, int> corners = cube.Value.edges;
 
                   int x3 = corners.Item1;
                   int y3 = corners.Item2;

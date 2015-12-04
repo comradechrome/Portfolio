@@ -81,7 +81,7 @@ namespace AgCubio
       /// returns the x,y coordinates of the top left and bottom right of the cube (in that order)
       /// x1,y1 are the top left and x2,y2 are the bottom right
       /// </summary>
-      public Tuple<int, int, int, int> corners
+      public Tuple<int, int, int, int> edges
       {
          get
          {
@@ -260,7 +260,8 @@ namespace AgCubio
             ourCubes.Add(cube.uid, cube);
          }
          // add our split cubes to ourCubes dictionary
-
+         else if (cube.team_id == ourID)
+            ourCubes.Add(cube.uid, cube);
 
          worldCubes.Add(cube.uid, cube);
       }
@@ -301,7 +302,7 @@ namespace AgCubio
             worldCubes.Remove(cube.uid);
          if (ourCubes.ContainsKey(cube.uid))
             ourCubes.Remove(cube.uid);
-            if (playerCubes.ContainsKey(cube.Name) && cube.team_id != 0)
+         if (playerCubes.ContainsKey(cube.Name) /*&& cube.team_id != 0*/)
             playerCubes.Remove(cube.Name);
          if (virusList.Contains(cube.uid))
             virusList.Remove(cube.uid);
