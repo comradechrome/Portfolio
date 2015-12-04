@@ -11,7 +11,7 @@ namespace AgCubio
       public void createCube()
       {
          Cube cube = new Cube(1, 1, -124342, 123, 124, false, "cube1", 400);
-         
+
          Assert.AreEqual(1, cube.loc_x);
          Assert.AreEqual(1, cube.loc_y);
          Assert.AreEqual(-124342, cube.argb_color);
@@ -43,7 +43,7 @@ namespace AgCubio
          world.addCube(cube1);
          world.addCube(cube2);
 
-         Assert.AreEqual(0,world.worldCubes[123].team_id);
+         Assert.AreEqual(0, world.worldCubes[123].team_id);
          Assert.AreEqual(123, world.ourCubes[125].team_id);
          Assert.AreEqual(2, world.ourCubes.Count);
 
@@ -88,19 +88,19 @@ namespace AgCubio
 
          world.addCube(cube1);
          world.addCube(cube2);
-         
+
          world.teams[cube1.uid] = cubes;
          world.removeCube(cube2);
          world.removeCube(cube1);
-         
+
 
 
          Assert.AreEqual(0, world.ourCubes.Count);
 
-      
 
 
-   }
+
+      }
 
       [TestMethod]
       public void processCube()
@@ -128,8 +128,8 @@ namespace AgCubio
          world.addCube(cube1);
          world.addCube(cube2);
 
-         Tuple<Double,Double,Double> cubeAvg = world.getOurCubesAverage();
-         
+         Tuple<Double, Double, Double> cubeAvg = world.getOurCubesAverage();
+
          Assert.AreEqual(12, (int)cubeAvg.Item1);
          Assert.AreEqual(12, (int)cubeAvg.Item2);
          Assert.AreEqual(15, (int)cubeAvg.Item3);
@@ -182,7 +182,7 @@ namespace AgCubio
 
 
 
-         Assert.AreEqual(cube1,cube2);
+         Assert.AreEqual(cube1, cube2);
          Assert.AreNotEqual(cube1, cube3);
          Assert.AreEqual(cube4, cube5);
          Assert.AreNotEqual(cube3, cube5);
@@ -203,8 +203,47 @@ namespace AgCubio
       {
          WorldParams worldParams = new WorldParams(@"..\..\..\Resources\Libraries\world_parameters.xml");
 
+         WorldParams worldParams2 = new WorldParams();
+
+
          Assert.AreEqual(1000, worldParams.width);
+         Assert.AreEqual(1000, worldParams.height);
+         Assert.AreEqual(150, worldParams.maxSplitDistance);
+         Assert.AreEqual(5, worldParams.topSpeed);
+         Assert.AreEqual(1, worldParams.lowSpeed);
+         Assert.AreEqual(200, worldParams.attritionRate);
+         Assert.AreEqual(1, worldParams.foodValue);
+         Assert.AreEqual(1000, worldParams.playerStartMass);
+         Assert.AreEqual(5000, worldParams.maxFood);
+         Assert.AreEqual(100, worldParams.minSplitMass);
+         Assert.AreEqual(1.25, worldParams.absorbConstant);
+         Assert.AreEqual(10000, worldParams.maxViewRange);
+         Assert.AreEqual(25, worldParams.heartbeatsPerSecond);
+         Assert.AreEqual(800, worldParams.virusMass);
+         Assert.AreEqual(5, worldParams.virusProbability);
+         Assert.AreEqual(800, worldParams.acceleratedAttrition);
+         Assert.AreEqual(100, worldParams.foodRandomFactor);
+         Assert.AreEqual(5, worldParams.foodGrowthFactor);
+         Assert.AreEqual(.25, worldParams.allowedOverlap);
+         Assert.AreEqual(.00125, worldParams.scaleConst);
+         Assert.AreEqual(1500, worldParams.smoothingIncrement);
+         Assert.AreEqual(20, worldParams.splitDistance);
+         Assert.AreEqual(10, worldParams.splitDecayRate);
+         Assert.AreEqual(50, worldParams.splitMomentum);
+         Assert.AreEqual(10, worldParams.splitDecay);
+         Assert.AreEqual(100, worldParams.infectedDecay);
       }
 
+      
+      /// <summary>
+      /// SHould not throw an exception
+      /// </summary>
+      [TestMethod]
+      //[ExpectedException(typeof(Exception))]
+      public void worldParamsBadFile()
+      {
+         WorldParams worldParams = new WorldParams("badfile");
+
+      }
    }
 }

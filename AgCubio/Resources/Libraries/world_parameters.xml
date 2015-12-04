@@ -22,6 +22,8 @@
   <scale_constant>0.00125</scale_constant>
   <smoothing_increment>1500</smoothing_increment>
   <split_distance>20</split_distance>
+  <split_decay_rate>10</split_decay_rate>
+  <split_momentum>50</split_momentum>
   <split_decay>10</split_decay>
   <infected_decay>100</infected_decay>
 </parameters>
