@@ -559,24 +559,24 @@ namespace Server
                                  if (playerCubeY2 > cubeY1)
                                  {
                                     playerCube.loc_y += 1;
-                                    merge(playerCube, cube);
+                                    //merge(playerCube, cube);
                                  }
                                  if (playerCubeY1 < cubeY2)
                                  {
                                     playerCube.loc_y -= 1;
-                                    merge(playerCube, cube);
+                                    //merge(playerCube, cube);
                                  }
 
                                  if (playerCubeX2 > cubeX1)
                                  {
                                     playerCube.loc_x += 1;
-                                    merge(playerCube, cube);
+                                    //merge(playerCube, cube);
                                  }
 
                                  if (playerCubeX1 < cubeX2)
                                  {
                                     playerCube.loc_x -= 1;
-                                    merge(playerCube, cube);
+                                    //merge(playerCube, cube);
                                  }
                               }
                               // cube mass is greater than player so we remove player cube (don't check if we're a virus)
@@ -621,14 +621,16 @@ namespace Server
             }
          }
       }
-
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="infectedCubes"></param>
       private static void processInfected(HashSet<Cube> infectedCubes)
       {
          foreach (var cube in infectedCubes)
          {
             Console.WriteLine(cube.Name + " was infected!!");
          }
-
       }
 
       private static void killPlayer(Cube cube)
@@ -642,15 +644,6 @@ namespace Server
             //  Network.Stop(clientStates[cube.Name].workSocket);
          }
 
-      }
-
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <returns></returns>
-      private static HashSet<Cube> virusCollision()
-      {
-         throw new NotImplementedException();
       }
 
       /// <summary>
