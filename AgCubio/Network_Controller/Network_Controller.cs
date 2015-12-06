@@ -54,7 +54,7 @@ namespace AgCubio
     /// </summary>
     public static class Network
     {
-        private const int port = 11000;
+        //private const int port = 11000;
 
         /// <summary>
         /// Attempt to connect to the server via a provided hostname. Save the callback function (in a state object)
@@ -63,7 +63,7 @@ namespace AgCubio
         /// <param name="callback">function inside the View to be called when a connection is made</param>
         /// <param name="hostname">name of the server to connect to</param>
         /// <returns></returns>
-        public static Socket Connect_to_Server(Action<StateObject> callback, String hostname)
+        public static Socket Connect_to_Server(Action<StateObject> callback, String hostname, int port)
         {
             StateObject ClientStateObject = new StateObject();
             ClientStateObject.CallbackAction = callback;
@@ -138,10 +138,23 @@ namespace AgCubio
                 // Read data from the remote device.
                 int bytesRead = client.EndReceive(ar);
 
-                // using UTF8 encoding, append buffer contents to our string buffer
-                state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
-                // run the Callback defined in the View - process JSON strings
-                state.CallbackAction(state);
+
+            if (bytesRead > 0)
+            {
+               // using UTF8 encoding, append buffer contents to our string buffer
+               state.sb.Append(Encoding.UTF8.GetString(state.buffer, 0, bytesRead));
+               // run the Callback defined in the View - process JSON strings
+               state.CallbackAction(state);
+            }
+            else
+            {
+               //Socket has been shut down (either by you or the other end of the connection)
+               //Now it's "safe" to call Socket.Close
+               client.Close();
+            }
+
+
+            
             }
             catch (Exception e)
             {
@@ -185,15 +198,39 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+               // Console.WriteLine(e);
             }
 
         }
 
-        /// <summary>
-        /// Assists 'Send'. Do nothing if all data has been sent, otherwise arrange to send remaining data
-        /// </summary>
-        static void SendCallBack(IAsyncResult ar)
+      /// <summary>
+      /// With the help of 'SendCallBack', allow a program to send data over a socket.
+      /// Convert to bytes then send using socket.BeginSend
+      /// TODO: This could be combined in the above method using an optional parameter
+      /// </summary>
+      /// <param name="socket"></param>
+      /// <param name="data"></param>
+      /// <param name="closeCallback"></param>
+      public static void Send(Socket socket, String data, bool closeFlag )
+      {
+         // Convert the string data to byte data using UTF8 encoding.
+         byte[] byteData = Encoding.UTF8.GetBytes(data);
+         try
+         {
+            // Begin sending the data to the remote device.
+            socket.BeginSend(byteData, 0, byteData.Length, 0, CloseCallBack, socket);
+         }
+         catch (Exception e)
+         {
+           // Console.WriteLine(e);
+         }
+
+      }
+
+      /// <summary>
+      /// Assists 'Send'. Do nothing if all data has been sent, otherwise arrange to send remaining data
+      /// </summary>
+      static void SendCallBack(IAsyncResult ar)
         {
 
             //If all the data has been sent, then life is good and nothing needs to be done 
@@ -210,23 +247,46 @@ namespace AgCubio
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+              //  Console.WriteLine(e.ToString());
             }
         }
 
-        /// <summary>
-        /// Close the Asyc Socket
-        /// </summary>
-        /// <param name="socket"></param>
-        public static void Stop(Socket socket)
+      /// <summary>
+      /// TODO: This should be a simple Lambda
+      /// </summary>
+      static void CloseCallBack(IAsyncResult ar)
+      {
+
+         //If all the data has been sent, then life is good and nothing needs to be done 
+         try
+         {
+            // Retrieve the socket from the state object.
+            Socket client = (Socket)ar.AsyncState;
+
+            // Complete sending the data to the remote device and close socket.
+            client.EndSend(ar);
+            client.Close();
+         }
+         catch (Exception e)
+         {
+           // Console.WriteLine(e.ToString());
+         }
+      }
+
+      /// <summary>
+      /// Close the Asyc Socket
+      /// </summary>
+      /// <param name="socket"></param>
+      public static void Stop(Socket socket)
         {
             socket.Close();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="callback"></param>
-        public static void Server_Awaiting_Client(Action<StateObject> callback)
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="callback"></param>
+      /// <param name="port"></param>
+      public static void Server_Awaiting_Client(Action<StateObject> callback, int port)
         {
             StateObject serverStateObject = new StateObject();
             serverStateObject.CallbackAction = callback;

@@ -177,13 +177,13 @@ namespace AgCubio
 
         /// <summary>
         /// Begin our connection to the server by sending our server name and the SendPlayerInfo 
-        /// callback method to the network_controller
+        /// callback method to the network_controller - connect on port 11000
         /// </summary>
         private void startGame()
         {
             isDead = false;
             isRunning = true;
-            worldSocket = Network.Connect_to_Server(SendPlayerInfo, textBox_serverName.Text);
+            worldSocket = Network.Connect_to_Server(SendPlayerInfo, textBox_serverName.Text, 11000);
             stopwatch.Start();
 
         }
