@@ -42,6 +42,7 @@ Server can be started with an argument of a file path to an XML parameter file o
 		-Food Cubes grow randomly to give players goals during play
 		-Speed decreases near edges to eliminate 'invisible wall' quality of world edge
 		-Movement smoothing optimizes visual experience
+		-Only the last mouse location is used from each player on each heart beat to prevent an unfair advantage from 'modified' clients
 
 	Known Bugs:
 		-Occasion food artifacts on startup
