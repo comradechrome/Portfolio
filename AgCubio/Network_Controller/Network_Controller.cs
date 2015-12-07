@@ -54,16 +54,17 @@ namespace AgCubio
     /// </summary>
     public static class Network
     {
-        //private const int port = 11000;
+      //private const int port = 11000;
 
-        /// <summary>
-        /// Attempt to connect to the server via a provided hostname. Save the callback function (in a state object)
-        ///  for use when data arrives.
-        /// </summary>
-        /// <param name="callback">function inside the View to be called when a connection is made</param>
-        /// <param name="hostname">name of the server to connect to</param>
-        /// <returns></returns>
-        public static Socket Connect_to_Server(Action<StateObject> callback, String hostname, int port)
+      /// <summary>
+      /// Attempt to connect to the server via a provided hostname. Save the callback function (in a state object)
+      ///  for use when data arrives.
+      /// </summary>
+      /// <param name="callback">function inside the View to be called when a connection is made</param>
+      /// <param name="hostname">name of the server to connect to</param>
+      /// <param name="port">port number to connect to</param>
+      /// <returns></returns>
+      public static Socket Connect_to_Server(Action<StateObject> callback, String hostname, int port)
         {
             StateObject ClientStateObject = new StateObject();
             ClientStateObject.CallbackAction = callback;
@@ -196,7 +197,7 @@ namespace AgCubio
                 // Begin sending the data to the remote device.
                 socket.BeginSend(byteData, 0, byteData.Length, 0, SendCallBack, socket);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                // Console.WriteLine(e);
             }
@@ -210,7 +211,7 @@ namespace AgCubio
       /// </summary>
       /// <param name="socket"></param>
       /// <param name="data"></param>
-      /// <param name="closeCallback"></param>
+      /// <param name="closeFlag"></param>
       public static void Send(Socket socket, String data, bool closeFlag )
       {
          // Convert the string data to byte data using UTF8 encoding.
@@ -220,7 +221,7 @@ namespace AgCubio
             // Begin sending the data to the remote device.
             socket.BeginSend(byteData, 0, byteData.Length, 0, CloseCallBack, socket);
          }
-         catch (Exception e)
+         catch (Exception)
          {
            // Console.WriteLine(e);
          }
@@ -245,7 +246,7 @@ namespace AgCubio
                 // Signal that all bytes have been sent.
                 //sendDone.Set();
             }
-            catch (Exception e)
+            catch (Exception)
             {
               //  Console.WriteLine(e.ToString());
             }
@@ -267,7 +268,7 @@ namespace AgCubio
             client.EndSend(ar);
             client.Close();
          }
-         catch (Exception e)
+         catch (Exception)
          {
            // Console.WriteLine(e.ToString());
          }
