@@ -831,10 +831,23 @@ namespace Server
          
          Network.Send(state.workSocket, html , true );
       }
+      /// <summary>
+      //       DELIMITER $$
+      //       CREATE FUNCTION getEaten(name VARCHAR(45), session INT) RETURNS INT
+      //       BEGIN
+      //       DECLARE cnt INT DEFAULT 0;
+      //       SET cnt = (select Count(*) FROM cs3500_ellefsen.GameStats where EatenBy like name and GameSessionID like session);
+      //       RETURN cnt;
+      //       END $$
 
+      //       select PlayerName, GameSessionID, timestampdiff(Second, StartTime, DeathTime) as SecondsAlive, MaxMass, HighestRank, (FoodEaten + getEaten(PlayerName, GameSessionID)) as CubesEaten from cs3500_ellefsen.GameStats;
+      /// </summary>
+      /// <returns></returns>
       private static string sendScores()
       {
          return "<h1>Send Scores</h1>\r\n";
+
+
       }
 
       private static string sendPlayer(string player)
