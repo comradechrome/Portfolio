@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml;
 using System.Timers;
+using MySql.Data.MySqlClient;
 
 namespace Server
 {
@@ -33,6 +34,8 @@ namespace Server
                               = new Dictionary<string, Tuple<int, int>>();
       private static WorldParams mainWorldParams;
       private static Timer heartbeat;
+      private static int dbSessionID;
+      public const string connectionString = "server=atr.eng.utah.edu;database=cs3500_ellefsen;uid=cs3500_ellefsen;password=PSWRD";
 
       public static void Main(string[] args)
       {
@@ -69,8 +72,121 @@ namespace Server
          // Start instance of agcubio web server
          Network.Server_Awaiting_Client(GetReceived, 11100);
 
+         // send Server startup time to the DB and receive the SesionID
+         dbSessionID = DBServerStart();
+
          SetTimer();
+         Console.WriteLine("Press enter to stop server");
          Console.Read();
+
+         // send server stop time to DB
+         DBServerStop();
+
+      }
+
+      /// <summary>
+      /// This method connects to the database, inserts the server start time and receives the DBSessionID
+      /// </summary>
+      /// <returns></returns>
+      private static int DBServerStart()
+      {
+         int sessionID = 0;
+         // Connect to the DB
+         using (MySqlConnection conn = new MySqlConnection(connectionString))
+         {
+
+            try
+            {
+               // Open a connection
+               conn.Open();
+
+
+               DateTime dateValue = DateTime.Now;
+               string datetime = dateValue.ToString("yyyy-MM-dd HH:mm:ss");
+               var insertCommand = "INSERT INTO cs3500_ellefsen.GameSession (StartTime) VALUES ('" + datetime + "');";
+               var selectCommand = "SELECT LAST_INSERT_ID();";
+
+               //Create mysql command and pass sql query to insert date into database
+               using (MySqlCommand comm = conn.CreateCommand())
+               {
+                  comm.CommandText = insertCommand;
+                  comm.CommandText += selectCommand;
+
+                  sessionID = Convert.ToInt32(comm.ExecuteScalar());
+
+               }
+               conn.Close();
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine(e.Message);
+            }
+         }
+
+         return sessionID;
+      }
+
+      private static void DBServerStop()
+      {
+         DateTime dateValue = DateTime.Now;
+         string datetime = dateValue.ToString("yyyy-MM-dd HH:mm:ss");
+         var command = "UPDATE cs3500_ellefsen.GameSession SET StopTime='" + datetime + "' WHERE ID='" + dbSessionID + "';";
+         DBInsert(command);
+      }
+
+      private static void DBPlayerStart(string playerName)
+      {
+         DateTime dateValue = DateTime.Now;
+         string datetime = dateValue.ToString("yyyy-MM-dd HH:mm:ss");
+         var command = @"INSERT INTO cs3500_ellefsen.GameStats (GameSessionID, PlayerName, StartTime) VALUES('" +
+                        dbSessionID + "','" + playerName + "','" + datetime + "');";
+         DBInsert(command);
+      }
+
+
+      private static void DBPlayerDeath(string eatenPlayer, string player)
+      {
+         int maxMass = 1100; //TODO: need this to be a counter and passed into method
+         int highestRank = 2; //TODO: need this to be a counter and passed into method
+         int foodEaten = 400; //TODO: need this to be a counter and passed into method
+         int timesInfected = 3; //TODO: need this to be a counter and passed into method
+
+         DateTime dateValue = DateTime.Now;
+         string datetime = dateValue.ToString("yyyy-MM-dd HH:mm:ss");
+         var command = "UPDATE cs3500_ellefsen.GameStats SET DeathTime= '" + datetime + "', EatenBy= '" + player +
+                       "', MaxMass= '" + maxMass + "', HighestRank= '" + highestRank + "', FoodEaten= '" +
+                       foodEaten + "', TimesInfected= '" + timesInfected + "' WHERE PlayerName= '" +
+                       eatenPlayer + "' && GameSessionID = '" + dbSessionID + "';";
+         DBInsert(command);
+
+      }
+
+      /// <summary>
+      /// Method that makes a DB connetion and runs the supplied insert command
+      /// </summary>
+      /// <param name="command"></param>
+      private static void DBInsert(string command)
+      {
+         // Connect to the DB
+         using (MySqlConnection conn = new MySqlConnection(connectionString))
+         {
+
+            try
+            {
+               // Open a connection
+               conn.Open();
+               //Create mysql command and pass sql query to insert date into database
+               using (var insert = new MySqlCommand(command, conn))
+               {
+                  insert.ExecuteNonQuery();
+               }
+               conn.Close();
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine(e.Message);
+            }
+         }
       }
 
       private static void SetTimer()
@@ -596,14 +712,14 @@ namespace Server
                               else if (cube.Mass > playerCube.Mass && !playerCube.food)
                               {
                                  cube.Mass += playerCube.Mass;
-                                 killPlayer(playerCube);
+                                 killPlayer(playerCube, cube.Name);
                                  playerCube.Mass = 0;
                               }
                               else if (!playerCube.food)
                               // cube is smaller (or equal) than the player cube so we will remove the cube (and we're not a virus)
                               {
                                  playerCube.Mass += cube.Mass;
-                                 killPlayer(cube);
+                                 killPlayer(cube, playerCube.Name);
                                  cube.Mass = 0;
                               }
                            }
@@ -646,14 +762,22 @@ namespace Server
             Console.WriteLine(cube.Name + " was infected!!");
          }
       }
-
-      private static void killPlayer(Cube cube)
+      /// <summary>
+      /// method that performs actions when a cube is eaten and the player dies
+      /// </summary>
+      /// <param name="cube">cube that was eaten</param>
+      /// <param name="player">player name that ate this cube</param>
+      private static void killPlayer(Cube cube, string player)
       {
          // TODO: once we have figured out splitting, we need to add logic here to figure out if this is last of the players cubes - close socket connection
          // TODO: just as the case above, we need method to determine if this is the last of a players cubes - close socket connection
 
          if (cube.team_id == 0 || cube.team_id == cube.uid)
          {
+            // send player Death Stats to Database
+            DBPlayerDeath(cube.Name, player);
+
+
             // Network.Send(clientStates[cube.Name].workSocket,"");
             //  Network.Stop(clientStates[cube.Name].workSocket);
          }
@@ -770,6 +894,9 @@ namespace Server
          // absorb and remove any cubes we landed on before sending anything else to client
          absorb();
          removeDead();
+
+         // send player name to database
+         DBPlayerStart(playerName);
          // send world cubes to client
          sendWorld(state.workSocket);
 
@@ -795,18 +922,18 @@ namespace Server
             return;
          }
 
-         string response = "HTTP/1.1 20 OK\r\n" + 
-                           "Connection: close\r\n" + 
+         string response = "HTTP/1.1 20 OK\r\n" +
+                           "Connection: close\r\n" +
                            "Content-Type: text/html; charset=UTF-8\r\n";
 
-         Network.Send(state.workSocket,response);
-         Network.Send(state.workSocket,"\r\n");
+         Network.Send(state.workSocket, response);
+         Network.Send(state.workSocket, "\r\n");
 
          string html = "";
 
          // generate html for scores
          if (request[1] == "/scores")
-            html = sendScores(); 
+            html = sendScores();
          // generate html for players
          else if (request[1].StartsWith(@"/games?player="))
          {
@@ -828,10 +955,11 @@ namespace Server
          // generate html for an error
          else
             html = sendError(request[1] + " has not been implimented");
-         
-         Network.Send(state.workSocket, html , true );
+
+         Network.Send(state.workSocket, html, true);
       }
       /// <summary>
+      /// This functino only needs to be run once on the SQL server. It will be stored in the database.
       //       DELIMITER $$
       //       CREATE FUNCTION getEaten(name VARCHAR(45), session INT) RETURNS INT
       //       BEGIN
@@ -854,7 +982,7 @@ namespace Server
       {
          return "<h1>Send Player: " + player + "</h1>\r\n";
       }
-   
+
       private static string sendEaten(int gameID)
       {
          return "<h1>Send Eaten: " + gameID + "</h1>\r\n";
