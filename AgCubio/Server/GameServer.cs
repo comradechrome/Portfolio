@@ -974,6 +974,9 @@ namespace Server
       private static string sendScores()
       {
          return "<h1>Send Scores</h1>\r\n";
+         // this SQL query will return the data needed for this call
+         // /scores
+         //select PlayerName, GameSessionID, timestampdiff(Second, StartTime, DeathTime) as SecondsAlive, MaxMass, HighestRank, (FoodEaten + getEaten(PlayerName, GameSessionID)) as CubesEaten from cs3500_ellefsen.GameStats;
 
 
       }
@@ -981,11 +984,17 @@ namespace Server
       private static string sendPlayer(string player)
       {
          return "<h1>Send Player: " + player + "</h1>\r\n";
+         // this SQL query will return the data needed for this call
+         // /games?player=george
+         //select GameSessionID, timestampdiff(Second, StartTime, DeathTime) as SecondsAlive, DeathTime, HighestRank, (FoodEaten + getEaten(PlayerName, GameSessionID)) as CubesEaten, getEaten(PlayerName, GameSessionID) as PlayersEaten, TimesInfected from cs3500_ellefsen.GameStats where PlayerName like 'george'; 
       }
 
       private static string sendEaten(int gameID)
       {
          return "<h1>Send Eaten: " + gameID + "</h1>\r\n";
+         // this SQL query will return the data needed for this call
+         // /eaten?id=1
+         // select PlayerName, timestampdiff(Second, StartTime, DeathTime) as SecondsAlive, MaxMass, HighestRank, EatenBy FROM cs3500_ellefsen.GameStats where GameSessionID = 1;
       }
 
       private static string sendError(string error)
