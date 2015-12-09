@@ -126,14 +126,14 @@ namespace Server
                   {
                      command.Parameters["@ID"].Value = gameID;
                      command.Parameters["@Name"].Value = name;
-                     command.ExecuteScalar();
+                     command.ExecuteNonQuery();
                   }
 
 
                   command.CommandText = "INSERT INTO cs3500_myakishe.Rank (ID, Rank) VALUES(@gameID, @Rank)";
                   command.Parameters.AddWithValue("@gameID", gameID);
                   command.Parameters.AddWithValue("@Rank", mainWorld.worldCubes[mainWorld.playerCubes[eatenPlayer]].MaxRank);
-                  command.ExecuteScalar();
+                  command.ExecuteNonQuery();
                   //foreach (int cubeID in mainWorld.playerCubes.Values)
                   //{
                   //    int maxRank = ;
@@ -994,26 +994,56 @@ namespace Server
          Network.HtmlSend(state.workSocket, html);
       }
       /// <summary>
-      /// This functino only needs to be run once on the SQL server. It will be stored in the database.
-      //       DELIMITER $$
-      //       CREATE FUNCTION getEaten(name VARCHAR(45), session INT) RETURNS INT
-      //       BEGIN
-      //       DECLARE cnt INT DEFAULT 0;
-      //       SET cnt = (select Count(*) FROM cs3500_ellefsen.GameStats where EatenBy like name and GameSessionID like session);
-      //       RETURN cnt;
-      //       END $$
-
-      //       select PlayerName, GameSessionID, timestampdiff(Second, StartTime, DeathTime) as SecondsAlive, MaxMass, HighestRank, (FoodEaten + getEaten(PlayerName, GameSessionID)) as CubesEaten from cs3500_ellefsen.GameStats;
+      //       select Name, ID, timestampdiff(Second, StartTime, EndTime) as SecondsAlive, MaxMass, (SELECT Rank FROM cs3500_myakishe.Rank where ID = cs3500_myakishe.Game.ID) as HighestRank, (FoodEaten + (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID)) as CubesEaten from cs3500_myakishe.Game;
       /// </summary>
       /// <returns></returns>
       private static string sendScores()
       {
-         return "<h1>Send Scores</h1>\r\n";
-         // this SQL query will return the data needed for this call
-         // /scores
-         //select PlayerName, GameSessionID, timestampdiff(Second, StartTime, DeathTime) as SecondsAlive, MaxMass, HighestRank, (FoodEaten + getEaten(PlayerName, GameSessionID)) as CubesEaten from cs3500_ellefsen.GameStats;
+          string html = "<table border=\"1\" style = \"width: 100 % \" ><tr><th>Name</th><th>ID</th><th>Seconds Alive</th><th>Max Mass</th><th>Highest Rank</th><th>Cubes Eaten</th></tr>";
+         using (MySqlConnection connection = new MySqlConnection(connectionString))
+         {
+            try
+            {
+               // Open a connection
+               connection.Open();
 
+               string selectCommand = "select Name, ID, timestampdiff(Second, StartTime, EndTime) as SecondsAlive, MaxMass," +
+                                      " (SELECT Rank FROM cs3500_myakishe.Rank where ID = cs3500_myakishe.Game.ID) as HighestRank," +
+                                      " (FoodEaten + (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID))" +
+                                      " as CubesEaten from cs3500_myakishe.Game;";
 
+               //Create mysql command and pass sql query to insert date into database
+               using (MySqlCommand command = connection.CreateCommand())
+               {
+                  command.CommandText = selectCommand;
+                  MySqlDataReader scores = command.ExecuteReader();
+                  string HighestRank = "No Rank";
+                  while (scores.Read())
+                  {
+                     string Name = scores.GetString(0);
+                     int ID = scores.GetInt32(1);
+                     int SecondsAlive = scores.GetInt32(2);
+                     int MaxMass = scores.GetInt32(3);
+                     if (!scores.IsDBNull(4))
+                         HighestRank = scores.GetInt32(4).ToString();
+                     int CubesEaten = scores.GetInt32(5);
+
+                     html += "<tr><td><a href=\"/games?player=" + Name + "\">" + Name + "</a></td><td><a href=\"/games?player=" + ID +
+                              "\">" + ID + "</td><td>" + SecondsAlive + "</td><td>" + MaxMass +
+                              "</td><td>" + HighestRank + "</td><td>" + CubesEaten + "</td></tr>";
+                  }
+                  scores.Close();
+               }
+
+               connection.Close();
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine(e.Message);
+            }
+         }
+
+         return "<h1>Scores</h1>" + html + "</table>\r\n";
       }
 
       private static string sendPlayer(string player)
