@@ -452,7 +452,7 @@ namespace AgCubio
       /// <summary>
       /// the rate at which a cube wil lose mass
       /// </summary>
-      public int attritionRate { get; } = 200;
+      public int attritionRate { get; } = 100;
       /// <summary>
       /// the mass of a food cube
       /// </summary>
@@ -494,11 +494,11 @@ namespace AgCubio
       /// </summary>
       public int acceleratedAttrition { get; } = 800;
       /// <summary>
-      /// The probability percentage every second thata virus will spawn
+      /// the probability per second that a food cube will grow bigger (100 is a 1% chance per second)
       /// </summary>
       public int foodRandomFactor { get; } = 100;
       /// <summary>
-      /// the probability per second that a food cube will grow bigger (100 is a 1% chance per second)
+      /// when food randomly grows, it will grow by thos amount
       /// </summary>
       public int foodGrowthFactor { get; } = 5;
       /// <summary>

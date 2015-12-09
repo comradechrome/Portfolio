@@ -121,7 +121,7 @@ namespace Server
                   command.CommandText = "INSERT INTO cs3500_myakishe.Ate (ID, Name) VALUES(@ID, @Name)  ON DUPLICATE KEY UPDATE Count=Count+1";
                   command.Parameters.AddWithValue("@ID", 0);
                   command.Parameters.AddWithValue("@Name", "");
-                  List<String> playersEaten = mainWorld.ourCubes[mainWorld.playerCubes[eatenPlayer]].PlayersEaten;
+                  List<String> playersEaten = mainWorld.worldCubes[mainWorld.playerCubes[eatenPlayer]].PlayersEaten;
                   foreach (string name in playersEaten)
                   {
                      command.Parameters["@ID"].Value = gameID;
