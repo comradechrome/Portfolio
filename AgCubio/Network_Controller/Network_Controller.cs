@@ -212,7 +212,7 @@ namespace AgCubio
       /// <param name="socket"></param>
       /// <param name="data"></param>
       /// <param name="closeFlag"></param>
-      public static void Send(Socket socket, String data, bool closeFlag )
+      public static void HtmlSend(Socket socket, String data)
       {
          // Convert the string data to byte data using UTF8 encoding.
          byte[] byteData = Encoding.UTF8.GetBytes(data);

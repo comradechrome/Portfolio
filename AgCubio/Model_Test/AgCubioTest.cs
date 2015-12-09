@@ -7,6 +7,16 @@ namespace AgCubio
    [TestClass]
    public class AgCubioTest
    {
+        [TestMethod]
+        public void maxRankTest()
+        {
+            Cube rankedCube = new Cube(1, 1, -124342, 123, 124, false, "cube2", 300);
+            rankedCube.MaxRank = 4;
+            rankedCube.MaxRank = 6;
+
+            Assert.AreEqual(4, rankedCube.MaxRank);
+        }
+
       [TestMethod]
       public void createCube()
       {

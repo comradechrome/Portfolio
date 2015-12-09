@@ -95,15 +95,36 @@ namespace AgCubio
             return Tuple.Create(x1, y1, x2, y2);
          }
       }
+        private int _MaxRank;
+        /// <summary>
+        /// Highest rank the player has achieved
+        /// </summary>
+        [JsonIgnore]
+        public int MaxRank {
+            get { return _MaxRank; }
+            set { if (_MaxRank == 0 || value < _MaxRank ) _MaxRank = value; }
+        }
+
+        private double _MaxMass;
+        /// <summary>
+        /// Greatest mass achieved by player
+        /// </summary>
+        [JsonIgnore]
+        public double MaxMass {
+            get { return _MaxMass; }
+            set { if (value > _MaxMass) _MaxMass = value; }
+        }
+
+        [JsonIgnore]
+        public DateTime StartTime {get;}
 
 
-
-      /// <summary>
-      /// Overloaded equals method
-      /// </summary>
-      /// <param name="obj"></param>
-      /// <returns></returns>
-      public override bool Equals(object obj)
+            /// <summary>
+            /// Overloaded equals method
+            /// </summary>
+            /// <param name="obj"></param>
+            /// <returns></returns>
+            public override bool Equals(object obj)
       {
 
          if (obj == null)
@@ -186,6 +207,7 @@ namespace AgCubio
          this.food = food;
          this.Name = name;
          this.Mass = mass;
+            this.StartTime = DateTime.Now;
       }
    }
 
