@@ -964,16 +964,23 @@ namespace Server
          Network.Send(state.workSocket, response);
          Network.Send(state.workSocket, "\r\n");
 
-         string html = "";
+         // add css style sheet info
+         string html = "<html><head><title>AgCubio Scoreboard</title>" +
+                     "<link rel=\"icon\" href=\"../../../Resources/favicon.ico\" type=\"image/x-icon\"><style>" + 
+                     "#agcubio {font - family: \"Trebuchet MS\", Arial, Helvetica, sans - serif;border-collapse: collapse;width: 100 %;}" +
+                     "#agcubio td, th {border: 1px solid #ddd;text-align: left;padding: 8px;}" +
+                     "#agcubio tr:nth-child(even){background-color: #f2f2f2}" +
+                     "#agcubio th {padding-top: 12px;padding-bottom: 12px;background-color: #3972ad;color: white;}" +
+                     "</style></head>";
 
          // generate html for scores
          if (request[1] == "/scores")
-            html = sendScores();
+            html += sendScores();
          // generate html for players
          else if (request[1].StartsWith(@"/games?player="))
          {
             string[] player = request[1].Split('=');
-            html = sendPlayer(player[1]);
+            html += sendPlayer(player[1]);
          }
          // generate html for game session
          else if (request[1].StartsWith(@"/eaten?id="))
@@ -983,13 +990,13 @@ namespace Server
 
             // make sure we have an integer for an argument
             if (Int32.TryParse(game[1], out gameID))
-               html = sendEaten(gameID);
+               html += sendEaten(gameID);
             else
-               html = sendError("Invalid Game ID: " + game[1]);
+               html += sendError("Invalid Game ID: " + game[1]);
          }
          // generate html for an error
          else
-            html = sendError(request[1] + " has not been implimented");
+            html += sendError(request[1] + " has not been implimented");
 
          Network.HtmlSend(state.workSocket, html);
       }
@@ -999,7 +1006,7 @@ namespace Server
       /// <returns></returns>
       private static string sendScores()
       {
-         string html = "<table border=\"1\" style = \"width: 100 % \" ><tr><th>Name</th><th>Game ID</th><th>Seconds Alive</th><th>Max Mass</th><th>Highest Rank</th><th>Cubes Eaten</th></tr>";
+         string html = "<table id = \"agcubio\" ><tr><th>Name</th><th>Game ID</th><th>Seconds Alive</th><th>Max Mass</th><th>Highest Rank</th><th>Cubes Eaten</th></tr>";
          using (MySqlConnection connection = new MySqlConnection(connectionString))
          {
             try
@@ -1043,7 +1050,7 @@ namespace Server
             }
          }
 
-         return "<h1>Scores</h1>" + html + "</table>\r\n";
+         return "<h1>Scores</h1>" + html + "</table></html>\r\n";
       }
       /// <summary>
       /// returns the html from this URL path: /games?player=george
@@ -1054,7 +1061,7 @@ namespace Server
       /// <returns></returns>
       private static string sendPlayer(string player)
       {
-         string html = "<table border=\"1\" style = \"width: 100 % \" ><tr><th>Game ID</th><th>Seconds Alive</th><th>Death Time</th><th>Highest Rank</th><th>Cubes Eaten</th><th>Players Eaten</th><th>Times Infected</th></tr>";
+         string html = "<table id = \"agcubio\" ><tr><th>Game ID</th><th>Seconds Alive</th><th>Death Time</th><th>Highest Rank</th><th>Cubes Eaten</th><th>Players Eaten</th><th>Times Infected</th></tr>";
          using (MySqlConnection connection = new MySqlConnection(connectionString))
          {
             try
@@ -1101,7 +1108,7 @@ namespace Server
             }
          }
 
-         return "<h1>Stats for " + player + "</h1>" + html + "</table><br><br><a href=\"/scores\">All Scores</a>\r\n";
+         return "<h1>Stats for " + player + "</h1>" + html + "</table><br><br><a href=\"/scores\">All Scores</a></html>\r\n";
       }
       /// <summary>
       /// returns the html from this URL path: /eaten?id=1
@@ -1112,7 +1119,8 @@ namespace Server
       /// <returns></returns>
       private static string sendEaten(int gameID)
       {
-         string html = "<table border=\"1\" style = \"width: 100 % \" ><tr><th>Name</th><th>Seconds Alive</th><th>Death Time</th><th>Highest Rank</th><th>Cubes Eaten</th><th>Players Eaten</th><th>Times Infected</th></tr>";
+         string html = "<table id = \"agcubio\" ><tr><th>Name</th><th>Seconds Alive</th><th>Death Time</th><th>Highest Rank</th><th>Cubes Eaten</th><th>Players Eaten</th><th>Times Infected</th></tr>";
+         string playerName = "";
          using (MySqlConnection connection = new MySqlConnection(connectionString))
          {
             try
@@ -1120,22 +1128,27 @@ namespace Server
                // Open a connection
                connection.Open();
 
-               string selectCommand = "select Name, timestampdiff(Second, StartTime, EndTime) as SecondsAlive, EndTime, " +
+               // select statement to get all game stats for a specified Game ID
+               string selectCommand1 = "select Name, timestampdiff(Second, StartTime, EndTime) as SecondsAlive, EndTime, " +
                   "(SELECT Rank FROM cs3500_myakishe.Rank where ID = cs3500_myakishe.Game.ID) as HighestRank, " +
                   "(FoodEaten + (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID)) as CubesEaten," +
                   " (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID) as PlayersEaten, " +
                   "VirusEaten as TimesInfected from cs3500_myakishe.Game where ID like @ID;";
+               // select statement to get a list of players eaten in a players specific game ID
+               string selectCommand2 = "select Name,Count from cs3500_myakishe.Ate where ID = @gameID";
+
 
                //Create mysql command and pass sql query to insert date into database
                using (MySqlCommand command = connection.CreateCommand())
                {
-                  command.CommandText = selectCommand;
+                  // create player ID stats table
+                  command.CommandText = selectCommand1;
                   command.Parameters.AddWithValue("@ID", gameID);
                   MySqlDataReader scores = command.ExecuteReader();
                   string HighestRank = "No Rank";
                   while (scores.Read())
                   {
-                     string Name = scores.GetString(0);
+                     playerName = scores.GetString(0);
                      int SecondsAlive = scores.GetInt32(1);
                      string DeathTime = scores.GetDateTime(2).ToString();
                      if (!scores.IsDBNull(3))
@@ -1144,11 +1157,26 @@ namespace Server
                      int PlayersEaten = scores.GetInt32(5);
                      int VirusEaten = scores.GetInt32(6);
 
-                     html += "<tr><td><a href=\"/games?player=" + Name + "\">" + Name + "</td><td>" + +SecondsAlive + "</td><td>" +
+                     html += "<tr><td><a href=\"/games?player=" + playerName + "\">" + playerName + "</td><td>" + SecondsAlive + "</td><td>" +
                                  DeathTime + "</td><td>" + HighestRank + "</td><td>" + CubesEaten + "</td><td>" + PlayersEaten +
-                                 "</td><td>" + VirusEaten + "</td></tr>";
+                                 "</td><td>" + VirusEaten + "</td></tr></table>";
                   }
                   scores.Close();
+                  // create eaten player table
+                  command.CommandText = selectCommand2;
+                  command.Parameters.AddWithValue("@gameID", gameID);
+                  MySqlDataReader eaten = command.ExecuteReader();
+                  html += "<br><br><body>Players that have been eaten by " + playerName + ":<br></body><br><table id = \"agcubio\" ><tr><th>Name</th><th>Times Eaten</th></tr>";
+
+                  while (eaten.Read())
+                  {
+                     string Name = eaten.GetString(0);
+                     int Count = eaten.GetInt32(1);
+
+                     html += "<tr><td><a href=\"/games?player=" + Name + "\">" + Name + "</td><td>" + Count + "</td></tr>";
+                  }
+
+                  eaten.Close();
                }
 
                connection.Close();
@@ -1159,12 +1187,12 @@ namespace Server
             }
          }
 
-         return "<h1>Stats for Game " + gameID + "</h1>" + html + "</table><br><br><a href=\"/scores\">All Scores</a>\r\n";
+         return "<h1>Stats for Game " + gameID + " (" + playerName + ")</h1>" + html + "</table><br><br><a href=\"/scores\">All Scores</a></html>\r\n";
       }
 
       private static string sendError(string error)
       {
-         return "<h1>Send Player: " + error + "</h1>\r\n";
+         return "<h1>Invalid URL</h1><body>" + error + "<br><br><br>Click<a href=\"/scores\"> Scores </a>to get all game scores.</body><br><br></html>\r\n";
       }
 
 

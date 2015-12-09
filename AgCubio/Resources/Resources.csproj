@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DONE.txt" />
+    <Content Include="favicon.ico" />
     <Content Include="Libraries\world_parameters.xml" />
     <Content Include="MySql.Data.dll" />
     <Content Include="README.txt" />
