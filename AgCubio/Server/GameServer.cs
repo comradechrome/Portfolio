@@ -999,7 +999,7 @@ namespace Server
       /// <returns></returns>
       private static string sendScores()
       {
-          string html = "<table border=\"1\" style = \"width: 100 % \" ><tr><th>Name</th><th>ID</th><th>Seconds Alive</th><th>Max Mass</th><th>Highest Rank</th><th>Cubes Eaten</th></tr>";
+         string html = "<table border=\"1\" style = \"width: 100 % \" ><tr><th>Name</th><th>Game ID</th><th>Seconds Alive</th><th>Max Mass</th><th>Highest Rank</th><th>Cubes Eaten</th></tr>";
          using (MySqlConnection connection = new MySqlConnection(connectionString))
          {
             try
@@ -1028,7 +1028,7 @@ namespace Server
                          HighestRank = scores.GetInt32(4).ToString();
                      int CubesEaten = scores.GetInt32(5);
 
-                     html += "<tr><td><a href=\"/games?player=" + Name + "\">" + Name + "</a></td><td><a href=\"/games?player=" + ID +
+                     html += "<tr><td><a href=\"/games?player=" + Name + "\">" + Name + "</a></td><td><a href=\"/eaten?id=" + ID +
                               "\">" + ID + "</td><td>" + SecondsAlive + "</td><td>" + MaxMass +
                               "</td><td>" + HighestRank + "</td><td>" + CubesEaten + "</td></tr>";
                   }
@@ -1045,21 +1045,121 @@ namespace Server
 
          return "<h1>Scores</h1>" + html + "</table>\r\n";
       }
-
+      /// <summary>
+      /// returns the html from this URL path: /games?player=george
+      /// html was built from the data resulting from this query:
+      /// select ID, timestampdiff(Second, StartTime, EndTime) as SecondsAlive, EndTime, (SELECT Rank FROM cs3500_myakishe.Rank where ID = cs3500_myakishe.Game.ID) as HighestRank, (FoodEaten + (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID)) as CubesEaten, (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID) as PlayersEaten, VirusEaten as TimesInfected from cs3500_myakishe.Game where Name like 'a';
+      /// </summary>
+      /// <param name="player"></param>
+      /// <returns></returns>
       private static string sendPlayer(string player)
       {
-         return "<h1>Send Player: " + player + "</h1>\r\n";
-         // this SQL query will return the data needed for this call
-         // /games?player=george
-         //select GameSessionID, timestampdiff(Second, StartTime, DeathTime) as SecondsAlive, DeathTime, HighestRank, (FoodEaten + getEaten(PlayerName, GameSessionID)) as CubesEaten, getEaten(PlayerName, GameSessionID) as PlayersEaten, TimesInfected from cs3500_ellefsen.GameStats where PlayerName like 'george'; 
-      }
+         string html = "<table border=\"1\" style = \"width: 100 % \" ><tr><th>Game ID</th><th>Seconds Alive</th><th>Death Time</th><th>Highest Rank</th><th>Cubes Eaten</th><th>Players Eaten</th><th>Times Infected</th></tr>";
+         using (MySqlConnection connection = new MySqlConnection(connectionString))
+         {
+            try
+            {
+               // Open a connection
+               connection.Open();
 
+               string selectCommand = "select ID, timestampdiff(Second, StartTime, EndTime) as SecondsAlive, EndTime, " +
+                  "(SELECT Rank FROM cs3500_myakishe.Rank where ID = cs3500_myakishe.Game.ID) as HighestRank, " +
+                  "(FoodEaten + (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID)) as CubesEaten," +
+                  " (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID) as PlayersEaten, " +
+                  "VirusEaten as TimesInfected from cs3500_myakishe.Game where Name like @Name;";
+
+               //Create mysql command and pass sql query to insert date into database
+               using (MySqlCommand command = connection.CreateCommand())
+               {
+                  command.CommandText = selectCommand;
+                  command.Parameters.AddWithValue("@Name", player);
+                  MySqlDataReader scores = command.ExecuteReader();
+                  string HighestRank = "No Rank";
+                  while (scores.Read())
+                  {
+                     int ID = scores.GetInt32(0);
+                     int SecondsAlive = scores.GetInt32(1);
+                     string DeathTime = scores.GetDateTime(2).ToString();
+                     if (!scores.IsDBNull(3))
+                        HighestRank = scores.GetInt32(3).ToString();
+                     int CubesEaten = scores.GetInt32(4);
+                     int PlayersEaten = scores.GetInt32(5);
+                     int VirusEaten = scores.GetInt32(6);
+
+                     html += "<tr><td><a href=\"/eaten?id=" + ID + "\">" + ID + "</td><td>" + +SecondsAlive + "</td><td>" +
+                                 DeathTime + "</td><td>" + HighestRank + "</td><td>" + CubesEaten + "</td><td>" + PlayersEaten +
+                                 "</td><td>" + VirusEaten + "</td></tr>";
+                  }
+                  scores.Close();
+               }
+
+               connection.Close();
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine(e.Message);
+            }
+         }
+
+         return "<h1>Stats for " + player + "</h1>" + html + "</table><br><br><a href=\"/scores\">All Scores</a>\r\n";
+      }
+      /// <summary>
+      /// returns the html from this URL path: /eaten?id=1
+      /// html was built from the data resulting from this query:
+      /// select Name, timestampdiff(Second, StartTime, EndTime) as SecondsAlive, EndTime, (SELECT Rank FROM cs3500_myakishe.Rank where ID = cs3500_myakishe.Game.ID) as HighestRank, (FoodEaten + (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID)) as CubesEaten, (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID) as PlayersEaten, VirusEaten as TimesInfected from cs3500_myakishe.Game where ID like '1';
+      /// </summary>
+      /// <param name="gameID"></param>
+      /// <returns></returns>
       private static string sendEaten(int gameID)
       {
-         return "<h1>Send Eaten: " + gameID + "</h1>\r\n";
-         // this SQL query will return the data needed for this call
-         // /eaten?id=1
-         // select PlayerName, timestampdiff(Second, StartTime, DeathTime) as SecondsAlive, MaxMass, HighestRank, EatenBy FROM cs3500_ellefsen.GameStats where GameSessionID = 1;
+         string html = "<table border=\"1\" style = \"width: 100 % \" ><tr><th>Name</th><th>Seconds Alive</th><th>Death Time</th><th>Highest Rank</th><th>Cubes Eaten</th><th>Players Eaten</th><th>Times Infected</th></tr>";
+         using (MySqlConnection connection = new MySqlConnection(connectionString))
+         {
+            try
+            {
+               // Open a connection
+               connection.Open();
+
+               string selectCommand = "select Name, timestampdiff(Second, StartTime, EndTime) as SecondsAlive, EndTime, " +
+                  "(SELECT Rank FROM cs3500_myakishe.Rank where ID = cs3500_myakishe.Game.ID) as HighestRank, " +
+                  "(FoodEaten + (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID)) as CubesEaten," +
+                  " (SELECT Count(*) FROM cs3500_myakishe.Ate where ID = cs3500_myakishe.Game.ID) as PlayersEaten, " +
+                  "VirusEaten as TimesInfected from cs3500_myakishe.Game where ID like @ID;";
+
+               //Create mysql command and pass sql query to insert date into database
+               using (MySqlCommand command = connection.CreateCommand())
+               {
+                  command.CommandText = selectCommand;
+                  command.Parameters.AddWithValue("@ID", gameID);
+                  MySqlDataReader scores = command.ExecuteReader();
+                  string HighestRank = "No Rank";
+                  while (scores.Read())
+                  {
+                     string Name = scores.GetString(0);
+                     int SecondsAlive = scores.GetInt32(1);
+                     string DeathTime = scores.GetDateTime(2).ToString();
+                     if (!scores.IsDBNull(3))
+                        HighestRank = scores.GetInt32(3).ToString();
+                     int CubesEaten = scores.GetInt32(4);
+                     int PlayersEaten = scores.GetInt32(5);
+                     int VirusEaten = scores.GetInt32(6);
+
+                     html += "<tr><td><a href=\"/games?player=" + Name + "\">" + Name + "</td><td>" + +SecondsAlive + "</td><td>" +
+                                 DeathTime + "</td><td>" + HighestRank + "</td><td>" + CubesEaten + "</td><td>" + PlayersEaten +
+                                 "</td><td>" + VirusEaten + "</td></tr>";
+                  }
+                  scores.Close();
+               }
+
+               connection.Close();
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine(e.Message);
+            }
+         }
+
+         return "<h1>Stats for Game " + gameID + "</h1>" + html + "</table><br><br><a href=\"/scores\">All Scores</a>\r\n";
       }
 
       private static string sendError(string error)
