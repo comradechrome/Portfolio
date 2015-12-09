@@ -114,17 +114,37 @@ namespace AgCubio
             get { return _MaxMass; }
             set { if (value > _MaxMass) _MaxMass = value; }
         }
-
+      /// <summary>
+      /// The start time of a player
+      /// </summary>
         [JsonIgnore]
         public DateTime StartTime {get;}
 
+      /// <summary>
+      /// The total number of food cubes eaten
+      /// </summary>
+      [JsonIgnore]
+      public int FoodEaten { get; set; }
 
-            /// <summary>
-            /// Overloaded equals method
-            /// </summary>
-            /// <param name="obj"></param>
-            /// <returns></returns>
-            public override bool Equals(object obj)
+      /// <summary>
+      /// The total number of times a player has been infected by a virus
+      /// </summary>
+      [JsonIgnore]
+      public int TimesInfected { get; set; }
+
+      /// <summary>
+      /// The list of players that a player has eaten
+      /// </summary>
+      [JsonIgnore]
+      public List<string> PlayersEaten { get; set; }
+
+
+      /// <summary>
+      /// Overloaded equals method
+      /// </summary>
+      /// <param name="obj"></param>
+      /// <returns></returns>
+      public override bool Equals(object obj)
       {
 
          if (obj == null)
@@ -207,7 +227,8 @@ namespace AgCubio
          this.food = food;
          this.Name = name;
          this.Mass = mass;
-            this.StartTime = DateTime.Now;
+         this.StartTime = DateTime.Now;
+         this.PlayersEaten = new List<string>();
       }
    }
 
