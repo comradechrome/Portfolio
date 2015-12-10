@@ -717,7 +717,7 @@ namespace Server
                                  infectedCubes.Add(playerCube);
                               }
                               //TODO: Add logic to make sure team_id is the same as our ID
-                              else if (otherCube.team_id != 0)
+                              else if (otherCube.team_id != 0 && otherCube.team_id == playerCube.team_id)
                               {
                                  if (playerCubeY2 > cubeY1)
                                  {
