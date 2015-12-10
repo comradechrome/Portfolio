@@ -978,16 +978,5 @@ namespace Server
 
             Network.i_want_more_data(state);
         }
-
-
-
-        //private void ConnectionReceived(IAsyncResult ar)
-        //{
-        //    Socket socket = server.EndAcceptSocket(ar);
-        //    socket.Listen(45);
-        //    //StringSocket ss = new StringSocket(socket, UTF8Encoding.Default);
-        //    //ss.BeginReceive(NameReceived, ss);
-        //    server.BeginAcceptSocket(ConnectionReceived, null);
-        //}
     }
 }
