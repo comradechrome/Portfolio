@@ -563,7 +563,7 @@ namespace Server
                                             cube.Mass = 0;
                                             infectedCubes.Add(playerCube);
                                         }
-                                        else if (cube.team_id != 0 && otherCube.team_id == playerCube.team_id)
+                                        else if (cube.team_id != 0 && cube.team_id == playerCube.team_id)
                                         {
                                             if (playerCubeY2 > cubeY1)
                                             {
